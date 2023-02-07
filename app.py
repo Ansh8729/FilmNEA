@@ -4,8 +4,8 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 @app.route("/")
-def hello_world():
-    return "<p>Harihar Rengan for Head of CS Soc<p>"
+def form():
+    return render_template('index.html')
 
 @app.route("/movies")
 def ant_man():
@@ -14,3 +14,5 @@ def ant_man():
 @app.route("/tv")
 def tlou():
     return render_template('tv.html')
+
+
