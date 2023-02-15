@@ -1,18 +1,8 @@
-import sqlite3
-from flask import Flask, render_template
+from website import create_app
 
-app = Flask(__name__)
+if __name__ == "__main__":
+    app = create_app()
+    app.run(debug=True)
 
-@app.route("/")
-def form():
-    return render_template('index.html')
-
-@app.route("/movies")
-def ant_man():
-    return render_template('movies.html')
-
-@app.route("/tv")
-def tlou():
-    return render_template('tv.html')
 
 
