@@ -6,8 +6,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 auth = Blueprint("auth", __name__)
 
-
-
 @auth.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -38,6 +36,7 @@ def sign_up():
         email_exists = User.query.filter_by(email=email).first()
         username_exists = User.query.filter_by(username=username).first()
 
+        # The below IF statement validates the inputs.
         if email_exists:
             flash('Email is already in use.', category='error')
         elif username_exists:
@@ -60,8 +59,9 @@ def sign_up():
 
     return render_template("signup.html")
 
+# The code below sends the user back to the home page when the user logs out.
 @auth.route("/logout")
-@login_required
+@login_required # This line restricts users from going on the site without logging in.
 def logout():
     logout_user()
     return redirect(url_for("views.home"))
