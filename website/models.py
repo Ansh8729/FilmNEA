@@ -3,17 +3,18 @@ from flask_login import UserMixin
 from sqlalchemy.sql import func
 
 class Users(db.Model, UserMixin):
-    userid = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150), unique=True)
     username = db.Column(db.String(150), unique=True)
     password = db.Column(db.String(150))
-    data_created = db.Column(db.DateTime(timezone=True), default=func.now())
+    date_created = db.Column(db.DateTime(timezone=True), default=func.now())
+'''
     writers = db.relationship('Screenwriters', backref = 'Users')
     producers = db.relationship('Producers', backref = 'Users')
 
 class Screenwriters(db.Model):
     writerid = db.Column(db.Integer, primary_key=True)
-    userid = db.Column(db.Integer, db.ForeignKey('Users.userid'))
+    userid = db.Column(db.Integer, db.ForeignKey('Users.id'))
     profilepic = db.Column(db.String(150)) #TO BE CHANGED
     biography = db.Column(db.Text)
     backgroundcolour = db.Column(db.Integer)
@@ -55,7 +56,7 @@ class Genres(db.Model):
 
 class Producers(db.Model):
     producerid = db.Column(db.Integer, primary_key=True)
-    userid = db.Column(db.Integer, db.ForeignKey('Users.userid'))
+    userid = db.Column(db.Integer, db.ForeignKey('Users.id'))
     profilepic = db.Column(db.String(150)) # TO BE CHANGED
     biography = db.Column(db.Text)
     approved = db.Column(db.Integer)
@@ -101,4 +102,4 @@ class LikedScreenplays(db.Model):
     title = db.Column(db.String(300))
     rating = db.Column(db.Float)
     commented = db.Column(db.Integer)
-    
+'''
