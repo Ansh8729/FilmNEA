@@ -6,12 +6,17 @@
     <title>Producer Authentication</title>
 </head>
 <body>
-    <div align="center">
-        <h1>We need to verify your account.</h1>
-        <div class="form-group">
+    <form method="POST">
+        <div align="center">
+            <h1>We need to verify your account.</h1>
             <h2> Enter your One-Time Password here:</h2>
-            <input type="password" id="otp" name="otp" class="form-control" placeholder="One-Time Password"/>
+            <div class="form-group">
+                <input type="password" id="otp" name="otp" class="form-control" placeholder="One-Time Password"/>
+                <br>
+                <br/>
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
         </div>
-    </div>
+    </form>
 </body>
 </html>

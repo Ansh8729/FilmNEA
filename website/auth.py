@@ -4,6 +4,8 @@ from .models import Users, Screenwriters, Producers
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
+from email.message import EmailMessage
+import ssl
 import smtplib
 
 auth = Blueprint("auth", __name__)
@@ -77,16 +79,27 @@ def sign_up():
 def approval():
     otp = ''.join([str(random.randint(0,9))] for i in range(6))
     newproducer = Users.query.order_by(Users.id.desc()).first()
-    server = smtplib.SMTP('localhost', 587)
-    server.login('noreply@gmail.com','_____')
-    msg = 'Hello, Your OTP is '+str(otp)
-    server.sendmail('noreply@gmail.com', newproducer.email, msg)
-    server.quit()
-    code = request.form.get("otp")
-    if code == otp:
-        return redirect(url_for('views.home'))
-    else:
-        flash('Incorrect OTP.', category='error')
+    email_sender = 'writersworldnoreply@gmail.com'
+    email_password = ''
+    email_receiver = newproducer.email
+    subject = 'WritersWorld Producer Authentication'
+    body = 'Hello, Your OTP is '+str(otp)
+    em = EmailMessage()
+    em['From'] = email_sender
+    em['To'] = email_receiver
+    em['subject'] = subject
+    em.set_content(body)
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL('smtp@gmail.com', 465, context=context) as smtp:
+        smtp.login(email_sender, email_password)
+        smtp.sendmail(email_sender, email_receiver, em.as_string())
+
+    if request.method == 'POST':
+        code = request.form.get("otp")
+        if code == otp:
+            return redirect(url_for('views.home'))
+        else:
+            flash('Incorrect OTP.', category='error')
 
 
 # The code below sends the user back to the home page when the user logs out.
