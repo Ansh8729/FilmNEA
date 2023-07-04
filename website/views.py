@@ -11,9 +11,10 @@ def home():
     return render_template("home.html", name=current_user.username) 
     #This line renders the home page using the HTML code in "home.html"
 
+'''
 @views.route("/approval")
 @login_required
 def approval():
     return render_template("approval.html", name=current_user.username)
-
+'''
     

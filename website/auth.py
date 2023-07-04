@@ -71,29 +71,24 @@ def sign_up():
                 new_producer = Producers(userid = newproducer.id)
                 db.session.add(new_producer)
                 db.session.commit()
-                return redirect(url_for('views.home'))
+                return redirect(url_for('views.approval'))
 
     return render_template("signup.html")
 
-'''
+
 @auth.route("/approval", methods=['GET', 'POST'])
 def approval():
     newproducer = Users.query.order_by(Users.id.desc()).first()
-    email_sender = 'writersworldnoreply@gmail.com'
-    email_password = 'lolfruollznvecyd'
-    email_receiver = 'bindrooansh@gmail.com'
-    subject = 'WritersWorld Producer Authentication'
-    otp = ''.join([str(random.randint(0,9))] for i in range(6))
-    body = 'Hello, Your OTP is '+str(otp)
-    em = EmailMessage()
-    em['From'] = email_sender
-    em['To'] = email_receiver
-    em['subject'] = subject
-    em.set_content(body)
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL('smtp.gmail.com', 587, context=context) as smtp:
-        smtp.login(email_sender, email_password)
-        smtp.sendmail(email_sender, email_receiver, em.as_string())
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login('writersworldnoreply@gmail.com', 'lolfruollznvecyd')
+    otp = ""
+    for i in range(6):
+        num = random.randint(0,9)
+        otp += str(num)
+    msg = 'Hello, Your OTP is '+otp
+    server.sendmail('writersworldnoreply@gmail.com', str(newproducer.email), msg)
+    server.quit()
 
     if request.method == 'POST':
         code = request.form.get("otp")
@@ -101,7 +96,9 @@ def approval():
             return redirect(url_for('views.home'))
         else:
             flash('Incorrect OTP.', category='error')
-'''
+
+    return render_template("approval.html")
+
 
 # The code below sends the user back to the home page when the user logs out.
 @auth.route("/logout")
