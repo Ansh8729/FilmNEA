@@ -58,6 +58,7 @@ class Producers(db.Model):
     profilepic = db.Column(db.String(150)) # TO BE CHANGED
     biography = db.Column(db.Text)
     approved = db.Column(db.Integer)
+    otp = db.Column(db.String(10))
 
 class Requests(db.Model):
     __tablename__ = "Requests"

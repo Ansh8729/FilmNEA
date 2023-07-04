@@ -10,6 +10,13 @@ import ssl
 
 auth = Blueprint("auth", __name__)
 
+def SendEmail(sender, sender_password, receiver, msg):
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(sender, sender_password)
+    server.sendmail(sender, receiver, msg)
+    server.quit()
+
 @auth.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -70,29 +77,25 @@ def sign_up():
                 newproducer = Users.query.order_by(Users.id.desc()).first()
                 new_producer = Producers(userid = newproducer.id)
                 db.session.add(new_producer)
+                otp = ""
+                for i in range(6):
+                    num = random.randint(0,9)
+                    otp += str(num)
+                msg = 'Hello, Your OTP is '+otp
+                new_producer.otp = otp
+                SendEmail('writersworldnoreply@gmail.com', 'lolfruollznvecyd', newproducer.email, msg)
                 db.session.commit()
-                return redirect(url_for('views.approval'))
+                return render_template("approval.html")
 
     return render_template("signup.html")
 
 
 @auth.route("/approval", methods=['GET', 'POST'])
 def approval():
-    newproducer = Users.query.order_by(Users.id.desc()).first()
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
-    server.login('writersworldnoreply@gmail.com', 'lolfruollznvecyd')
-    otp = ""
-    for i in range(6):
-        num = random.randint(0,9)
-        otp += str(num)
-    msg = 'Hello, Your OTP is '+otp
-    server.sendmail('writersworldnoreply@gmail.com', str(newproducer.email), msg)
-    server.quit()
-
     if request.method == 'POST':
+        newproducer = Users.query.order_by(Users.id.desc()).first()
         code = request.form.get("otp")
-        if code == otp:
+        if code == newproducer.otp:
             return redirect(url_for('views.home'))
         else:
             flash('Incorrect OTP.', category='error')
