@@ -4,9 +4,9 @@ from .models import Users, Screenwriters, Producers
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
+import smtplib
 from email.message import EmailMessage
 import ssl
-import smtplib
 
 auth = Blueprint("auth", __name__)
 
@@ -55,7 +55,7 @@ def sign_up():
         elif len(email) < 4:
             flash('Email is invalid.', category='error')
         else:
-            new_user = Users(email=email, username=username, password=generate_password_hash(password1, method='sha256'))
+            new_user = Users(email=email, username=username, password=generate_password_hash(password1, method='scrypt'))
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user, remember=True)
@@ -71,18 +71,19 @@ def sign_up():
                 new_producer = Producers(userid = newproducer.id)
                 db.session.add(new_producer)
                 db.session.commit()
-                return redirect(url_for('views.approval'))
+                return redirect(url_for('views.home'))
 
     return render_template("signup.html")
 
+'''
 @auth.route("/approval", methods=['GET', 'POST'])
 def approval():
-    otp = ''.join([str(random.randint(0,9))] for i in range(6))
     newproducer = Users.query.order_by(Users.id.desc()).first()
     email_sender = 'writersworldnoreply@gmail.com'
-    email_password = ''
-    email_receiver = newproducer.email
+    email_password = 'lolfruollznvecyd'
+    email_receiver = 'bindrooansh@gmail.com'
     subject = 'WritersWorld Producer Authentication'
+    otp = ''.join([str(random.randint(0,9))] for i in range(6))
     body = 'Hello, Your OTP is '+str(otp)
     em = EmailMessage()
     em['From'] = email_sender
@@ -90,7 +91,7 @@ def approval():
     em['subject'] = subject
     em.set_content(body)
     context = ssl.create_default_context()
-    with smtplib.SMTP_SSL('smtp@gmail.com', 465, context=context) as smtp:
+    with smtplib.SMTP_SSL('smtp.gmail.com', 587, context=context) as smtp:
         smtp.login(email_sender, email_password)
         smtp.sendmail(email_sender, email_receiver, em.as_string())
 
@@ -100,7 +101,7 @@ def approval():
             return redirect(url_for('views.home'))
         else:
             flash('Incorrect OTP.', category='error')
-
+'''
 
 # The code below sends the user back to the home page when the user logs out.
 @auth.route("/logout")
