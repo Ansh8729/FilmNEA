@@ -10,7 +10,7 @@ import ssl
 
 auth = Blueprint("auth", __name__)
 
-def SendEmail(sender, sender_password, receiver, msg):
+def send_email(sender, sender_password, receiver, msg):
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
     server.login(sender, sender_password)
@@ -26,7 +26,7 @@ def login():
         user = Users.query.filter_by(email=email).first()
         if user:
             if check_password_hash(user.password, password):
-                flash("Logged in!", category='sucess')
+                flash("Logged in!", category='success')  
                 login_user(user, remember=True)
                 return redirect(url_for('views.home'))
             else:
@@ -64,26 +64,23 @@ def sign_up():
         else:
             new_user = Users(email=email, username=username, password=generate_password_hash(password1, method='scrypt'))
             db.session.add(new_user)
-            db.session.commit()
             login_user(new_user, remember=True)
-            flash('User created!')
+            flash('User created!', category='success')  
             if accounttype == "Screenwriter":
-                newwriter = Users.query.order_by(Users.id.desc()).first()
-                new_writer = Screenwriters(userid = newwriter.id)
+                new_writer = Screenwriters(userid=new_user.id)  
                 db.session.add(new_writer)
                 db.session.commit()
                 return redirect(url_for('views.home'))
             elif accounttype == "Producer":
-                newproducer = Users.query.order_by(Users.id.desc()).first()
-                new_producer = Producers(userid = newproducer.id)
+                new_producer = Producers(userid=new_user.id) 
                 db.session.add(new_producer)
                 otp = ""
-                for i in range(6):
-                    num = random.randint(0,9)
+                for _ in range(6): 
+                    num = random.randint(0, 9)
                     otp += str(num)
-                msg = 'Hello, Your OTP is '+otp
+                msg = 'Hello, Your OTP is ' + otp
                 new_producer.otp = otp
-                SendEmail('writersworldnoreply@gmail.com', 'lolfruollznvecyd', newproducer.email, msg)
+                send_email('writersworldnoreply@gmail.com', 'lolfruollznvecyd', newproducer.email, msg)
                 db.session.commit()
                 return render_template("approval.html")
 
