@@ -9,6 +9,7 @@ class Users(db.Model, UserMixin):
     username = db.Column(db.String(150), unique=True)
     password = db.Column(db.String(150))
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
+    accounttype = db.Column(db.Integer)
 
 class Screenwriters(db.Model):
     __tablename__ = "Screenwriters"

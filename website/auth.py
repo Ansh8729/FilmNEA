@@ -26,9 +26,18 @@ def login():
         user = Users.query.filter_by(email=email).first()
         if user:
             if check_password_hash(user.password, password):
-                flash("Logged in!", category='success')  
-                login_user(user, remember=True)
-                return redirect(url_for('views.home'))
+                if user.accounttype == 2:
+                    producer = Producers.query.filter_by(userid=user.id).first()
+                    if producer.approved == 1:
+                        flash("Logged in!", category='success')  
+                        login_user(user, remember=True)
+                        return redirect(url_for('views.home'))
+                    else:
+                        flash("Account is not authenticated.", category='error')  
+                else:
+                    flash("Logged in!", category='success')  
+                    login_user(user, remember=True)
+                    return redirect(url_for('views.home'))
             else:
                 flash('Password is incorrect.', category='error')
         else:
@@ -62,25 +71,26 @@ def sign_up():
         elif len(email) < 4:
             flash('Email is invalid.', category='error')
         else:
-            new_user = Users(email=email, username=username, password=generate_password_hash(password1, method='scrypt'))
-            db.session.add(new_user)
-            login_user(new_user, remember=True)
-            flash('User created!', category='success')  
             if accounttype == "Screenwriter":
+                new_user = Users(email=email, username=username, password=generate_password_hash(password1, method='scrypt'), accounttype = 1)
+                db.session.add(new_user)
                 new_writer = Screenwriters(userid=new_user.id)  
                 db.session.add(new_writer)
+                login_user(new_user, remember=True)
+                flash('User created!', category='success')  
                 db.session.commit()
                 return redirect(url_for('views.home'))
             elif accounttype == "Producer":
-                new_producer = Producers(userid=new_user.id) 
-                db.session.add(new_producer)
+                new_user = Users(email=email, username=username, password=generate_password_hash(password1, method='scrypt'), accounttype = 2)
+                db.session.add(new_user)
                 otp = ""
                 for _ in range(6): 
                     num = random.randint(0, 9)
                     otp += str(num)
+                new_producer = Producers(otp=otp)
+                db.session.add(new_producer)
                 msg = 'Hello, Your OTP is ' + otp
-                new_producer.otp = otp
-                send_email('writersworldnoreply@gmail.com', 'lolfruollznvecyd', newproducer.email, msg)
+                send_email('writersworldnoreply@gmail.com', 'lolfruollznvecyd', email, msg)
                 db.session.commit()
                 return render_template("approval.html")
 
@@ -90,15 +100,20 @@ def sign_up():
 @auth.route("/approval", methods=['GET', 'POST'])
 def approval():
     if request.method == 'POST':
-        newproducer = Users.query.order_by(Users.id.desc()).first()
+        newproducer = Producers.query.order_by(Producers.producerid.desc()).first()
         code = request.form.get("otp")
         if code == newproducer.otp:
+            new_user = Users.query.order_by(Users.id.desc()).first()
+            newproducer.userid = new_user.id
+            newproducer.approved = 1
+            login_user(new_user, remember=True)
+            flash('User created!', category='success')  
+            db.session.commit()
             return redirect(url_for('views.home'))
         else:
             flash('Incorrect OTP.', category='error')
 
     return render_template("approval.html")
-
 
 # The code below sends the user back to the home page when the user logs out.
 @auth.route("/logout")
