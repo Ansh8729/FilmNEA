@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
+# from .models import Screenwriters
 
 # The below code allows different routes to be stored.
 views = Blueprint("views", __name__)
@@ -8,13 +9,16 @@ views = Blueprint("views", __name__)
 @views.route("/home")
 @login_required # This line restricts users from going on the home page without logging in.
 def home():
-    return render_template("home.html", name=current_user.username) 
+    return render_template("home.html", user=current_user.username) 
     #This line renders the home page using the HTML code in "home.html"
 
 '''
-@views.route("/approval")
+@views.route("/<username>/profilepage")
 @login_required
-def approval():
-    return render_template("approval.html", name=current_user.username)
-'''
-    
+def profilepage():
+    if current_user.accounttype == 1:
+        writer = Screenwriters.query.filter_by(userid = current_user.id).first()
+        return render_template("profilepage.html", writer=writer, user=current_user)
+    if current_user.accounttype == 2:
+        return render_template("producerpage.html")
+''' 
