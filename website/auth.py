@@ -32,7 +32,7 @@ def login():
         else:
             flash('Email does not exist.', category='error')
 
-    return render_template("login.html")
+    return render_template("login.html", user=current_user)
 
 @auth.route("/sign-up", methods=['GET', 'POST'])
 def sign_up():
@@ -63,6 +63,7 @@ def sign_up():
                 new_user = Users(email=email, username=username, password=generate_password_hash(
                     password1, method='scrypt'), accounttype = 1)
                 db.session.add(new_user)
+                new_user = Users.query.order_by(id.desc()).first
                 new_writer = Screenwriters(userid = new_user.id)
                 db.session.add(new_writer)
                 db.session.commit()
@@ -74,16 +75,16 @@ def sign_up():
                     password1, method='scrypt'), accounttype = 2)
                 db.session.add(new_user)
                 db.session.commit()
-                '''
+                new_user = Users.query.order_by(id.desc()).first
                 new_producer = Producers(userid = new_user.id)
                 db.session.add(new_producer)
                 db.session.commit()
                 login_user(new_user, remember=True)
                 flash('User created!', category='success')
-                '''
                 return redirect(url_for('views.home'))  
 
-    return render_template("signup.html")
+    return render_template("signup.html", user=current_user)
+
 '''
 @auth.route("/approval", methods=['GET', 'POST'])
 def approval():
