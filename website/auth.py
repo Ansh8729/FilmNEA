@@ -63,8 +63,8 @@ def sign_up():
                 new_user = Users(email=email, username=username, password=generate_password_hash(
                     password1, method='scrypt'), accounttype = 1)
                 db.session.add(new_user)
-                new_user = Users.query.order_by(id.desc()).first
-                new_writer = Screenwriters(userid = new_user.id)
+                newuser = Users.query.order_by(Users.id.desc()).first()
+                new_writer = Screenwriters(userid = newuser.id)
                 db.session.add(new_writer)
                 db.session.commit()
                 login_user(new_user, remember=True)
@@ -75,8 +75,8 @@ def sign_up():
                     password1, method='scrypt'), accounttype = 2)
                 db.session.add(new_user)
                 db.session.commit()
-                new_user = Users.query.order_by(id.desc()).first
-                new_producer = Producers(userid = new_user.id)
+                newuser = Users.query.order_by(Users.id.desc()).first()
+                new_producer = Producers(userid = newuser.id)
                 db.session.add(new_producer)
                 db.session.commit()
                 login_user(new_user, remember=True)
