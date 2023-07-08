@@ -9,6 +9,8 @@ flask-sqlalchemy = "*"
 sqlalchemy = "*"
 flask-login = "*"
 werkzeug = "*"
+flask-wtf = "*"
+wtforms = "*"
 
 [dev-packages]
 

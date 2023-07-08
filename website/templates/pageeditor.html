@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form method='POST' enctype='multipart/form-data'>
+        <div align="center">
+            {{ form.hiddentag }}
+            <h2>Profile Picture: </h2>
+            {{ form.profilepic }}
+            <br></br>
+            <h2>Biography: </h2>
+            {{ form.biography }}
+            <br></br>
+            <h2>Background Colour: </h2>
+            {{ form.bgcolour }}
+            <br></br>
+            <h2>Font Style: </h2>
+            {{ form.fontstyle }}
+            <br></br>
+            {{ form.submit }}
+        </div>
+    </form>
+</body>
+</html>
+{% endblock %}
