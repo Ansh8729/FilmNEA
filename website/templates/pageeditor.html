@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Home{% endblock %}
+{% block title %}Page Editor{% endblock %}
 {% block content %}
 <!DOCTYPE html>
 <html lang="en">
@@ -9,24 +9,23 @@
     <title>Document</title>
 </head>
 <body>
-    <form method='POST' enctype='multipart/form-data'>
-        <div align="center">
-            {{ form.hiddentag }}
+    <div style="text-align:center"></div>
+        <form method='POST' enctype='multipart/form-data'>
             <h2>Profile Picture: </h2>
-            {{ form.profilepic }}
+            {{ form.profilepic() }}
             <br></br>
             <h2>Biography: </h2>
-            {{ form.biography }}
+            {{ form.biography() }}
             <br></br>
             <h2>Background Colour: </h2>
-            {{ form.bgcolour }}
+            {{ form.bgcolour() }}
             <br></br>
             <h2>Font Style: </h2>
-            {{ form.fontstyle }}
+            {{ form.fontstyle() }}
             <br></br>
-            {{ form.submit }}
-        </div>
-    </form>
+            {{ form.submit() }}
+        </form>
+    </div>
 </body>
 </html>
 {% endblock %}

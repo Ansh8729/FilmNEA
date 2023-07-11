@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Create Post{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div style="text-align:center" class="container">
+        <h1>Upload your screenplay</h1>
+        <h3>The file must be a PDF.</h3>
+        <h3>2. The file name cannot have any spaces.</h3>
+
+        <form method='POST' enctype='multipart/form-data'>
+            {{form.hidden_tag()}}
+            {{form.file()}}
+            <br>
+            <br/>
+            <h2>Start page:</h2>
+            <h3>Note: Coverpage = 0</h3>
+            {{form.start()}}
+            <h2>End page:</h2>
+            {{form.end()}}
+            <h3>Disclaimer: Your file won't be uploaded if you upload more than 10 pages of your screenplay.</h3>
+            <br>
+            <br/>
+            {{form.submit()}}
+        </form> <!--The Jinja code below allows the warning messages to be displayed when the user inputs invalid data.-->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %} 
+                    <h3>{{ message }}</h3>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>
+{% endblock %}
