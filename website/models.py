@@ -15,7 +15,7 @@ class Screenwriters(db.Model):
     __tablename__ = "Screenwriters"
     writerid = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.Integer, db.ForeignKey('Users.id'))
-    profilepic = db.Column(db.String(150)) #TO BE CHANGED
+    profilepic = db.Column(db.String()) 
     biography = db.Column(db.Text)
     backgroundcolour = db.Column(db.Integer)
     fontstyle = db.Column(db.Integer)
@@ -56,7 +56,7 @@ class Producers(db.Model):
     __tablename__ = "Producers"
     producerid = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.Integer, db.ForeignKey('Users.id'))
-    profilepic = db.Column(db.String(150)) # TO BE CHANGED
+    profilepic = db.Column(db.String()) 
     biography = db.Column(db.Text)
     approved = db.Column(db.Integer)
     otp = db.Column(db.String(10))

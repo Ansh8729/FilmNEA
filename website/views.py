@@ -11,10 +11,11 @@ from PyPDF4 import PdfFileReader, PdfFileWriter
 import shutil
 import PyPDF2
 from PyPDF2 import PdfReader, PdfWriter
+from werkzeug.utils import secure_filename
+import uuid as uuid
+from . import db
 
 views = Blueprint("views", __name__)
-views.config['SECRET_KEY'] = 'supersecretkey'
-views.config['UPLOAD_FOLDER'] = '/Users/anshbindroo/Desktop/CSFilmNEA/Prototype'
 
 class ProfilePageForm(FlaskForm):
     profilepic = FileField("Profile Picture")
@@ -109,6 +110,14 @@ def profilepage():
 def pageeditor():
     form = ProfilePageForm()
     if form.validate_on_submit():
+        picture = request.files['profilepic']
+        picture.save(os.path.join(app.config['UPLOAD_FOLDER'], picname))
+        picturefilename = secure_filename(picture.filename)
+        picname = str(uuid.uuid1()) + "_" + picturefilename
+        shutil.move(picname,'static/files')
+        query = Screenwriters.query.filter_by(username = current_user.username).first()
+        query.profilepic = picname
+        db.session.commit()
         flash("Edits made!")
         return render_template("profilepage.html", user=current_user)
     return render_template("pageeditor.html", form=form, user=current_user)
@@ -123,7 +132,7 @@ def post():
         start = form.start.data
         end = form.end.data
         # The file is saved to the folder
-        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),views.config['UPLOAD_FOLDER'],secure_filename(file.filename))) 
+        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['UPLOAD_FOLDER'],secure_filename(file.filename))) 
         if AreThereSpaces(file.filename) == True:
             flash("There are spaces in the file name!", category='error')
         else:
