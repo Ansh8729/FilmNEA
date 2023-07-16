@@ -12,18 +12,41 @@
     <div style="text-align:center"></div>
         <form method='POST' enctype='multipart/form-data'>
             <h2>Profile Picture: </h2>
-            {{ form.profilepic() }}
+            <input 
+            type="file" 
+            id="profilepic" 
+            name="profilepic" 
+            class="form-control" 
+            placeholder="Upload Profile Picture"
+            />
             <br></br>
             <h2>Biography: </h2>
-            {{ form.biography() }}
+            <input 
+            type="text" 
+            id="bio" 
+            name="bio" 
+            class="form-control" 
+            placeholder="Enter Biography"
+            />
             <br></br>
             <h2>Background Colour: </h2>
-            {{ form.bgcolour() }}
+            <input type="radio" id="red" name="bgcolour" value="Red">
+            <label for="red">Red</label><br>
+            <input type="radio" id="yellow" name="bgcolour" value="Yellow">
+            <label for="yellow">Yellow</label><br>
+            <input type="radio" id="blue" name="bgcolour" value="Blue">
+            <label for="blue">Blue</label>
             <br></br>
+            <input type = "submit" id = "submit">
+            <!--
             <h2>Font Style: </h2>
-            {{ form.fontstyle() }}
-            <br></br>
-            {{ form.submit() }}
+            <input type="radio" id="r" name="bgcolour" value="Red">
+            <label for="red">Red</label><br>
+            <input type="radio" id="yellow" name="bgcolour" value="Yellow">
+            <label for="yellow">Yellow</label><br>
+            <input type="radio" id="blue" name="bgcolour" value="Blue">
+            <label for="blue">Blue</label>
+            <br></br>-->
         </form>
     </div>
 </body>

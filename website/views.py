@@ -17,13 +17,6 @@ from . import db
 
 views = Blueprint("views", __name__)
 
-class ProfilePageForm(FlaskForm):
-    profilepic = FileField("Profile Picture")
-    biography = TextAreaField("Biography")
-    bgcolour = SelectField("Background Colour", choices=[('1', 'Red'), ('2', 'Yellow'), ('3', 'Blue')])
-    fontstyle = SelectField("Font Style", choices=[('1', 'Default'), ('2', 'Arial'), ('3', 'Impact')])
-    submit = SubmitField("Submit")
-
 class UploadFileForm(FlaskForm): #Allows users to input the data needed to upload their screenplay.
     file = FileField("File", validators=[InputRequired()])
     start = IntegerField("Start page: ", validators=[InputRequired()])
@@ -108,15 +101,15 @@ def profilepage():
 @views.route("/pageeditor", methods=['GET', 'POST'])
 @login_required
 def pageeditor():
-    form = ProfilePageForm()
-    if form.validate_on_submit():
-        picture = request.files['profilepic']
-        picture.save(os.path.join(app.config['UPLOAD_FOLDER'], picname))
-        picturefilename = secure_filename(picture.filename)
+    if request.method == "POST":
+        file = request.form.get('profilepic')
+        picturefilename = secure_filename(file.filename)
         picname = str(uuid.uuid1()) + "_" + picturefilename
+        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['UPLOAD_FOLDER'],picname)) 
         shutil.move(picname,'static/files')
         query = Screenwriters.query.filter_by(username = current_user.username).first()
         query.profilepic = picname
+        query.biography = form.biography.data
         db.session.commit()
         flash("Edits made!")
         return render_template("profilepage.html", user=current_user)
