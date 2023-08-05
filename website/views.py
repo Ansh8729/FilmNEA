@@ -105,15 +105,15 @@ def pageeditor():
         file = request.form.get('profilepic')
         picturefilename = secure_filename(file.filename)
         picname = str(uuid.uuid1()) + "_" + picturefilename
-        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['UPLOAD_FOLDER'],picname)) 
+        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',picname)) 
         shutil.move(picname,'static/files')
         query = Screenwriters.query.filter_by(username = current_user.username).first()
         query.profilepic = picname
-        query.biography = form.biography.data
+        query.biography = request.form.get('bio')
         db.session.commit()
         flash("Edits made!")
         return render_template("profilepage.html", user=current_user)
-    return render_template("pageeditor.html", form=form, user=current_user)
+    return render_template("pageeditor.html", user=current_user)
 
 @views.route("/post", methods=['GET', 'POST'])
 @login_required
@@ -125,22 +125,30 @@ def post():
         start = form.start.data
         end = form.end.data
         # The file is saved to the folder
-        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['UPLOAD_FOLDER'],secure_filename(file.filename))) 
+        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',secure_filename(file.filename))) 
+        if IsPDF(file.filename) == False:
+            flash("Upload a PDF!", category='error')
+        else:
+            if ValidPageNums(file.filename, start, end) == False:
+                flash("Invalid page range!", category='error')
+            else:
+                PyPDF4.PdfFileReader(file.filename)
+                watermark(input_pdf=file.filename,output_pdf="watermarked.pdf", watermark="watermark.pdf")
+                os.remove(file.filename)
+                split_pdf(input="watermarked.pdf",output="finalfile.pdf",start=start, end=end)
+                os.remove("watermarked.pdf")
+                shutil.move("finalfile.pdf",'static/files')
+                return render_template("home.html", user=current_user)
+
+    return render_template('create_post.html', form=form, user=current_user)
+
+'''
         if AreThereSpaces(file.filename) == True:
             flash("There are spaces in the file name!", category='error')
         else:
-            if IsPDF(file.filename) == False:
-                flash("Upload a PDF!", category='error')
-            else:
-                if ValidPageNums(file.filename, start, end) == False:
-                    flash("Invalid page range!", category='error')
-                else:
-                    PyPDF4.PdfFileReader(file.filename)
-                    watermark(input_pdf=file.filename,output_pdf="watermarked.pdf", watermark="watermark.pdf")
-                    os.remove(file.filename)
-                    split_pdf(input="watermarked.pdf",output="finalfile.pdf",start=start, end=end)
-                    os.remove("watermarked.pdf")
-                    shutil.move("finalfile.pdf",'static/files')
-                    return render_template("home.html", user=current_user)
+        '''
 
-    return render_template('create_post.html', form=form, user=current_user)
+@views.route("/competitions")
+@login_required
+def competitions():
+    return render_template("competitions.html", user=current_user)
