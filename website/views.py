@@ -118,6 +118,7 @@ def pageeditor():
 @views.route("/post", methods=['GET', 'POST'])
 @login_required
 def post():
+    userdetails = Users.query.order_by(Users.id.desc()).first()
     form = UploadFileForm()
     if form.validate_on_submit():
         # The data is grabbed from the form
@@ -140,7 +141,7 @@ def post():
                 shutil.move("finalfile.pdf",'static/files')
                 return render_template("home.html", user=current_user)
 
-    return render_template('create_post.html', form=form, user=current_user)
+    return render_template('create_post.html', form=form, user=current_user, userdetails=userdetails)
 
 '''
         if AreThereSpaces(file.filename) == True:
