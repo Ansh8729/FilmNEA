@@ -14,7 +14,6 @@
         <h1>Upload your screenplay</h1>
         <h3>The file must be a PDF.</h3>
         <h3>2. The file name cannot have any spaces.</h3>
-
         <form method='POST' enctype='multipart/form-data'>
             {{form.hidden_tag()}}
             {{form.file()}}
@@ -39,7 +38,20 @@
         {% endwith %}
     </div>
     {% else %}
-    <h2>Put Producer Post Creation here</h2>
+    <div style="text-align:center" class="container">
+        <h1>Create Competition</h1>
+        {{form.hidden_tag()}}
+        <h2>Title</h2>
+        {{form.title()}}
+        <br><br>
+        <h2>Brief</h2>
+        {{form.brief()}}
+        <br><br>
+        <h2>Submission Deadline</h2>
+        {{form.submissiondate()}}
+        <br><br>
+        {{form.submit()}}
+    </div>
     {% endif %}
 
 </body>

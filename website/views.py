@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, flash
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers
+from .models import Users, Screenwriters, Producers, Competitions
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField
+from wtforms import StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField
 from werkzeug.utils import secure_filename
 import os
 from wtforms.validators import InputRequired
@@ -22,6 +22,12 @@ class UploadFileForm(FlaskForm): #Allows users to input the data needed to uploa
     start = IntegerField("Start page: ", validators=[InputRequired()])
     end = IntegerField("End page: ", validators=[InputRequired()])
     submit = SubmitField("Upload File")
+
+class CompetitionForm(FlaskForm):
+    title = StringField("Title: ")
+    brief = TextAreaField("Brief: ")
+    submissiondate = DateField("Submission Deadline: ", format='%Y-%m-%d')
+    submit = SubmitField("Submit Details")
 
 def AreThereSpaces(filename): #Checks if the name of the file they have uploaded has any spaces
     spaces = 0
@@ -118,28 +124,37 @@ def pageeditor():
 @views.route("/post", methods=['GET', 'POST'])
 @login_required
 def post():
-    userdetails = Users.query.order_by(Users.id.desc()).first()
-    form = UploadFileForm()
-    if form.validate_on_submit():
-        # The data is grabbed from the form
-        file = form.file.data 
-        start = form.start.data
-        end = form.end.data
-        # The file is saved to the folder
-        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',secure_filename(file.filename))) 
-        if IsPDF(file.filename) == False:
-            flash("Upload a PDF!", category='error')
-        else:
-            if ValidPageNums(file.filename, start, end) == False:
-                flash("Invalid page range!", category='error')
+    userdetails = Users.query.filter_by(username = current_user.username).first()
+    if userdetails.accounttype == 2:
+        form = CompetitionForm()
+        if form.validate_on_submit():
+            producerdetails = Producers.query.filter_by(userid = userdetails.userid).first()
+            num = producerdetails.producerid
+            newcomp = Competitions(producerid = num, title=form.title.data, brief=form.brief.data, deadline=form.deadline.data)
+            db.session.add(newcomp)
+            db.session.commit()
+    elif userdetails.accounttype == 1:
+        form = UploadFileForm()
+        if form.validate_on_submit():
+            # The data is grabbed from the form
+            file = form.file.data 
+            start = form.start.data
+            end = form.end.data
+            # The file is saved to the folder
+            file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',secure_filename(file.filename))) 
+            if IsPDF(file.filename) == False:
+                flash("Upload a PDF!", category='error')
             else:
-                PyPDF4.PdfFileReader(file.filename)
-                watermark(input_pdf=file.filename,output_pdf="watermarked.pdf", watermark="watermark.pdf")
-                os.remove(file.filename)
-                split_pdf(input="watermarked.pdf",output="finalfile.pdf",start=start, end=end)
-                os.remove("watermarked.pdf")
-                shutil.move("finalfile.pdf",'static/files')
-                return render_template("home.html", user=current_user)
+                if ValidPageNums(file.filename, start, end) == False:
+                    flash("Invalid page range!", category='error')
+                else:
+                    PyPDF4.PdfFileReader(file.filename)
+                    watermark(input_pdf=file.filename,output_pdf="watermarked.pdf", watermark="watermark.pdf")
+                    os.remove(file.filename)
+                    split_pdf(input="watermarked.pdf",output="finalfile.pdf",start=start, end=end)
+                    os.remove("watermarked.pdf")
+                    shutil.move("finalfile.pdf",'static/files')
+                    return render_template("home.html", user=current_user)
 
     return render_template('create_post.html', form=form, user=current_user, userdetails=userdetails)
 
