@@ -7,19 +7,24 @@ class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150), unique=True)
     username = db.Column(db.String(150), unique=True)
+    forename = db.Column(db.String(75), unique=True)
+    surname = db.Column(db.String(75), unique=True)
     password = db.Column(db.String(150))
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
     accounttype = db.Column(db.Integer)
+    profilepic = db.Column(db.String()) 
+    biography = db.Column(db.Text)
+    writers = db.relationship('Screenwriters', backref="user", passive_deletes=True)
+    producers = db.relationship('Producers', backref="user", passive_deletes=True)
 
 class Screenwriters(db.Model):
     __tablename__ = "Screenwriters"
     writerid = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.Integer, db.ForeignKey('Users.id'))
-    profilepic = db.Column(db.String()) 
-    biography = db.Column(db.Text)
     backgroundcolour = db.Column(db.Integer)
     fontstyle = db.Column(db.Integer)
     experiencelevel = db.Column(db.Float)
+    posts = db.relationship('Screenplays', backref="writer", passive_deletes=True)
 
 class BGColours(db.Model):
     __tablename__ = "BGColours"
@@ -34,7 +39,7 @@ class FontStyles(db.Model):
 class Screenplays(db.Model):
     __tablename__ = "Screenplays"
     scriptid = db.Column(db.Integer, primary_key=True)
-    writerid = db.Column(db.Integer)
+    writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid', ondelete="CASCADE"), nullable=False)
     title = db.Column(db.String(300))
     logline = db.Column(db.String(165))
     message = db.Column(db.Text)
@@ -56,10 +61,9 @@ class Producers(db.Model):
     __tablename__ = "Producers"
     producerid = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.Integer, db.ForeignKey('Users.id'))
-    profilepic = db.Column(db.String()) 
-    biography = db.Column(db.Text)
     approved = db.Column(db.Integer)
     otp = db.Column(db.String(10))
+    posts = db.relationship('Competitions', backref="producer", passive_deletes=True)
 
 class Requests(db.Model):
     __tablename__ = "Requests"
@@ -75,6 +79,7 @@ class Competitions(db.Model):
     title = db.Column(db.String(300))
     brief = db.Column(db.Text)
     deadline = db.Column(db.DateTime(timezone=True))
+    date_created = db.Column(db.DateTime(timezone=True), default=func.now())
 
 class CompHas(db.Model):
     __tablename__ = "CompHas"

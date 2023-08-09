@@ -1,0 +1,24 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+    %}
+    <h1 align="center">{% block header %}Competitions{% endblock %}</h1>
+    <div id="comps">
+      {% for comp in comps %}
+      <h1>{{comp.title}}</h1>
+      <div class="card border-dark">
+        <a href="/competitions/{{comp.producer.user.username}}">{{comp.producer.user.username}}</a>
+        <div class="card-body">
+          <div class="card-text">{{comp.brief}}</div>
+          <h5>Deadline:</h5>
+          {{comp.deadline}}
+        </div>
+        <div class="card-footer text-muted">{{comp.date_created}}</div>
+      </div>
+      <br/> {% endfor %}
+    </div>
+    {% block footer %}
+    {% if details.accounttype == 2 %}
+    <div align="center">
+      <a href="/post"><button type="button" class="btn btn-primary btn-lg">Create a Competition</button></a>
+    </div>
+    {% endif %}
+    {% endblock %} {% endblock %}

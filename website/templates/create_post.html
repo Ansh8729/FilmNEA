@@ -41,16 +41,24 @@
     <div style="text-align:center" class="container">
         <form method='POST'>
             <h1>Create Competition</h1>
-            <h2>Title</h2>
-            {{form.title()}}
+            <label for="title">Title</label><br>
+            <input type="text" id="title" name="title"><br>
             <br><br>
-            <h2>Brief</h2>
-            {{form.brief()}}
+            <label for="brief">Brief</label><br>
+            <input type="text" id="brief" name="brief">
             <br><br>
-            <h2>Submission Deadline</h2>
-            {{form.submissiondate()}}
+            <label for="date">Deadline</label><br>
+            <input type="date" id="date" name="date">
             <br><br>
-            {{form.submit}}
+            <h2>Genres</h2>
+            <input type="checkbox" id="drama" name="drama" value="Drama">
+            <label for="drama">Drama</label><br>
+            <input type="checkbox" id="comedy" name="comedy" value="Comedy">
+            <label for="comedy">Comedy</label><br>
+            <input type="checkbox" id="horror" name="horror" value="Horror">
+            <label for="horror">Horror</label>
+            <br><br>
+            <input type="submit" id="submit" name="submit">
         </form>
     </div>
     {% endif %}

@@ -54,14 +54,17 @@ def sign_up():
             flash('Password don\'t match!', category='error')
         elif len(username) < 2:
             flash('Username is too short.', category='error')
-        elif len(password1) < 6:
+        elif len(password1) < 8:
             flash('Password is too short.', category='error')
         elif len(email) < 4:
             flash("Email is invalid.", category='error')
         else:
+            names = username.split(" ")
+            forename = names[0]
+            surname = names[1]
             if accounttype == "Screenwriter":
-                new_user = Users(email=email, username=username, password=generate_password_hash(
-                    password1, method='scrypt'), accounttype = 1)
+                new_user = Users(email=email, username=username, forename=forename, surname=surname, password=generate_password_hash(
+                password1, method='scrypt'), accounttype = 1)
                 db.session.add(new_user)
                 newuser = Users.query.order_by(Users.id.desc()).first()
                 new_writer = Screenwriters(userid = newuser.id)
@@ -71,8 +74,8 @@ def sign_up():
                 flash('User created!')
                 return redirect(url_for('views.home'))
             if accounttype == "Producer":
-                new_user = Users(email=email, username=username, password=generate_password_hash(
-                    password1, method='scrypt'), accounttype = 2)
+                new_user = Users(email=email, username=username, forename=forename, surname=surname, password=generate_password_hash(
+                password1, method='scrypt'), accounttype = 2)
                 db.session.add(new_user)
                 db.session.commit()
                 newuser = Users.query.order_by(Users.id.desc()).first()

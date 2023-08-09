@@ -13,6 +13,7 @@ flask-wtf = "*"
 wtforms = "*"
 pypdf4 = "*"
 pypdf2 = "*"
+python-dateutil = "*"
 
 [dev-packages]
 

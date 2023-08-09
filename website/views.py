@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, request, flash
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required, current_user
 from .models import Users, Screenwriters, Producers, Competitions
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField
+from wtforms import widgets, RadioField, StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField, SelectMultipleField
 from werkzeug.utils import secure_filename
 import os
 from wtforms.validators import InputRequired
@@ -14,8 +14,12 @@ from PyPDF2 import PdfReader, PdfWriter
 from werkzeug.utils import secure_filename
 import uuid as uuid
 from . import db
+from dateutil.parser import parse
 
 views = Blueprint("views", __name__)
+
+def convert_to_datetime(input_str, parserinfo=None):
+    return parse(input_str, parserinfo=parserinfo)
 
 class UploadFileForm(FlaskForm): #Allows users to input the data needed to upload their screenplay.
     file = FileField("File", validators=[InputRequired()])
@@ -23,10 +27,15 @@ class UploadFileForm(FlaskForm): #Allows users to input the data needed to uploa
     end = IntegerField("End page: ", validators=[InputRequired()])
     submit = SubmitField("Upload File")
 
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
+
 class CompetitionForm(FlaskForm):
     title = StringField("Title: ")
     brief = TextAreaField("Brief: ")
     submissiondate = DateField("Submission Deadline: ", format='%Y-%m-%d')
+    genres = MultiCheckboxField('Genres', choices=['option1'])
     submit = SubmitField("Submit Details")
 
 def AreThereSpaces(filename): #Checks if the name of the file they have uploaded has any spaces
@@ -96,13 +105,8 @@ def home():
 @views.route("/profilepage")
 @login_required
 def profilepage():
-    user = Users.query.filter_by(username = current_user.username).first()
-    if user.accounttype == 1:
-        details = Screenwriters.query.filter_by(userid = user.id).first()
-    elif user.accounttype == 2:
-        details = Producers.query.filter_by(userid = user.id).first()
-
-    return render_template("profilepage.html", user=current_user, details1=user, details2=details)
+    userdetails = Users.query.filter_by(username = current_user.username).first()
+    return render_template("profilepage.html", user=current_user, userdetails=userdetails)
 
 @views.route("/pageeditor", methods=['GET', 'POST'])
 @login_required
@@ -126,13 +130,16 @@ def pageeditor():
 def post():
     userdetails = Users.query.filter_by(username = current_user.username).first()
     if userdetails.accounttype == 2:
-        form = CompetitionForm()
-        if form.validate_on_submit():
-            producerdetails = Producers.query.filter_by(userid = userdetails.userid).first()
+        if request.method == "POST":
+            producerdetails = Producers.query.filter_by(userid = userdetails.id).first()
             num = producerdetails.producerid
-            newcomp = Competitions(producerid = num, title=form.title.data, brief=form.brief.data, deadline=form.deadline.data)
+            deadline=str(request.form.get("date"))
+            date = convert_to_datetime(deadline)
+            newcomp = Competitions(producerid = num, title=request.form.get("title"), brief=request.form.get("brief"), deadline=date)
             db.session.add(newcomp)
             db.session.commit()
+            flash("Competition created!")
+            return redirect(url_for('views.competitions'))
     elif userdetails.accounttype == 1:
         form = UploadFileForm()
         if form.validate_on_submit():
@@ -156,7 +163,7 @@ def post():
                     shutil.move("finalfile.pdf",'static/files')
                     return render_template("home.html", user=current_user)
 
-    return render_template('create_post.html', form=form, user=current_user, userdetails=userdetails)
+    return render_template('create_post.html', user=current_user, userdetails=userdetails)
 
 '''
         if AreThereSpaces(file.filename) == True:
@@ -167,4 +174,6 @@ def post():
 @views.route("/competitions")
 @login_required
 def competitions():
-    return render_template("competitions.html", user=current_user)
+    comps = Competitions.query.order_by(Competitions.compid.desc())
+    userdetails = Users.query.filter_by(username = current_user.username).first()
+    return render_template("competitions.html", user=current_user, comps=comps, details=userdetails)
