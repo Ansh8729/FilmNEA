@@ -29,6 +29,7 @@
             placeholder="Enter Biography"
             />
             <br></br>
+            {% if userdetails.accounttype == 1 %}
             <h2>Background Colour: </h2>
             <input type="radio" id="red" name="bgcolour" value="Red">
             <label for="red">Red</label><br>
@@ -37,7 +38,6 @@
             <input type="radio" id="blue" name="bgcolour" value="Blue">
             <label for="blue">Blue</label>
             <br></br>
-            <input type = "submit" id = "submit">
             <!--
             <h2>Font Style: </h2>
             <input type="radio" id="r" name="bgcolour" value="Red">
@@ -47,6 +47,8 @@
             <input type="radio" id="blue" name="bgcolour" value="Blue">
             <label for="blue">Blue</label>
             <br></br>-->
+            {% endif %}
+            <input type = "submit" id = "submit">
         </form>
     </div>
 </body>

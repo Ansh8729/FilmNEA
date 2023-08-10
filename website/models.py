@@ -12,7 +12,7 @@ class Users(db.Model, UserMixin):
     password = db.Column(db.String(150))
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
     accounttype = db.Column(db.Integer)
-    profilepic = db.Column(db.String()) 
+    profilepic = db.Column(db.String(), nullable=True) 
     biography = db.Column(db.Text)
     writers = db.relationship('Screenwriters', backref="user", passive_deletes=True)
     producers = db.relationship('Producers', backref="user", passive_deletes=True)
@@ -80,6 +80,7 @@ class Competitions(db.Model):
     brief = db.Column(db.Text)
     deadline = db.Column(db.DateTime(timezone=True))
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
+    submissionnum = db.Column(db.Integer)
 
 class CompHas(db.Model):
     __tablename__ = "CompHas"

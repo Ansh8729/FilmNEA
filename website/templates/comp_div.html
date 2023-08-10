@@ -1,9 +1,16 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
     %}
     <h1 align="center">{% block header %}Competitions{% endblock %}</h1>
-    <div id="comps">
+    
+      <form action="{{ url_for('views.competitions') }}" method='POST'>
+        <input type="submit" name="sorted" value="New"></input>
+        <input type="submit" name="sorted" value="Top of Week"></input>
+        <input type="submit" name="sorted" value="Top of Month"></input>
+      </form>
+    
+    <div id="comps" style="text-align:center">
       {% for comp in comps %}
-      <h1>{{comp.title}}</h1>
+      <h2>{{comp.title}}</h2>
       <div class="card border-dark">
         <a href="/competitions/{{comp.producer.user.username}}">{{comp.producer.user.username}}</a>
         <div class="card-body">

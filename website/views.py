@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions
+from .models import Users, Screenwriters, Producers, Competitions, Submissions
 from flask_wtf import FlaskForm
 from wtforms import widgets, RadioField, StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField, SelectMultipleField
 from werkzeug.utils import secure_filename
@@ -15,28 +15,24 @@ from werkzeug.utils import secure_filename
 import uuid as uuid
 from . import db
 from dateutil.parser import parse
+from datetime import date, timedelta
 
 views = Blueprint("views", __name__)
 
 def convert_to_datetime(input_str, parserinfo=None):
     return parse(input_str, parserinfo=parserinfo)
 
+'''
 class UploadFileForm(FlaskForm): #Allows users to input the data needed to upload their screenplay.
     file = FileField("File", validators=[InputRequired()])
     start = IntegerField("Start page: ", validators=[InputRequired()])
     end = IntegerField("End page: ", validators=[InputRequired()])
     submit = SubmitField("Upload File")
-
+'''
+    
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
     option_widget = widgets.CheckboxInput()
-
-class CompetitionForm(FlaskForm):
-    title = StringField("Title: ")
-    brief = TextAreaField("Brief: ")
-    submissiondate = DateField("Submission Deadline: ", format='%Y-%m-%d')
-    genres = MultiCheckboxField('Genres', choices=['option1'])
-    submit = SubmitField("Submit Details")
 
 def AreThereSpaces(filename): #Checks if the name of the file they have uploaded has any spaces
     spaces = 0
@@ -111,19 +107,20 @@ def profilepage():
 @views.route("/pageeditor", methods=['GET', 'POST'])
 @login_required
 def pageeditor():
+    userdetails = Users.query.filter_by(username = current_user.username).first()
     if request.method == "POST":
-        file = request.form.get('profilepic')
+        file = request.files['profilepic']
         picturefilename = secure_filename(file.filename)
         picname = str(uuid.uuid1()) + "_" + picturefilename
         file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',picname)) 
-        shutil.move(picname,'static/files')
-        query = Screenwriters.query.filter_by(username = current_user.username).first()
+        shutil.move(picname,'static/images')
+        query = Users.query.filter_by(username = current_user.username).first()
         query.profilepic = picname
         query.biography = request.form.get('bio')
         db.session.commit()
         flash("Edits made!")
-        return render_template("profilepage.html", user=current_user)
-    return render_template("pageeditor.html", user=current_user)
+        return render_template("profilepage.html", user=current_user, userdetails=userdetails)
+    return render_template("pageeditor.html", user=current_user, userdetails=userdetails)
 
 @views.route("/post", methods=['GET', 'POST'])
 @login_required
@@ -140,17 +137,16 @@ def post():
             db.session.commit()
             flash("Competition created!")
             return redirect(url_for('views.competitions'))
+        return render_template('create_post.html', user=current_user, userdetails=userdetails)
     elif userdetails.accounttype == 1:
-        form = UploadFileForm()
-        if form.validate_on_submit():
+        if request.method == "POST":
             # The data is grabbed from the form
-            file = form.file.data 
-            start = form.start.data
-            end = form.end.data
+            file = request.files['screenplay']
             # The file is saved to the folder
             file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',secure_filename(file.filename))) 
             if IsPDF(file.filename) == False:
                 flash("Upload a PDF!", category='error')
+            '''
             else:
                 if ValidPageNums(file.filename, start, end) == False:
                     flash("Invalid page range!", category='error')
@@ -162,8 +158,8 @@ def post():
                     os.remove("watermarked.pdf")
                     shutil.move("finalfile.pdf",'static/files')
                     return render_template("home.html", user=current_user)
-
-    return render_template('create_post.html', user=current_user, userdetails=userdetails)
+            '''
+        return render_template('create_post.html', user=current_user, userdetails=userdetails)
 
 '''
         if AreThereSpaces(file.filename) == True:
@@ -171,9 +167,34 @@ def post():
         else:
         '''
 
-@views.route("/competitions")
+@views.route("/competitions", methods=['GET', 'POST'])
 @login_required
 def competitions():
-    comps = Competitions.query.order_by(Competitions.compid.desc())
     userdetails = Users.query.filter_by(username = current_user.username).first()
+    comps2 = Competitions.query.all()
+    subs = Submissions.query.all()
+    for comp in comps2:
+        subs2 = Submissions.query.filter_by(compid = comp.compid)
+        comp.submissionnum = subs2.count()
+        db.session.commit()
+    comps = Competitions.query.order_by(Competitions.submissionnum.desc())
+    if request.method == "POST":
+        sort = request.form['sorted']
+        if sort == "New":
+            comps = Competitions.query.order_by(Competitions.date_created.desc())
+            flash("Competitions now sorted by newest to oldest.")
+            return render_template("competitions.html", user=current_user, comps=comps, details=userdetails)
+        elif sort == "Top Of Week":
+            filter_after = date.today() - timedelta(days = 7)
+            comps2 = Competitions.query.filter(Competitions.date_created >= filter_after)
+            comps = comps2.order_by(Competitions.submissionnum.desc())
+            flash("Competitions now sorted by top of this week.")
+            return render_template("competitions.html", user=current_user, comps=comps, details=userdetails)
+        elif sort == "Top Of Month":
+            filter_after = date.today() - timedelta(days = 30)
+            comps2 = Competitions.query.filter(Competitions.date_created >= filter_after)
+            comps = comps2.order_by(Competitions.submissionnum.desc())
+            flash("Competitions now sorted by top of this month.")
+            return render_template("competitions.html", user=current_user, comps=comps, details=userdetails)
+
     return render_template("competitions.html", user=current_user, comps=comps, details=userdetails)

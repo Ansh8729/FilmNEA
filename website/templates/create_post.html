@@ -11,24 +11,29 @@
 <body>
     {% if userdetails.accounttype == 1 %}
     <div style="text-align:center" class="container">
-        <h1>Upload your screenplay</h1>
-        <h3>The file must be a PDF.</h3>
-        <h3>2. The file name cannot have any spaces.</h3>
+        <h1>Create Screenplay Post</h1><br>
         <form method='POST' enctype='multipart/form-data'>
-            {{form.hidden_tag()}}
-            {{form.file()}}
+            <label for="title">Title</label>
+            <input type="text" id="title"><br><br>
+            <label for="logline">Logline</label>
+            <input type="text" id="logline"><br><br>
+            <label for="screenplay">Upload Screenplay</label>
+            <input type="file" id="screenplay" value="screenplay">
             <br>
-            <br/>
-            <h2>Start page:</h2>
-            <h3>Note: Coverpage = 0</h3>
-            {{form.start()}}
-            <h2>End page:</h2>
-            {{form.end()}}
-            <h3>Disclaimer: Your file won't be uploaded if you upload more than 10 pages of your screenplay.</h3>
             <br>
-            <br/>
-            {{ form.submit }}
+            <h4>1. The file must be a PDF.</h4>
+            <h4>2. The file name cannot have any spaces.</h4>
+            <br>
+            <h2>Page Range</h2>
+            <h4>Note: Coverpage = 0</h4>
+            <label for="start">Start Page</label>
+            <input type="number" id="start"><br><br>
+            <label for="end">End Page</label>
+            <input type="number" id="end"><br><br>
+            <h4>Disclaimer: Your file won't be uploaded if you upload more than 10 pages of your screenplay.</h4><br>
+            <input type="submit" value="Submit">
         </form> <!--The Jinja code below allows the warning messages to be displayed when the user inputs invalid data.-->
+        <br>
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for message in messages %} 
