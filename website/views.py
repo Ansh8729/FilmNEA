@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, send_from_directory
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions, Submissions
+from .models import Users, Screenwriters, Producers, Competitions, Submissions, Screenplays
 from flask_wtf import FlaskForm
 from wtforms import widgets, RadioField, StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField, SelectMultipleField
 from werkzeug.utils import secure_filename
@@ -96,7 +96,8 @@ def split_pdf(input, output, start, end): #Cuts the screenplay down to the pages
 @views.route("/home")
 @login_required
 def home():
-    return render_template("home.html", user=current_user)
+    posts = Screenplays.query.all()
+    return render_template("home.html", user=current_user, posts=posts)
 
 @views.route("/profilepage")
 @login_required
@@ -138,34 +139,45 @@ def post():
             flash("Competition created!")
             return redirect(url_for('views.competitions'))
         return render_template('create_post.html', user=current_user, userdetails=userdetails)
+    
     elif userdetails.accounttype == 1:
         if request.method == "POST":
             # The data is grabbed from the form
+            title = request.form.get("title")
+            logline = request.form.get("logline")
+            message = request.form.get("message")
             file = request.files['screenplay']
+            start = int(request.form.get("start"))
+            end = int(request.form.get("end"))
             # The file is saved to the folder
-            file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',secure_filename(file.filename))) 
+            scriptname = secure_filename(file.filename) 
+            file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
             if IsPDF(file.filename) == False:
                 flash("Upload a PDF!", category='error')
-            '''
             else:
                 if ValidPageNums(file.filename, start, end) == False:
                     flash("Invalid page range!", category='error')
                 else:
-                    PyPDF4.PdfFileReader(file.filename)
+                    PyPDF4.PdfFileReader(scriptname)
                     watermark(input_pdf=file.filename,output_pdf="watermarked.pdf", watermark="watermark.pdf")
                     os.remove(file.filename)
-                    split_pdf(input="watermarked.pdf",output="finalfile.pdf",start=start, end=end)
+                    newname = str(uuid.uuid1()) + "_" + "finalfile.pdf"
+                    split_pdf(input="watermarked.pdf",output=newname ,start=start, end=end)
                     os.remove("watermarked.pdf")
-                    shutil.move("finalfile.pdf",'static/files')
-                    return render_template("home.html", user=current_user)
-            '''
+                    shutil.move(newname,'static/images')
+                    currentwriter = Screenwriters.query.filter_by(userid = current_user.id).first()
+                    newpost = Screenplays(writerid = currentwriter.userid, title=title, logline=logline, message=message, screenplay=newname)
+                    db.session.add(newpost)
+                    db.session.commit()
+                    posts = Screenplays.query.all()
+                    return render_template("home.html", user=current_user, posts=posts)
         return render_template('create_post.html', user=current_user, userdetails=userdetails)
 
 '''
         if AreThereSpaces(file.filename) == True:
             flash("There are spaces in the file name!", category='error')
         else:
-        '''
+'''
 
 @views.route("/competitions", methods=['GET', 'POST'])
 @login_required

@@ -9,7 +9,24 @@
     <title>Home</title>
 </head>
 <body>
-
+    <form action="{{ url_for('views.competitions') }}" method='POST'>
+        <input type="submit" name="sorted" value="New"></input>
+        <input type="submit" name="sorted" value="Top of Week"></input>
+        <input type="submit" name="sorted" value="Top of Month"></input>
+      </form>
+    <div id="posts" style="text-align:center">
+      {% for post in posts %}
+      <h2>{{post.title}}</h2>
+      <div class="card border-dark">
+        <a href="/home/{{post.writer.user.username}}">{{post.writer.user.username}}</a>
+        <div class="card-body">
+          <div class="card-text">{{post.logline}}</div>
+          {{post.message}}
+          <embed style="text-align: center;" src="{{url_for('static', filename='images/'+post.screenplay)}}" width = "75%" height = "550px"> 
+        </div>
+      </div>
+      <br/>{% endfor %}
+    </div>
 </body>
 </html>
 {% endblock %}
