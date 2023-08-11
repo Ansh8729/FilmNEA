@@ -79,16 +79,19 @@ def sign_up():
                 db.session.add(new_user)
                 db.session.commit()
                 newuser = Users.query.order_by(Users.id.desc()).first()
-                new_producer = Producers(userid = newuser.id)
+                otp = ""
+                for i in range(6):
+                    num = random.randint(0,9)
+                    otp += str(num)
+                msg = 'Hello, Your OTP is '+otp
+                new_producer = Producers(userid = newuser.id, otp=otp)
                 db.session.add(new_producer)
                 db.session.commit()
-                login_user(new_user, remember=True)
-                flash('User created!', category='success')
-                return redirect(url_for('views.home'))  
+                send_email('writersworldnoreply@gmail.com', 'lolfruollznvecyd', newuser.email, msg)
+                return redirect(url_for('auth.approval'))  
 
     return render_template("signup.html", user=current_user)
 
-'''
 @auth.route("/approval", methods=['GET', 'POST'])
 def approval():
     if request.method == 'POST':
@@ -97,8 +100,8 @@ def approval():
         if code == newproducer.otp:
             newproducer = Producers.query.order_by(Producers.producerid.desc()).first()
             new_user = Users.query.order_by(Users.id.desc()).first()
-            newproducer.userid = new_user.id
             newproducer.approved = 1
+            db.session.commit()
             login_user(new_user, remember=True)
             flash('User approved and created!', category='success')  
             return redirect(url_for('views.home'))
@@ -106,7 +109,7 @@ def approval():
             flash('Incorrect OTP.', category='error')
 
     return render_template("approval.html")
-'''
+
 @auth.route("/logout")
 @login_required
 def logout():
