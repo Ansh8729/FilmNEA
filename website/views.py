@@ -99,11 +99,22 @@ def home():
     posts = Screenplays.query.all()
     return render_template("home.html", user=current_user, posts=posts)
 
-@views.route("/profilepage")
+@views.route("/profilepage/<username>")
 @login_required
-def profilepage():
+def profilepage(username):
     userdetails = Users.query.filter_by(username = current_user.username).first()
-    return render_template("profilepage.html", user=current_user, userdetails=userdetails)
+    if userdetails.accounttype == 1:
+        writer = Screenwriters.query.filter_by(userid = current_user.id).first()
+        scripts = Screenplays.query.filter_by(writerid = writer.id)
+        rating = 0
+        for i in scripts:
+            rating += i.avgrating
+        writer.experiencelevel = rating*scripts.count()
+        db.session.commit()
+        writerdetails = Screenwriters.query.filter_by(userid = current_user.id).first()
+        return render_template("profilepage.html", user=current_user, userdetails=userdetails, scripts=scripts, details=writerdetails)
+    if userdetails.accounttype == 2:
+        return render_template("profilepage.html", user=current_user, userdetails=userdetails)
 
 @views.route("/pageeditor", methods=['GET', 'POST'])
 @login_required
@@ -210,3 +221,20 @@ def competitions():
             return render_template("competitions.html", user=current_user, comps=comps, details=userdetails)
 
     return render_template("competitions.html", user=current_user, comps=comps, details=userdetails)
+
+@views.route('/comp/<title>', methods=['GET', 'POST'])
+@login_required
+def comp(title):
+    comp = Competitions.query.filter_by(title = title).first()
+    if request.method == "POST":
+        submission = request.files["submissions"]
+        scriptname = secure_filename(submission.filename) 
+        submission.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
+        user = Users.query.filter_by(username = current_user.username).first()
+        writer = Screenwriters.query.filter_by(userid = user.id).first()
+        newsub = Submissions(writerid = writer.writerid, compid = comp.compid, submission=scriptname)
+        db.session.add(newsub)
+        db.session.commit()
+        flash("Submission sent!")
+        return redirect(url_for("views.competitions"))
+    return render_template("comp_full.html",user=current_user, comp=comp)

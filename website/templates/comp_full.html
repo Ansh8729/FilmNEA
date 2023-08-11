@@ -1,0 +1,26 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+    %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <button onclick="window.location.href = '/competitions';">Back</button>
+  <br><br>
+  <div style="text-align:left">
+    <h1>{{comp.title}}</h1>
+    <h3>Deadline: {{comp.deadline}}</h3>
+  </div>
+  <p>{{comp.brief}}</p>
+  <br>
+  <h2>Submit Your Entry</h2>
+  <form method='POST' enctype='multipart/form-data'>
+    <input type="file" name="submission"><br><br>
+    <input type="submit" name="Submit">
+  </form>
+</body>
+</html>
+  {% endblock %}

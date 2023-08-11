@@ -20,6 +20,25 @@
     <h3>{{  userdetails.username }}</h3>
     <h5>{{ userdetails.email }}</h5>
     {{ userdetails.biography }}
+    {% if userdetails.accounttype == 1 %}
+    <p>Experience Level: {{ details.experiencelevel }}</p>
+    <div style="text-align:center">
+        <h2>Scripts</h2>
+        {% for post in scripts %}
+        <div id="posts" style="text-align:center">
+            <h2>{{post.title}}</h2>
+            <div class="card border-dark">
+              <a href="/home/{{post.writer.user.username}}">{{post.writer.user.username}}</a>
+              <div class="card-body">
+                <div class="card-text">{{post.logline}}</div>
+                {{post.message}}
+                <embed style="text-align: center;" src="{{url_for('static', filename='images/'+post.screenplay)}}" width = "75%" height = "550px"> 
+              </div>
+            </div>
+            <br/>{% endfor %}
+          </div>
+    </div>
+    {% endif %}
 </body>
 </html>
 {% endblock %}

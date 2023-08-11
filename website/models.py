@@ -91,7 +91,7 @@ class Submissions(db.Model):
     __tablename__ = "Submissions"
     writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'), primary_key=True)
     compid = db.Column(db.Integer, db.ForeignKey('Competitions.compid'), primary_key=True)
-    submission = db.Column(db.String(150)) # TO BE CHANGED
+    submission = db.Column(db.String(150)) 
     submissiondate = db.Column(db.DateTime(timezone=True))
 
 class SubmissionResponses(db.Model):
