@@ -107,4 +107,9 @@ class LikedScreenplays(db.Model):
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'), primary_key=True)
     title = db.Column(db.String(300))
     rating = db.Column(db.Float)
-    commented = db.Column(db.Integer)
+
+class Comments(db.Model):
+    __tablename__ = "Comments"
+    writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'), primary_key=True)
+    scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'), primary_key=True)
+    comment = db.Column(db.String(300))

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_from_directory
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions, Submissions, Screenplays
+from .models import Users, Screenwriters, Producers, Competitions, Submissions, Screenplays, LikedScreenplays, Comments
 from flask_wtf import FlaskForm
 from wtforms import widgets, RadioField, StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField, SelectMultipleField
 from werkzeug.utils import secure_filename
@@ -97,7 +97,37 @@ def split_pdf(input, output, start, end): #Cuts the screenplay down to the pages
 @login_required
 def home():
     posts = Screenplays.query.all()
-    return render_template("home.html", user=current_user, posts=posts)
+    comments = Comments.query.all()
+    return render_template("home.html", user=current_user, posts=posts, comments=comments)
+
+@views.route("/rate/<scriptid>", methods=['POST'])
+@login_required
+def rate(scriptid):
+    rating = request.form.get("rate")
+    writer = Screenwriters.query.filter_by(userid = current_user.id).first()
+    script = Screenplays.query.filter_by(scriptid=scriptid).first()
+    newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
+    db.session.add(newrating)
+    db.session.commit()
+    return redirect(url_for('views.home'))
+
+@views.route("/create-comment/<scriptid>", methods=['POST'])
+@login_required
+def create_comment(scriptid):
+    text = request.form.get('text')
+    if not text:
+        flash('Comment cannot be empty.', category='error')
+    else:
+        post = Screenplays.query.filter_by(scriptid = scriptid)
+        writer = Screenwriters.query.filter_by(userid = current_user.id).first()
+        if post:
+            comment = Comments(writerid=writer.writerid, scriptid=scriptid, comment=text)
+            db.session.add(comment)
+            db.session.commit()
+        else:
+            flash('Post does not exist.', category='error')
+
+    return redirect(url_for('views.home'))
 
 @views.route("/profilepage/<username>")
 @login_required
@@ -105,14 +135,15 @@ def profilepage(username):
     userdetails = Users.query.filter_by(username = current_user.username).first()
     if userdetails.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid = current_user.id).first()
-        scripts = Screenplays.query.filter_by(writerid = writer.id)
+        scripts = Screenplays.query.filter_by(writerid = writer.writerid)
         rating = 0
         for i in scripts:
-            rating += i.avgrating
+            if i.avgrating != None:
+                rating += i.avgrating
         writer.experiencelevel = rating*scripts.count()
         db.session.commit()
         writerdetails = Screenwriters.query.filter_by(userid = current_user.id).first()
-        return render_template("profilepage.html", user=current_user, userdetails=userdetails, scripts=scripts, details=writerdetails)
+        return render_template("profilepage.html", user=current_user, userdetails=userdetails, posts=scripts, details=writerdetails)
     if userdetails.accounttype == 2:
         return render_template("profilepage.html", user=current_user, userdetails=userdetails)
 
@@ -177,7 +208,7 @@ def post():
                     os.remove("watermarked.pdf")
                     shutil.move(newname,'static/images')
                     currentwriter = Screenwriters.query.filter_by(userid = current_user.id).first()
-                    newpost = Screenplays(writerid = currentwriter.userid, title=title, logline=logline, message=message, screenplay=newname)
+                    newpost = Screenplays(writerid = currentwriter.writerid, title=title, logline=logline, message=message, screenplay=newname)
                     db.session.add(newpost)
                     db.session.commit()
                     posts = Screenplays.query.all()
