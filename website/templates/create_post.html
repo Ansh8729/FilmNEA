@@ -33,7 +33,15 @@
             <label for="end">End Page</label>
             <input type="number" id="end" name="end" class="form-control"><br><br>
             <h4>Disclaimer: Your file won't be uploaded if you upload more than 10 pages of your screenplay.</h4><br>
-            <input type="submit" value="Submit">
+            <h4>Genres:</h4>
+            <input type="checkbox" id="drama" name="genres" value="1">
+            <label for="drama">Drama</label><br>
+            <input type="checkbox" id="comedy" name="genres" value="2">
+            <label for="comedy">Comedy</label><br>
+            <input type="checkbox" id="horror" name="genres" value="3">
+            <label for="horror">Horror</label>
+            <br><br>
+            <input type="submit" id="submit" name="submit">
         </form> <!--The Jinja code below allows the warning messages to be displayed when the user inputs invalid data.-->
         <br>
         {% with messages = get_flashed_messages() %}

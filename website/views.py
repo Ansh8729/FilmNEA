@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_from_directory
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions, Submissions, Screenplays, LikedScreenplays, Comments
+from .models import Users, Screenwriters, Producers, Competitions, Submissions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas
 from flask_wtf import FlaskForm
 from wtforms import widgets, RadioField, StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField, SelectMultipleField
 from werkzeug.utils import secure_filename
@@ -93,12 +93,41 @@ def split_pdf(input, output, start, end): #Cuts the screenplay down to the pages
         writer.write(out)
 
 @views.route("/")
-@views.route("/home")
+@views.route("/home", methods=['GET', 'POST'])
 @login_required
 def home():
     posts = Screenplays.query.all()
     comments = Comments.query.all()
-    return render_template("home.html", user=current_user, posts=posts, comments=comments)
+    scripthas = ScriptHas.query.all()
+    if request.method == "POST":
+        sort = request.form.get('sorted')
+        if sort == "New":
+            posts = Screenplays.query.order_by(Screenplays.scriptid.desc())
+            flash("Screenplays now sorted by newest to oldest.")
+            return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
+        elif sort == "Top Of Week":
+            filter_after = date.today() - timedelta(days = 7)
+            posts2 = Screenplays.query.filter(Screenplays.date_created >= filter_after)
+            posts = posts2.order_by(Screenplays.avgrating.desc())
+            flash("Screenplays now sorted by top of this week.")
+            return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
+        elif sort == "Top Of Month":
+            filter_after = date.today() - timedelta(days = 30)
+            posts2 = Screenplays.query.filter(Screenplays.date_created >= filter_after)
+            posts = posts2.order_by(Screenplays.avgrating.desc())
+            flash("Competitions now sorted by top of this month.")
+            return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
+        genre = request.form.get("genre")
+        genre2 = Genres.query.filter_by(genreid=genre).first()
+        scriptids = ScriptHas.query.filter_by(genreid=genre).all()
+        posts = []
+        for i in scriptids:
+            script = Screenplays.query.filter_by(scriptid=i.scriptid).first()
+            posts.append(script)
+        flash(f"Now showing all {genre2.genre} scripts.")
+        return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
+        
+    return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
 
 @views.route("/rate/<scriptid>", methods=['POST'])
 @login_required
@@ -128,6 +157,25 @@ def create_comment(scriptid):
             flash('Post does not exist.', category='error')
 
     return redirect(url_for('views.home'))
+
+@views.route("/delete-post/<scriptid>", methods=['POST'])
+@login_required
+def delete_post(scriptid):
+    if request.method == "POST":
+        post = Screenplays.query.filter_by(scriptid = scriptid).first()
+        user = Screenwriters.query.filter_by(writerid = post.writerid).first()
+        if current_user.id == user.userid:
+            comments = Comments.query.filter_by(scriptid = scriptid)
+            for i in comments:
+                db.session.delete(i)
+            ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
+            for i in ratings:
+                db.session.delete(i)
+            os.remove(post.screenplay)
+            db.session.delete(post)
+            db.session.commit()
+            flash('Post deleted.', category='success')
+            return redirect(url_for('views.home'))
 
 @views.route("/profilepage/<username>")
 @login_required
@@ -191,6 +239,7 @@ def post():
             file = request.files['screenplay']
             start = int(request.form.get("start"))
             end = int(request.form.get("end"))
+            genres = request.form.getlist("genres")
             # The file is saved to the folder
             scriptname = secure_filename(file.filename) 
             file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
@@ -211,6 +260,11 @@ def post():
                     newpost = Screenplays(writerid = currentwriter.writerid, title=title, logline=logline, message=message, screenplay=newname)
                     db.session.add(newpost)
                     db.session.commit()
+                    newscript = Screenplays.query.order_by(Screenplays.scriptid.desc()).first()
+                    for i in genres:
+                        newscripthas = ScriptHas(scriptid=newscript.scriptid, genreid=i)
+                        db.session.add(newscripthas)
+                        db.session.commit()
                     posts = Screenplays.query.all()
                     return render_template("home.html", user=current_user, posts=posts)
         return render_template('create_post.html', user=current_user, userdetails=userdetails)

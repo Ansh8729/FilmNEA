@@ -16,7 +16,7 @@ class Users(db.Model, UserMixin):
     biography = db.Column(db.Text)
     writers = db.relationship('Screenwriters', backref="user", passive_deletes=True)
     producers = db.relationship('Producers', backref="user", passive_deletes=True)
-
+    
 class Screenwriters(db.Model):
     __tablename__ = "Screenwriters"
     writerid = db.Column(db.Integer, primary_key=True)
@@ -25,6 +25,7 @@ class Screenwriters(db.Model):
     fontstyle = db.Column(db.Integer)
     experiencelevel = db.Column(db.Float)
     posts = db.relationship('Screenplays', backref="writer", passive_deletes=True)
+    commenters = db.relationship('Comments', backref="writer", passive_deletes=True)
 
 class BGColours(db.Model):
     __tablename__ = "BGColours"
@@ -50,12 +51,13 @@ class Screenplays(db.Model):
 class ScriptHas(db.Model):
     __tablename__ = "ScriptHas"
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'), primary_key=True)
-    genreid = db.Column(db.Integer, primary_key=True)
+    genreid = db.Column(db.Integer, db.ForeignKey('Genres.genreid'), primary_key=True)
 
 class Genres(db.Model):
     __tablename__ = "Genres"
     genreid = db.Column(db.Integer, primary_key=True)
     genre = db.Column(db.String(50))
+    genres = db.relationship('ScriptHas', backref="genre", passive_deletes=True)
 
 class Producers(db.Model):
     __tablename__ = "Producers"

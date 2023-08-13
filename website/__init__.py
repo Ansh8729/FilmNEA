@@ -20,10 +20,19 @@ def create_app():
     app.register_blueprint(views, url_prefix="/")
     app.register_blueprint(auth, url_prefix="/")
 
-    from .models import Users, Screenwriters, Producers, Screenplays
+    from .models import Users, Screenwriters, Producers, Screenplays, Genres
 
     with app.app_context():
         db.create_all()
+        genrelist = ['Drama', 'Comedy', 'Horror']
+        for i in range(len(genrelist)):
+            newgenre = Genres(genre=genrelist[i])
+            db.session.add(newgenre)
+            db.session.commit()
+        for i in Genres.query.all():
+            if i.genreid > 3:
+                db.session.delete(i)
+                db.session.commit()
 
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
