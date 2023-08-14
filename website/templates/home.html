@@ -66,72 +66,91 @@
             </form>
             <br>
             <div id="posts" style="text-align:center" class="container">
-            {% for post in posts %}
-            <div class="card border-dark">
-                    <form method = "POST" action="/rate/{{post.scriptid}}">
-                        <div class="rate" style="text-align:left">
-                            <input type="radio" id="star5" name="rate" value="5" />
-                            <label for="star5" title="text">5 stars</label>
-                            <input type="radio" id="star4" name="rate" value="4" />
-                            <label for="star4" title="text">4 stars</label>
-                            <input type="radio" id="star3" name="rate" value="3" />
-                            <label for="star3" title="text">3 stars</label>
-                            <input type="radio" id="star2" name="rate" value="2" />
-                            <label for="star2" title="text">2 stars</label>
-                            <input type="radio" id="star1" name="rate" value="1" />
-                            <label for="star1" title="text">1 star</label>
-                        </div>
-                        <br>
-                        <div style="text-align:left">
-                            <input type="submit" value="Submit Rating">
-                        </div>
-                    </form>
-                    {% if user.id == post.writer.user.id %}
-                    <div style="text-align:right">
-                        <form action = /delete-post/{{post.scriptid}} method="POST">
-                            <input type="submit" value="Delete">
+            {% if posts %}
+                {% for post in posts %}
+                <div class="card border-dark">
+                        <form method = "POST" action="/rate/{{post.scriptid}}">
+                            <div class="rate" style="text-align:left">
+                                <input type="radio" id="star5" name="rate" value="5" />
+                                <label for="star5" title="text">5 stars</label>
+                                <input type="radio" id="star4" name="rate" value="4" />
+                                <label for="star4" title="text">4 stars</label>
+                                <input type="radio" id="star3" name="rate" value="3" />
+                                <label for="star3" title="text">3 stars</label>
+                                <input type="radio" id="star2" name="rate" value="2" />
+                                <label for="star2" title="text">2 stars</label>
+                                <input type="radio" id="star1" name="rate" value="1" />
+                                <label for="star1" title="text">1 star</label>
+                            </div>
+                            <br>
+                            <div style="text-align:left">
+                                <input type="submit" value="Submit Rating">
+                            </div>
                         </form>
-                    </div>
-                    {% endif %}
-                    <h2>{{post.title}}</h2>
-                    By<a href="/profilepage/{{post.writer.user.username}}">{{post.writer.user.username}}</a>
-                    <div class="card-body">
-                        <div style="text-align:left">
-                        <h4>Genres:</h4>
-                        {% for script in scripthas %}
-                            {% if script.scriptid == post.scriptid %}
-                                <b>{{script.genre.genre}}</b><br>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                        <h3>Logline:</h3>
-                        <p><div class="card-text">{{post.logline}}</div></p>
-                        <br>
-                        <h3>Message:</h3>
-                        {{post.message}}
-                        <embed style="text-align: center;" src="{{url_for('static', filename='images/'+post.screenplay)}}" width = "75%" height = "550px"> 
-                    </div>
-                    <div class="card border-dark">
+                        {% if user.id == post.writer.user.id %}
+                        <div style="text-align:right">
+                            <form action = /delete-post/{{post.scriptid}} method="POST">
+                                <input type="submit" value="Delete">
+                            </form>
+                        </div>
+                        {% endif %}
+                        <h2>{{post.title}}</h2>
+                        By<a href="/profilepage/{{post.writer.user.username}}">{{post.writer.user.username}}</a>
                         <div class="card-body">
-                        <h3>Comments</h3>
-                        {% for comment in comments %}
-                            {% if comment.scriptid == post.scriptid %}
-                                <div style="text-align:left">
-                                    <b><a href="/profilepage/{{comment.writer.user.username}}">{{comment.writer.user.username}}</a></b>:
-                                    {{comment.comment}}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
+                            <div style="text-align:left">
+                            <h4>Genres:</h4>
+                            {% for script in scripthas %}
+                                {% if script.scriptid == post.scriptid %}
+                                    <b>{{script.has.genre}}</b><br>
+                                {% endif %}
+                            {% endfor %}
                         </div>
-                        <br>
-                        <form class="input-group mb-3"method="POST" action="/create-comment/{{post.scriptid}}">
-                            <input type="text" id="text" name="text" class="form-control" placeholder="Comment something!"/>
-                            <button type="submit" class="btn btn-primary">Comment</button>
-                        </form>
-                    </div>
+                            <h3>Logline:</h3>
+                            <p><div class="card-text">{{post.logline}}</div></p>
+                            <br>
+                            <h3>Message:</h3>
+                            {{post.message}}
+                            <embed style="text-align: center;" src="{{url_for('static', filename='images/'+post.screenplay)}}" width = "75%" height = "550px"> 
+                        </div>
+                        <div class="card border-dark">
+                            <div class="card-body">
+                            <h3>Comments</h3>
+                            {% for comment in comments %}
+                                {% if comment.scriptid == post.scriptid %}
+                                    <div style="text-align:left">
+                                        <b><a href="/profilepage/{{comment.writer.user.username}}">{{comment.writer.user.username}}</a></b>:
+                                        {{comment.comment}}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            </div>
+                            <br>
+                            <form class="input-group mb-3"method="POST" action="/create-comment/{{post.scriptid}}">
+                                <input type="text" id="text" name="text" class="form-control" placeholder="Comment something!"/>
+                                <button type="submit" class="btn btn-primary">Comment</button>
+                            </form>
+                        </div>
+                </div>
+                    {% endfor %}
+            {% else %}
+            <h1>No posts available</h1>
+            {% endif %}
             </div>
+        </div>
+        <div class="col-3">
+            <br>
+            <br>
+            <h1>Recommended</h1>
+            {% if not recs %}
+            <div style="text-align:center">
+                <h4>No reccomendations available</h4>
+            </div>
+            {% else %}
+                {% for i in recs %}
+                    <h3>{{ i[0] }}</h3>
+                    <h4>{{ i[1] }}</h4>  
                 {% endfor %}
-            </div>
+            {% endif %}
         </div>
     </div>
 </body>

@@ -57,7 +57,8 @@ class Genres(db.Model):
     __tablename__ = "Genres"
     genreid = db.Column(db.Integer, primary_key=True)
     genre = db.Column(db.String(50))
-    genres = db.relationship('ScriptHas', backref="genre", passive_deletes=True)
+    genres = db.relationship('ScriptHas', backref="has")
+    genres2 = db.relationship('CompHas', backref="has")
 
 class Producers(db.Model):
     __tablename__ = "Producers"
@@ -87,7 +88,7 @@ class Competitions(db.Model):
 class CompHas(db.Model):
     __tablename__ = "CompHas"
     compid = db.Column(db.Integer, db.ForeignKey('Competitions.compid'), primary_key=True)
-    genreid = db.Column(db.Integer, primary_key=True)
+    genreid = db.Column(db.Integer, db.ForeignKey('Genres.genreid'), primary_key=True)
 
 class Submissions(db.Model):
     __tablename__ = "Submissions"

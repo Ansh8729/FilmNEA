@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_from_directory
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions, Submissions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas
+from .models import Users, Screenwriters, Producers, Competitions, Submissions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas
 from flask_wtf import FlaskForm
 from wtforms import widgets, RadioField, StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField, SelectMultipleField
 from werkzeug.utils import secure_filename
@@ -96,6 +96,45 @@ def split_pdf(input, output, start, end): #Cuts the screenplay down to the pages
 @views.route("/home", methods=['GET', 'POST'])
 @login_required
 def home():
+    if current_user.accounttype == 1:
+        writer = Screenwriters.query.filter_by(userid = current_user.id).first()
+        likedposts = LikedScreenplays.query.filter(LikedScreenplays.rating > 3.5).all()
+        scriptids = []
+        for i in likedposts:
+            if i.writerid == writer.writerid:
+                scriptids.append(i.writerid)
+        if len(scriptids) == 0:
+            recs = []
+        else:
+            genres = [] 
+            for i in range(len(scriptids)):
+                info = ScriptHas.query.filter(ScriptHas.scriptid == scriptids[i])
+                for j in info:
+                    genres.append(j.genreid)
+            finalgenres = []
+            for i in range(len(genres)):
+                genre2 = Genres.query.filter(Genres.genreid == genres[i])
+                for j in genre2:
+                    finalgenres.append(j.genreid) 
+            if list(set(finalgenres)) == finalgenres and len(list(set(finalgenres))) > 1:
+                recs = []
+            else:
+                favgenreid = max(set(finalgenres), key = finalgenres.count)
+                query1 = ScriptHas.query.filter(ScriptHas.genreid == favgenreid)
+                genreids = []
+                for i in query1:
+                    genreids.append(i.scriptid)
+                likedids = []
+                recs = [[],[]]
+                query2 = LikedScreenplays.query.all()
+                for j in query2:
+                    likedids.append(j.scriptid)
+                for i in genreids:
+                    if i not in likedids: #Only the posts that haven't been liked by the user yet are shown as reccomendations.
+                        query3 = Screenplays.query.filter(Screenplays.scriptid == i)
+                        for j in query3:
+                            recs.append([j.title, j.avgrating])
+                            recs.sort()
     posts = Screenplays.query.all()
     comments = Comments.query.all()
     scripthas = ScriptHas.query.all()
@@ -104,19 +143,19 @@ def home():
         if sort == "New":
             posts = Screenplays.query.order_by(Screenplays.scriptid.desc())
             flash("Screenplays now sorted by newest to oldest.")
-            return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
+            return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
         elif sort == "Top Of Week":
             filter_after = date.today() - timedelta(days = 7)
             posts2 = Screenplays.query.filter(Screenplays.date_created >= filter_after)
             posts = posts2.order_by(Screenplays.avgrating.desc())
             flash("Screenplays now sorted by top of this week.")
-            return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
+            return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
         elif sort == "Top Of Month":
             filter_after = date.today() - timedelta(days = 30)
             posts2 = Screenplays.query.filter(Screenplays.date_created >= filter_after)
             posts = posts2.order_by(Screenplays.avgrating.desc())
             flash("Competitions now sorted by top of this month.")
-            return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
+            return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
         genre = request.form.get("genre")
         genre2 = Genres.query.filter_by(genreid=genre).first()
         scriptids = ScriptHas.query.filter_by(genreid=genre).all()
@@ -125,7 +164,7 @@ def home():
             script = Screenplays.query.filter_by(scriptid=i.scriptid).first()
             posts.append(script)
         flash(f"Now showing all {genre2.genre} scripts.")
-        return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
+        return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
         
     return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
 
@@ -138,7 +177,31 @@ def rate(scriptid):
     newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
     db.session.add(newrating)
     db.session.commit()
+    ratings = LikedScreenplays.query.filter_by(scriptid = script.scriptid)
+    total = 0
+    for i in ratings:
+        total += i.rating
+    script.avgrating = total/ratings.count()
+    db.session.commit()
     return redirect(url_for('views.home'))
+
+@views.route("/rate2/<scriptid>", methods=['POST'])
+@login_required
+def rate2(scriptid):
+    rating = request.form.get("rate")
+    writer = Screenwriters.query.filter_by(userid = current_user.id).first()
+    script = Screenplays.query.filter_by(scriptid=scriptid).first()
+    newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
+    db.session.add(newrating)
+    db.session.commit()
+    ratings = LikedScreenplays.query.filter_by(scriptid = script.scriptid)
+    total = 0
+    for i in ratings:
+        total += i.rating
+    script = Screenplays.query.filter_by(scriptid=scriptid).first()
+    script.avgrating = total/ratings.count()
+    db.session.commit()
+    return redirect(url_for('views.profilepage'))
 
 @views.route("/create-comment/<scriptid>", methods=['POST'])
 @login_required
@@ -171,7 +234,6 @@ def delete_post(scriptid):
             ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
             for i in ratings:
                 db.session.delete(i)
-            os.remove(post.screenplay)
             db.session.delete(post)
             db.session.commit()
             flash('Post deleted.', category='success')
@@ -184,6 +246,8 @@ def profilepage(username):
     if userdetails.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid = current_user.id).first()
         scripts = Screenplays.query.filter_by(writerid = writer.writerid)
+        comments = Comments.query.all()
+        scripthas = ScriptHas.query.all()
         rating = 0
         for i in scripts:
             if i.avgrating != None:
@@ -191,9 +255,9 @@ def profilepage(username):
         writer.experiencelevel = rating*scripts.count()
         db.session.commit()
         writerdetails = Screenwriters.query.filter_by(userid = current_user.id).first()
-        return render_template("profilepage.html", user=current_user, userdetails=userdetails, posts=scripts, details=writerdetails)
+        return render_template("profilepage.html", user=current_user, userdetails=userdetails, posts=scripts, details=writerdetails, comments=comments, scripthas=scripthas)
     if userdetails.accounttype == 2:
-        return render_template("profilepage.html", user=current_user, userdetails=userdetails)
+        return render_template("profilepage.html", user=current_user, userdetails=userdetails, comments=comments, scripthas=scripthas)
 
 @views.route("/pageeditor", methods=['GET', 'POST'])
 @login_required
@@ -226,6 +290,11 @@ def post():
             newcomp = Competitions(producerid = num, title=request.form.get("title"), brief=request.form.get("brief"), deadline=date)
             db.session.add(newcomp)
             db.session.commit()
+            newcomp = Screenplays.query.order_by(Competitions.compid.desc()).first()
+            for i in genres:
+                newcomphas = CompHas(compid=newcomp.compid, genreid=i)
+                db.session.add(newcomphas)
+                db.session.commit()
             flash("Competition created!")
             return redirect(url_for('views.competitions'))
         return render_template('create_post.html', user=current_user, userdetails=userdetails)
