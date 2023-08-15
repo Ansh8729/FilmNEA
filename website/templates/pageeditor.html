@@ -30,6 +30,9 @@
             />
             <br></br>
             {% if user.accounttype == 1 %}
+            <label for="colorpicker">Background Colour:</label>
+            <input type="color" name="colorpicker" id="colorpicker" value="#0000ff">
+            <!--
             <h2>Background Colour: </h2>
             <input type="radio" id="red" name="bgcolour" value="Red">
             <label for="red">Red</label><br>
@@ -38,7 +41,6 @@
             <input type="radio" id="blue" name="bgcolour" value="Blue">
             <label for="blue">Blue</label>
             <br></br>
-            <!--
             <h2>Font Style: </h2>
             <input type="radio" id="r" name="bgcolour" value="Red">
             <label for="red">Red</label><br>
@@ -48,6 +50,7 @@
             <label for="blue">Blue</label>
             <br></br>-->
             {% endif %}
+            <br><br>
             <input type = "submit" id = "submit">
         </form>
     </div>

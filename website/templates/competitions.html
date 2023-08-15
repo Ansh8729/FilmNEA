@@ -7,7 +7,7 @@
   <div class="col-3">
     <br><br>
     <h2>Genre List</h2>
-    <form action="/home" method="POST">
+    <form action="/competitions" method="POST">
         <button name="genre" value="1" class="btn btn-primary btn-lg">Drama</button><br><br>
         <button name="genre" value="2" class="btn btn-primary btn-lg">Comedy</button><br><br>
         <button name="genre" value="3" class="btn btn-primary btn-lg">Horror</button><br><br>
@@ -19,36 +19,44 @@
       <input type="submit" name="sorted" value="Top of Week"></input>
       <input type="submit" name="sorted" value="Top of Month"></input>
     </form>
-    {% for comp in comps %}
-        <div class="card border-dark">
-            {% if details.accounttype == 1 %}
-            <a href="/comp/{{comp.title}}"><h2>{{comp.title}}</h2></a>
-            {% else %}
-            <h2>{{comp.title}}</h2>
-            {% endif %}
-            <a href="/profilepage/{{comp.producer.user.username}}">{{comp.producer.user.username}}</a>
-            <h4>Genres:</h4>
-            {% for comp2 in comphas %}
-              {% if comp2.compid == comp.compid %}
-                  <b>{{comp2.has.genre}}</b><br>
+    <br>
+    {% if comps %}
+      {% for comp in comps %}
+          <div class="card border-dark">
+              {% if details.accounttype == 1 %}
+              <a href="/comp/{{comp.title}}"><h2>{{comp.title}}</h2></a>
+              {% else %}
+              <h2>{{comp.title}}</h2>
               {% endif %}
-            {% endfor %}
-            <div class="card-body">
-                <div class="card-text">{{comp.brief}}</div>
-                    <h5>Deadline:</h5>
-                    {{comp.deadline}}
-                </div>
-            <div class="card-footer text-muted">{{comp.date_created}}</div>
-        </div>
-    <br/> {% endfor %}
+              <a href="/profilepage/{{comp.producer.user.username}}">{{comp.producer.user.username}}</a>
+              <h4>Genres:</h4>
+              {% for comp2 in comphas %}
+                {% if comp2.compid == comp.compid %}
+                    <b>{{comp2.has.genre}}</b><br>
+                {% endif %}
+              {% endfor %}
+              <div class="card-body">
+                  <div class="card-text">{{comp.brief}}</div>
+                      <h5>Deadline:</h5>
+                      {{comp.deadline}}
+                  </div>
+              <div class="card-footer text-muted">{{comp.date_created}}</div>
+          </div>
+          <br/> 
+      {% endfor %}
+    {% else %}
+    <h1>No competitions available</h1>
+    {% endif %}
+  </div>
+  <div class="col-3">
+    {% if details.accounttype == 2 %}
+    <div align="center">
+      <a href="/post"><button type="button" class="btn btn-primary btn-lg">Create a Competition</button></a>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% block footer %}
-{% if details.accounttype == 2 %}
-<div align="center">
-  <a href="/post"><button type="button" class="btn btn-primary btn-lg">Create a Competition</button></a>
-</div>
-{% endif %}
 {% endblock %} {% endblock %}
 {% with messages = get_flashed_messages(with_categories=True) %}
       {% if messages %}

@@ -7,76 +7,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Page</title>
-    <!--
-    {% if details.backgroundcolour == 1 %}
-    <style>
-        .profilepage{
-                    background-color: tomato;
-                }
-    </style>
+    {% if user.accounttype == 1 %}
+        <style>
+            .profilepage {
+                background-color: {{ details.backgroundcolour }};
+            }
+                *{
+                margin: 0;
+                padding: 0;
+            }
+            .rate {
+                float: left;
+                height: 46px;
+                padding: 0 10px;
+            }
+            .rate:not(:checked) > input {
+                position:absolute;
+                top:-9999px;
+            }
+            .rate:not(:checked) > label {
+                float:right;
+                width:1em;
+                overflow:hidden;
+                white-space:nowrap;
+                cursor:pointer;
+                font-size:30px;
+                color:#ccc;
+            }
+            .rate:not(:checked) > label:before {
+                content: '★ ';
+            }
+            .rate > input:checked ~ label {
+                color: #ffc700;    
+            }
+            .rate:not(:checked) > label:hover,
+            .rate:not(:checked) > label:hover ~ label {
+                color: #deb217;  
+            }
+            .rate > input:checked + label:hover,
+            .rate > input:checked + label:hover ~ label,
+            .rate > input:checked ~ label:hover,
+            .rate > input:checked ~ label:hover ~ label,
+            .rate > label:hover ~ input:checked ~ label {
+                color: #c59b08;
+            }
+        </style>
     {% endif %}
-    {% if details.backgroundcolour == 2 %}
-    <style>
-        .profilepage{
-            background-color: powderblue;
-        }
-    </style>
-    {% endif %}
-    {% if details.fontstyle == 1 %}
-    <style>
-        .profilepage{
-            font-family: Arial, Helvetica, sans-serif;
-        }
-    </style>
-    {% endif %}
-    {% if details.fontstyle == 2 %}
-    <style>
-        .profilepage{
-            font-family: 'Courier New', Courier, monospace;
-        }
-    </style>
-    {% endif %}-->
-    <style>
-            *{
-            margin: 0;
-            padding: 0;
-        }
-        .rate {
-            float: left;
-            height: 46px;
-            padding: 0 10px;
-        }
-        .rate:not(:checked) > input {
-            position:absolute;
-            top:-9999px;
-        }
-        .rate:not(:checked) > label {
-            float:right;
-            width:1em;
-            overflow:hidden;
-            white-space:nowrap;
-            cursor:pointer;
-            font-size:30px;
-            color:#ccc;
-        }
-        .rate:not(:checked) > label:before {
-            content: '★ ';
-        }
-        .rate > input:checked ~ label {
-            color: #ffc700;    
-        }
-        .rate:not(:checked) > label:hover,
-        .rate:not(:checked) > label:hover ~ label {
-            color: #deb217;  
-        }
-        .rate > input:checked + label:hover,
-        .rate > input:checked + label:hover ~ label,
-        .rate > input:checked ~ label:hover,
-        .rate > input:checked ~ label:hover ~ label,
-        .rate > label:hover ~ input:checked ~ label {
-            color: #c59b08;
-        }
-    </style>
 </head>
 <body class="profilepage">
         {% if current_user.id == user.id %}
@@ -91,16 +67,19 @@
         {% endif %}
         <br>
         <br>
-        <h1>{{  userdetails.username }}</h1>
-        <h5>{{ userdetails.email }}</h5>
-        {% if userdetails.biography != None %}
-        {{ userdetails.biography }}
+        <h1>{{  user.username }}</h1>
+        <h5>{{ user.email }}</h5>
+        {% if user.biography != None %}
+        {{ user.biography }}
         {% endif %}
-        {% if userdetails.accounttype == 1 %}
+        {% if user.accounttype == 1 %}
         <p>Experience Level: {{ details.experiencelevel }}</p>
         <br>
         <div id="posts" style="text-align:center" class="container">
             <h1>Screenplays</h1>
+            {% if not posts %}
+                <p>This user has not posted any screenplays</p>
+            {% else %}
             {% for post in posts %}
             <div class="card border-dark">
                     <form method = "POST" action="/rate2/{{post.scriptid}}">
@@ -171,6 +150,7 @@
                     </div>
             </div>
             {% endfor %}
+            {% endif %}
         </div>
         {% endif %}
     </div>

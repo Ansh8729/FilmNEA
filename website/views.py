@@ -239,15 +239,12 @@ def delete_post(scriptid):
             flash('Post deleted.', category='success')
             return redirect(url_for('views.home'))
 
-@views.route("/profilepage/<username>")
+@views.route("/profilepage/<userid>")
 @login_required
-def profilepage(username):
-    userdetails = Users.query.filter_by(username = current_user.username).first()
-    if userdetails.accounttype == 1:
-        writer = Screenwriters.query.filter_by(userid = current_user.id).first()
+def profilepage(userid):
+    if current_user.accounttype == 1:
+        writer = Screenwriters.query.filter_by(userid=userid).first()
         scripts = Screenplays.query.filter_by(writerid = writer.writerid)
-        comments = Comments.query.all()
-        scripthas = ScriptHas.query.all()
         rating = 0
         for i in scripts:
             if i.avgrating != None:
@@ -255,9 +252,12 @@ def profilepage(username):
         writer.experiencelevel = rating*scripts.count()
         db.session.commit()
         writerdetails = Screenwriters.query.filter_by(userid = current_user.id).first()
-        return render_template("profilepage.html", user=current_user, userdetails=userdetails, posts=scripts, details=writerdetails, comments=comments, scripthas=scripthas)
-    if userdetails.accounttype == 2:
-        return render_template("profilepage.html", user=current_user, userdetails=userdetails, comments=comments, scripthas=scripthas)
+        comments = Comments.query.all()
+        scripthas = ScriptHas.query.all()
+        return render_template("profilepage.html", user=current_user, posts=scripts, details=writerdetails, comments=comments, scripthas=scripthas)
+    if current_user.accounttype == 2:
+        return render_template("profilepage.html", user=current_user)
+
 
 @views.route("/pageeditor/<username>", methods=['GET', 'POST'])
 @login_required
@@ -272,6 +272,11 @@ def pageeditor(username):
         query.profilepic = picname
         query.biography = request.form.get('bio')
         db.session.commit()
+        if current_user.accounttype == 1:
+            colour = request.form.get('colorpicker')
+            writer = Screenwriters.query.filter_by(userid = current_user.id).first()
+            writer.backgroundcolour = colour
+            db.session.commit()
         flash("Edits made!")
         writer = Screenwriters.query.filter_by(userid = current_user.id).first()
         scripts = Screenplays.query.filter_by(writerid = writer.writerid)
@@ -294,7 +299,8 @@ def post():
             newcomp = Competitions(producerid = num, title=request.form.get("title"), brief=request.form.get("brief"), deadline=date)
             db.session.add(newcomp)
             db.session.commit()
-            newcomp = Screenplays.query.order_by(Competitions.compid.desc()).first()
+            newcomp = Competitions.query.order_by(Competitions.compid.desc()).first()
+            genres = request.form.getlist("genres")
             for i in genres:
                 newcomphas = CompHas(compid=newcomp.compid, genreid=i)
                 db.session.add(newcomphas)
@@ -354,31 +360,40 @@ def competitions():
     userdetails = Users.query.filter_by(username = current_user.username).first()
     comps2 = Competitions.query.all()
     subs = Submissions.query.all()
+    comphas = CompHas.query.all()
     for comp in comps2:
         subs2 = Submissions.query.filter_by(compid = comp.compid)
         comp.submissionnum = subs2.count()
         db.session.commit()
     comps = Competitions.query.order_by(Competitions.submissionnum.desc())
     if request.method == "POST":
-        sort = request.form['sorted']
+        sort = request.form.get('sorted')
         if sort == "New":
             comps = Competitions.query.order_by(Competitions.date_created.desc())
             flash("Competitions now sorted by newest to oldest.")
-            return render_template("competitions.html", user=current_user, comps=comps, details=userdetails)
+            return render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
         elif sort == "Top Of Week":
             filter_after = date.today() - timedelta(days = 7)
             comps2 = Competitions.query.filter(Competitions.date_created >= filter_after)
             comps = comps2.order_by(Competitions.submissionnum.desc())
             flash("Competitions now sorted by top of this week.")
-            return render_template("competitions.html", user=current_user, comps=comps, details=userdetails)
+            return render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
         elif sort == "Top Of Month":
             filter_after = date.today() - timedelta(days = 30)
             comps2 = Competitions.query.filter(Competitions.date_created >= filter_after)
             comps = comps2.order_by(Competitions.submissionnum.desc())
             flash("Competitions now sorted by top of this month.")
-            return render_template("competitions.html", user=current_user, comps=comps, details=userdetails)
+            return render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
+        genre = request.form.get("genre")
+        genre2 = Genres.query.filter_by(genreid=genre).first()
+        compids = CompHas.query.filter_by(genreid=genre).all()
+        comps = []
+        for i in compids:
+            comp = Competitions.query.filter_by(compid=i.compid).first()
+            comps.append(comp)
+        flash(f"Now showing all {genre2.genre} competitions.")
 
-    return render_template("competitions.html", user=current_user, comps=comps, details=userdetails)
+    return render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
 
 @views.route('/comp/<title>', methods=['GET', 'POST'])
 @login_required

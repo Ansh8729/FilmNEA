@@ -95,7 +95,7 @@
                         </div>
                         {% endif %}
                         <h2>{{post.title}}</h2>
-                        By<a href="/profilepage/{{post.writer.user.username}}">{{post.writer.user.username}}</a>
+                        By<a href="/profilepage/{{post.writer.user.id}}">{{post.writer.user.username}}</a>
                         {% if post.writer.user.profilepic %}
                         <img src="{{ url_for('static', filename='images/'+ 'post.writer.user.profilepic') }}" alt="Profile picture">
                         {% else %}
@@ -123,7 +123,7 @@
                             {% for comment in comments %}
                                 {% if comment.scriptid == post.scriptid %}
                                     <div style="text-align:left">
-                                        <b><a href="/profilepage/{{comment.writer.user.username}}">{{comment.writer.user.username}}</a></b>:
+                                        <b><a href="/profilepage/{{comment.writer.user.id}}">{{comment.writer.user.username}}</a></b>:
                                         {{comment.comment}}
                                     </div>
                                 {% endif %}
