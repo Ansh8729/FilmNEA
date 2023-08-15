@@ -201,7 +201,7 @@ def rate2(scriptid):
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     script.avgrating = total/ratings.count()
     db.session.commit()
-    return redirect(url_for('views.profilepage'))
+    return redirect(url_for(f'views.profilepage/{current_user.id}'))
 
 @views.route("/create-comment/<scriptid>", methods=['POST'])
 @login_required
@@ -274,8 +274,13 @@ def pageeditor(username):
         db.session.commit()
         if current_user.accounttype == 1:
             colour = request.form.get('colorpicker')
+            fontid = request.form.get('fontstyle')
             writer = Screenwriters.query.filter_by(userid = current_user.id).first()
             writer.backgroundcolour = colour
+            if fontid == 0:
+                writer.fontid = None
+            else:
+                writer.fontid = fontid
             db.session.commit()
         flash("Edits made!")
         writer = Screenwriters.query.filter_by(userid = current_user.id).first()

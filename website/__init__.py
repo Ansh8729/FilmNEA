@@ -20,7 +20,7 @@ def create_app():
     app.register_blueprint(views, url_prefix="/")
     app.register_blueprint(auth, url_prefix="/")
 
-    from .models import Users, Screenwriters, Producers, Screenplays, Genres
+    from .models import Users, Genres, FontStyles
 
     with app.app_context():
         db.create_all()
@@ -31,6 +31,15 @@ def create_app():
             db.session.commit()
         for i in Genres.query.all():
             if i.genreid > 3:
+                db.session.delete(i)
+                db.session.commit()
+        fontlist = ['serif','monospace','fantasy']
+        for i in range(len(fontlist)):
+            newfont = FontStyles(font=fontlist[i])
+            db.session.add(newfont)
+            db.session.commit()
+        for i in FontStyles.query.all():
+            if i.fontid > 3:
                 db.session.delete(i)
                 db.session.commit()
 

@@ -30,27 +30,21 @@
             />
             <br></br>
             {% if user.accounttype == 1 %}
-            <label for="colorpicker">Background Colour:</label>
+            <label for="colorpicker"><h2>Background Colour:</h2></label>
             <input type="color" name="colorpicker" id="colorpicker" value="#0000ff">
-            <!--
-            <h2>Background Colour: </h2>
-            <input type="radio" id="red" name="bgcolour" value="Red">
-            <label for="red">Red</label><br>
-            <input type="radio" id="yellow" name="bgcolour" value="Yellow">
-            <label for="yellow">Yellow</label><br>
-            <input type="radio" id="blue" name="bgcolour" value="Blue">
-            <label for="blue">Blue</label>
             <br></br>
             <h2>Font Style: </h2>
-            <input type="radio" id="r" name="bgcolour" value="Red">
-            <label for="red">Red</label><br>
-            <input type="radio" id="yellow" name="bgcolour" value="Yellow">
-            <label for="yellow">Yellow</label><br>
-            <input type="radio" id="blue" name="bgcolour" value="Blue">
-            <label for="blue">Blue</label>
-            <br></br>-->
+            <input type="radio" id="default" name="fontstyle" value="0">
+            <label for="default">Default</label><br>
+            <input type="radio" id="font1" name="fontstyle" value="1">
+            <label for="font1">Serif</label><br>
+            <input type="radio" id="font2" name="fontstyle" value="2">
+            <label for="font2">Monospace</label><br>
+            <input type="radio" id="font3" name="fontstyle" value="3">
+            <label for="font3">Fantasy</label>
+            <br></br>
             {% endif %}
-            <br><br>
+            <br>
             <input type = "submit" id = "submit">
         </form>
     </div>

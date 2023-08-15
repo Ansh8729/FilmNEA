@@ -22,20 +22,16 @@ class Screenwriters(db.Model):
     writerid = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.Integer, db.ForeignKey('Users.id'))
     backgroundcolour = db.Column(db.Integer)
-    fontstyle = db.Column(db.Integer)
+    fontid = db.Column(db.Integer, db.ForeignKey('FontStyles.fontid'))
     experiencelevel = db.Column(db.Float)
     posts = db.relationship('Screenplays', backref="writer", passive_deletes=True)
     commenters = db.relationship('Comments', backref="writer", passive_deletes=True)
 
-class BGColours(db.Model):
-    __tablename__ = "BGColours"
-    backgroundcolour = db.Column(db.Integer, primary_key=True)
-    colour = db.Column(db.String(150), primary_key=True)
-
 class FontStyles(db.Model):
     __tablename__ = "FontStyles"
-    fontstyle = db.Column(db.Integer, primary_key=True)
-    font = db.Column(db.String(150), primary_key=True)
+    fontid = db.Column(db.Integer, primary_key=True)
+    font = db.Column(db.String(150))
+    fonts = db.relationship('Screenwriters', backref="fontstyle")
 
 class Screenplays(db.Model):
     __tablename__ = "Screenplays"
