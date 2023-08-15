@@ -80,7 +80,7 @@
 </head>
 <body class="profilepage">
         {% if current_user.id == user.id %}
-        <a href="/pageeditor">Edit Page</a>
+        <a href="/pageeditor/{userdetails.username}"><butto type="button">Edit Page</button></a>
         {% endif %}
         <br>
         <br>

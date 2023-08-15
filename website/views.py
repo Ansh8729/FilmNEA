@@ -259,10 +259,9 @@ def profilepage(username):
     if userdetails.accounttype == 2:
         return render_template("profilepage.html", user=current_user, userdetails=userdetails, comments=comments, scripthas=scripthas)
 
-@views.route("/pageeditor", methods=['GET', 'POST'])
+@views.route("/pageeditor/<username>", methods=['GET', 'POST'])
 @login_required
-def pageeditor():
-    userdetails = Users.query.filter_by(username = current_user.username).first()
+def pageeditor(username):
     if request.method == "POST":
         file = request.files['profilepic']
         picturefilename = secure_filename(file.filename)
@@ -274,8 +273,13 @@ def pageeditor():
         query.biography = request.form.get('bio')
         db.session.commit()
         flash("Edits made!")
-        return render_template("profilepage.html", user=current_user, userdetails=userdetails)
-    return render_template("pageeditor.html", user=current_user, userdetails=userdetails)
+        writer = Screenwriters.query.filter_by(userid = current_user.id).first()
+        scripts = Screenplays.query.filter_by(writerid = writer.writerid)
+        comments = Comments.query.all()
+        scripthas = ScriptHas.query.all()
+        writerdetails = Screenwriters.query.filter_by(userid = current_user.id).first()
+        return render_template("profilepage.html", user=current_user, posts=scripts, details=writerdetails, comments=comments, scripthas=scripthas)
+    return render_template("pageeditor.html", user=current_user)
 
 @views.route("/post", methods=['GET', 'POST'])
 @login_required
