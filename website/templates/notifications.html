@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Home{% endblock %}
+
+{% block title %}Notifications{% endblock %}
+
 {% block content %}
 <!DOCTYPE html>
 <html lang="en">
@@ -9,31 +11,37 @@
     <title>Notifications</title>
 </head>
 <body>
-    <div class = "row" style="text-align:center">
-        <div class = "col-6">
-            <h1>Screenplay Requests</h1>
-            {% for response in responses %}
-                {% if response.responsetype == 1 %}
-                <div class="card" style="text-align:center">
-                    <h4><a href="/profilepage/{{request.producer.user.id}}">{{response.producer.user.username}}</a> wants full access to your screenplay {{request.script.title}}</h4>
-                    <form method="POST">
-                        <input type="radio" name="decision" id="accept" value="Accept">
-                        <label for="accept">Accept</label>
-                        <input type="radio" name="decision" id="decline" value="Decline">
-                        <label for="decline">Decline</label>
-                        <input type="submit" name="Submit">
-                    </form>
-                    </div>
-                </div>
-                {% endif %}
-            {% endfor %}
-        
-        <!--<div class="col-6">
+    <div class="row" style="text-align:center">
+        <div class="col-6">
             <h1>Producer Responses</h1>
             {% for response in responses %}
-                {% if response.responsetype == 2 %}-->
-            
+                {% if response.responsetype == 1 %}
+                    <div class="card" style="text-align:left">
+                        <h4><a href="/profilepage/{{response.producer.user.id}}">{{response.producer.user.username}}</a> says {{response.message}}</h4>
+                        <form method="POST" action="/deleteresponse/{{response.responseid}}">
+                            <button type="submit" name="Delete">Delete</button>
+                        </form>
+                        
+                    </div>
+                {% endif %}
+            {% endfor %}
         </div>
+        <div class="col-6">
+            <h1>Screenplay Requests</h1>
+            {% for response in responses %}
+                {% if response.responsetype == 2 %}
+                    <div class="card" style="text-align:center">
+                        <h4><a href="/profilepage/{{response.producer.user.id}}">{{response.producer.user.username}}</a> wants full access to your screenplay {{response.request.script.title}}</h4>
+                        <form method="POST">
+                            <input type="radio" name="decision" id="accept" value="Accept">
+                            <label for="accept">Accept</label>
+                            <input type="radio" name="decision" id="decline" value="Decline">
+                            <label for="decline">Decline</label>
+                            <input type="submit" name="Submit">
+                        </form>
+                    </div>
+                {% endif %}
+            {% endfor %}
         </div>
     </div>
 </body>

@@ -65,7 +65,7 @@
                 <input type="submit" name="sorted" value="Top of Month"></input>
             </form>
             <br>
-            <div id="posts" style="text-align:center" class="container">
+            <div id="posts" class="container">
             {% if posts %}
                 {% for post in posts %}
                 <div class="card border-dark">
@@ -138,9 +138,18 @@
                             </form>
                         </div>
                         {% else %}
-                        <form method="POST" action="/request/{{post.scriptid}}">
-                            <button type="submit">Request for Full Access</button>
-                        </form>
+                        <div class="text-align:left">
+                            <form method="POST" name="response" action="/response/{{post.scriptid}}">
+                                <input type="text" name="response" id="response" class="form-control">
+                                <label for="response">Send Response</label>
+                                <input type="submit">
+                            </form>
+                        </div>
+                        <div class="text-align:right">
+                            <form method="POST" action="/response/{{post.scriptid}}" name="request">
+                                <button name ="request" type="submit">Request for Full Access</button>
+                            </form>
+                        </div>
                         {% endif %}
                 </div>
                 <br>

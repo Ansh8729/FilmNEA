@@ -62,14 +62,14 @@ class Producers(db.Model):
     responses = db.relationship('Responses', backref="producer", passive_deletes=True)
 
 class Responses(db.Model):
-    __tablename__ = "Requests"
+    __tablename__ = "Responses"
     responseid = db.Column(db.Integer, primary_key=True)
     producerid = db.Column(db.Integer, db.ForeignKey('Producers.producerid'))
     writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'))
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'))
     responsetype = db.Column(db.Integer)
     message = db.Column(db.Text)
-    granted = db.Column(db.Integer)
+    requestgranted = db.Column(db.Integer)
 
 class Competitions(db.Model):
     __tablename__ = "Competitions"
