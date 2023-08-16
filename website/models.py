@@ -22,17 +22,11 @@ class Screenwriters(db.Model):
     writerid = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.Integer, db.ForeignKey('Users.id'))
     backgroundcolour = db.Column(db.Integer)
-    fontid = db.Column(db.Integer, db.ForeignKey('FontStyles.fontid'))
+    fontstyle = db.Column(db.String(30))
     experiencelevel = db.Column(db.Float)
     posts = db.relationship('Screenplays', backref="writer", passive_deletes=True)
     commenters = db.relationship('Comments', backref="writer", passive_deletes=True)
-    requestees = db.relationship('Requests', backref="writer", passive_deletes=True)
-
-class FontStyles(db.Model):
-    __tablename__ = "FontStyles"
-    fontid = db.Column(db.Integer, primary_key=True)
-    font = db.Column(db.String(150))
-    fonts = db.relationship('Screenwriters', backref="fontstyle")
+    responsees = db.relationship('Responses', backref="writer", passive_deletes=True)
 
 class Screenplays(db.Model):
     __tablename__ = "Screenplays"
@@ -44,7 +38,7 @@ class Screenplays(db.Model):
     screenplay = db.Column(db.String(300)) #TO BE CHANGED
     data_created = db.Column(db.DateTime(timezone=True), default=func.now())
     avgrating = db.Column(db.Float)
-    scripts = db.relationship('Requests', backref="script", passive_deletes=True)
+    scripts = db.relationship('Responses', backref="script", passive_deletes=True)
 
 class ScriptHas(db.Model):
     __tablename__ = "ScriptHas"
@@ -65,14 +59,16 @@ class Producers(db.Model):
     approved = db.Column(db.Integer)
     otp = db.Column(db.String(10))
     posts = db.relationship('Competitions', backref="producer", passive_deletes=True)
-    posts = db.relationship('Requests', backref="producer", passive_deletes=True)
+    responses = db.relationship('Responses', backref="producer", passive_deletes=True)
 
-class Requests(db.Model):
+class Responses(db.Model):
     __tablename__ = "Requests"
-    requestid = db.Column(db.Integer, primary_key=True)
+    responseid = db.Column(db.Integer, primary_key=True)
     producerid = db.Column(db.Integer, db.ForeignKey('Producers.producerid'))
     writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'))
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'))
+    responsetype = db.Column(db.Integer)
+    message = db.Column(db.Text)
     granted = db.Column(db.Integer)
 
 class Competitions(db.Model):
@@ -90,18 +86,13 @@ class CompHas(db.Model):
     compid = db.Column(db.Integer, db.ForeignKey('Competitions.compid'), primary_key=True)
     genreid = db.Column(db.Integer, db.ForeignKey('Genres.genreid'), primary_key=True)
 
-class Submissions(db.Model):
-    __tablename__ = "Submissions"
+class CompSubmissions(db.Model):
+    __tablename__ = "CompSubmissions"
     writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'), primary_key=True)
+    producerid = db.Column(db.Integer, db.ForeignKey('Producers.producerid'), primary_key=True)
     compid = db.Column(db.Integer, db.ForeignKey('Competitions.compid'), primary_key=True)
     submission = db.Column(db.String(150)) 
     submissiondate = db.Column(db.DateTime(timezone=True))
-
-class SubmissionResponses(db.Model):
-    __tablename__ = "SubmissionResponses"
-    producerid = db.Column(db.Integer, db.ForeignKey('Producers.producerid'), primary_key=True)
-    writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'), primary_key=True)
-    compid = db.Column(db.Integer, db.ForeignKey('Competitions.compid'), primary_key=True)
     message = db.Column(db.Text)
 
 class LikedScreenplays(db.Model):
@@ -116,3 +107,5 @@ class Comments(db.Model):
     writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'), primary_key=True)
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'), primary_key=True)
     comment = db.Column(db.String(300))
+
+

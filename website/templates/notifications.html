@@ -12,9 +12,10 @@
     <div class = "row" style="text-align:center">
         <div class = "col-6">
             <h1>Screenplay Requests</h1>
-            {% for request in requests %}
+            {% for response in responses %}
+                {% if response.responsetype == 1 %}
                 <div class="card" style="text-align:center">
-                    <h4><a href="/profilepage/{{request.producer.user.id}}">{{request.producer.user.username}}</a> wants full access to your screenplay {{request.script.title}}</h4>
+                    <h4><a href="/profilepage/{{request.producer.user.id}}">{{response.producer.user.username}}</a> wants full access to your screenplay {{request.script.title}}</h4>
                     <form method="POST">
                         <input type="radio" name="decision" id="accept" value="Accept">
                         <label for="accept">Accept</label>
@@ -24,7 +25,15 @@
                     </form>
                     </div>
                 </div>
+                {% endif %}
             {% endfor %}
+        
+        <!--<div class="col-6">
+            <h1>Producer Responses</h1>
+            {% for response in responses %}
+                {% if response.responsetype == 2 %}-->
+            
+        </div>
         </div>
     </div>
 </body>

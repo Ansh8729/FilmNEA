@@ -1,7 +1,7 @@
 # from flask import Blueprint, render_template, request, flash, redirect, url_for
 import flask 
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions, Submissions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Requests
+from .models import Users, Screenwriters, Producers, Competitions, Submissions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Responses
 from flask_wtf import FlaskForm
 from wtforms import widgets, RadioField, StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField, SelectMultipleField
 from werkzeug.utils import secure_filename
@@ -225,13 +225,13 @@ def create_comment(scriptid):
 @login_required
 def request(scriptid):
     producer = Producers.query.filter_by(userid = current_user.id).first()
-    request_exists = Requests.query.filter(Requests.producerid == producer.producerid, Requests.scriptid == scriptid).first()
+    request_exists = Responses.query.filter(Responses.producerid == producer.producerid, Responses.scriptid == scriptid).first()
     if request_exists:
         flask.flash("You've already sent a request for this script.")
     else:
         producer = Producers.query.filter_by(userid = current_user.id).first()
         script = Screenplays.query.filter_by(scriptid=scriptid).first()
-        newrequest = Requests(producerid = producer.producerid, writerid=script.writerid, scriptid=scriptid)
+        newrequest = Responses(producerid = producer.producerid, writerid=script.writerid, scriptid=scriptid)
         db.session.add(newrequest)
         db.session.commit()
         flask.flash(f"Request for full access for {script.title} sent!")
@@ -285,19 +285,19 @@ def pageeditor(username):
         picname = str(uuid.uuid1()) + "_" + picturefilename
         file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',picname)) 
         shutil.move(picname,'static/images')
-        query = Users.query.filter_by(username = current_user.username).first()
+        query = Users.query.filter_by(username = username).first()
         query.profilepic = picname
         query.biography = flask.request.form.get('bio')
         db.session.commit()
         if current_user.accounttype == 1:
             colour = flask.request.form.get('colorpicker')
-            fontid = flask.request.form.get('fontstyle')
+            font = flask.request.form.get('fontstyle')
             writer = Screenwriters.query.filter_by(userid = current_user.id).first()
             writer.backgroundcolour = colour
-            if fontid == 0:
+            if font == 0:
                 writer.fontid = None
             else:
-                writer.fontid = fontid
+                writer.fontstyle = font
             db.session.commit()
         flask.flash("Edits made!")
         writer = Screenwriters.query.filter_by(userid = current_user.id).first()
@@ -443,7 +443,7 @@ def comp(title):
 def notifications(userid):
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=userid).first()
-        requests = Requests.query.filter_by(writerid = writer.writerid)
+        responses = Responses.query.filter_by(writerid = writer.writerid)
         '''
         if flask.request.method == "POST":
             decision = flask.request.form.get("decision")
@@ -452,5 +452,5 @@ def notifications(userid):
             if decision == "Decline":
         '''
         
-    return flask.render_template("notifications.html", requests=requests, user=current_user)
+    return flask.render_template("notifications.html", requests=responses, user=current_user)
 
