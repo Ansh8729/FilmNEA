@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, send_from_directory
+# from flask import Blueprint, render_template, request, flash, redirect, url_for
+import flask 
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions, Submissions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas
+from .models import Users, Screenwriters, Producers, Competitions, Submissions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Requests
 from flask_wtf import FlaskForm
 from wtforms import widgets, RadioField, StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField, SelectMultipleField
 from werkzeug.utils import secure_filename
@@ -17,7 +18,7 @@ from . import db
 from dateutil.parser import parse
 from datetime import date, timedelta
 
-views = Blueprint("views", __name__)
+views = flask.Blueprint("views", __name__)
 
 def convert_to_datetime(input_str, parserinfo=None):
     return parse(input_str, parserinfo=parserinfo)
@@ -138,40 +139,39 @@ def home():
     posts = Screenplays.query.all()
     comments = Comments.query.all()
     scripthas = ScriptHas.query.all()
-    if request.method == "POST":
-        sort = request.form.get('sorted')
+    if flask.request.method == "POST":
+        sort = flask.request.form.get('sorted')
         if sort == "New":
             posts = Screenplays.query.order_by(Screenplays.scriptid.desc())
-            flash("Screenplays now sorted by newest to oldest.")
-            return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
+            flask.flash("Screenplays now sorted by newest to oldest.")
+            return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
         elif sort == "Top Of Week":
             filter_after = date.today() - timedelta(days = 7)
             posts2 = Screenplays.query.filter(Screenplays.date_created >= filter_after)
             posts = posts2.order_by(Screenplays.avgrating.desc())
-            flash("Screenplays now sorted by top of this week.")
-            return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
+            flask.flash("Screenplays now sorted by top of this week.")
+            return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
         elif sort == "Top Of Month":
             filter_after = date.today() - timedelta(days = 30)
             posts2 = Screenplays.query.filter(Screenplays.date_created >= filter_after)
             posts = posts2.order_by(Screenplays.avgrating.desc())
-            flash("Competitions now sorted by top of this month.")
-            return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
-        genre = request.form.get("genre")
+            flask.flash("Competitions now sorted by top of this month.")
+            return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
+        genre = flask.request.form.get("genre")
         genre2 = Genres.query.filter_by(genreid=genre).first()
         scriptids = ScriptHas.query.filter_by(genreid=genre).all()
         posts = []
         for i in scriptids:
             script = Screenplays.query.filter_by(scriptid=i.scriptid).first()
             posts.append(script)
-        flash(f"Now showing all {genre2.genre} scripts.")
-        return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
-        
-    return render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
+        flask.flash(f"Now showing all {genre2.genre} scripts.")
+        return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
+    return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
 
 @views.route("/rate/<scriptid>", methods=['POST'])
 @login_required
 def rate(scriptid):
-    rating = request.form.get("rate")
+    rating = flask.request.form.get("rate")
     writer = Screenwriters.query.filter_by(userid = current_user.id).first()
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
@@ -183,12 +183,12 @@ def rate(scriptid):
         total += i.rating
     script.avgrating = total/ratings.count()
     db.session.commit()
-    return redirect(url_for('views.home'))
+    return flask.redirect(flask.url_for('views.home'))
 
 @views.route("/rate2/<scriptid>", methods=['POST'])
 @login_required
 def rate2(scriptid):
-    rating = request.form.get("rate")
+    rating = flask.request.form.get("rate")
     writer = Screenwriters.query.filter_by(userid = current_user.id).first()
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
@@ -201,14 +201,14 @@ def rate2(scriptid):
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     script.avgrating = total/ratings.count()
     db.session.commit()
-    return redirect(url_for(f'views.profilepage/{current_user.id}'))
+    return flask.redirect(flask.url_for(f'views.profilepage/{current_user.id}'))
 
 @views.route("/create-comment/<scriptid>", methods=['POST'])
 @login_required
 def create_comment(scriptid):
-    text = request.form.get('text')
+    text = flask.request.form.get('text')
     if not text:
-        flash('Comment cannot be empty.', category='error')
+        flask.flash('Comment cannot be empty.', category='error')
     else:
         post = Screenplays.query.filter_by(scriptid = scriptid)
         writer = Screenwriters.query.filter_by(userid = current_user.id).first()
@@ -217,14 +217,30 @@ def create_comment(scriptid):
             db.session.add(comment)
             db.session.commit()
         else:
-            flash('Post does not exist.', category='error')
+            flask.flash('Post does not exist.', category='error')
 
-    return redirect(url_for('views.home'))
+    return flask.redirect(flask.url_for('views.home'))
+
+@views.route('/request/<scriptid>',methods=['POST'])
+@login_required
+def request(scriptid):
+    producer = Producers.query.filter_by(userid = current_user.id).first()
+    request_exists = Requests.query.filter(Requests.producerid == producer.producerid, Requests.scriptid == scriptid).first()
+    if request_exists:
+        flask.flash("You've already sent a request for this script.")
+    else:
+        producer = Producers.query.filter_by(userid = current_user.id).first()
+        script = Screenplays.query.filter_by(scriptid=scriptid).first()
+        newrequest = Requests(producerid = producer.producerid, writerid=script.writerid, scriptid=scriptid)
+        db.session.add(newrequest)
+        db.session.commit()
+        flask.flash(f"Request for full access for {script.title} sent!")
+    return flask.redirect(flask.url_for("views.home"))
 
 @views.route("/delete-post/<scriptid>", methods=['POST'])
 @login_required
 def delete_post(scriptid):
-    if request.method == "POST":
+    if flask.request.method == "POST":
         post = Screenplays.query.filter_by(scriptid = scriptid).first()
         user = Screenwriters.query.filter_by(writerid = post.writerid).first()
         if current_user.id == user.userid:
@@ -236,13 +252,14 @@ def delete_post(scriptid):
                 db.session.delete(i)
             db.session.delete(post)
             db.session.commit()
-            flash('Post deleted.', category='success')
-            return redirect(url_for('views.home'))
+            flask.flash('Post deleted.', category='success')
+            return flask.redirect(flask.url_for('views.home'))
 
 @views.route("/profilepage/<userid>")
 @login_required
 def profilepage(userid):
-    if current_user.accounttype == 1:
+    user = Users.query.filter_by(id=userid).first()
+    if user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=userid).first()
         scripts = Screenplays.query.filter_by(writerid = writer.writerid)
         rating = 0
@@ -254,27 +271,27 @@ def profilepage(userid):
         writerdetails = Screenwriters.query.filter_by(userid = current_user.id).first()
         comments = Comments.query.all()
         scripthas = ScriptHas.query.all()
-        return render_template("profilepage.html", user=current_user, posts=scripts, details=writerdetails, comments=comments, scripthas=scripthas)
-    if current_user.accounttype == 2:
-        return render_template("profilepage.html", user=current_user)
+        return flask.render_template("profilepage.html", user=current_user, posts=scripts, details=writerdetails, comments=comments, scripthas=scripthas)
+    if user.accounttype == 2:
+        return flask.render_template("profilepage.html", user=current_user, user2=user)
 
 
 @views.route("/pageeditor/<username>", methods=['GET', 'POST'])
 @login_required
 def pageeditor(username):
-    if request.method == "POST":
-        file = request.files['profilepic']
+    if flask.request.method == "POST":
+        file = flask.request.files['profilepic']
         picturefilename = secure_filename(file.filename)
         picname = str(uuid.uuid1()) + "_" + picturefilename
         file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',picname)) 
         shutil.move(picname,'static/images')
         query = Users.query.filter_by(username = current_user.username).first()
         query.profilepic = picname
-        query.biography = request.form.get('bio')
+        query.biography = flask.request.form.get('bio')
         db.session.commit()
         if current_user.accounttype == 1:
-            colour = request.form.get('colorpicker')
-            fontid = request.form.get('fontstyle')
+            colour = flask.request.form.get('colorpicker')
+            fontid = flask.request.form.get('fontstyle')
             writer = Screenwriters.query.filter_by(userid = current_user.id).first()
             writer.backgroundcolour = colour
             if fontid == 0:
@@ -282,56 +299,56 @@ def pageeditor(username):
             else:
                 writer.fontid = fontid
             db.session.commit()
-        flash("Edits made!")
+        flask.flash("Edits made!")
         writer = Screenwriters.query.filter_by(userid = current_user.id).first()
         scripts = Screenplays.query.filter_by(writerid = writer.writerid)
         comments = Comments.query.all()
         scripthas = ScriptHas.query.all()
         writerdetails = Screenwriters.query.filter_by(userid = current_user.id).first()
-        return render_template("profilepage.html", user=current_user, posts=scripts, details=writerdetails, comments=comments, scripthas=scripthas)
-    return render_template("pageeditor.html", user=current_user)
+        return flask.render_template("profilepage.html", user=current_user, posts=scripts, details=writerdetails, comments=comments, scripthas=scripthas)
+    return flask.render_template("pageeditor.html", user=current_user)
 
 @views.route("/post", methods=['GET', 'POST'])
 @login_required
 def post():
     userdetails = Users.query.filter_by(username = current_user.username).first()
     if userdetails.accounttype == 2:
-        if request.method == "POST":
+        if flask.request.method == "POST":
             producerdetails = Producers.query.filter_by(userid = userdetails.id).first()
             num = producerdetails.producerid
-            deadline=str(request.form.get("date"))
+            deadline=str(flask.request.form.get("date"))
             date = convert_to_datetime(deadline)
-            newcomp = Competitions(producerid = num, title=request.form.get("title"), brief=request.form.get("brief"), deadline=date)
+            newcomp = Competitions(producerid = num, title=flask.request.form.get("title"), brief=flask.request.form.get("brief"), deadline=date)
             db.session.add(newcomp)
             db.session.commit()
             newcomp = Competitions.query.order_by(Competitions.compid.desc()).first()
-            genres = request.form.getlist("genres")
+            genres = flask.request.form.getlist("genres")
             for i in genres:
                 newcomphas = CompHas(compid=newcomp.compid, genreid=i)
                 db.session.add(newcomphas)
                 db.session.commit()
-            flash("Competition created!")
-            return redirect(url_for('views.competitions'))
-        return render_template('create_post.html', user=current_user, userdetails=userdetails)
+            flask.flash("Competition created!")
+            return flask.redirect(flask.url_for('views.competitions'))
+        return flask.render_template('create_post.html', user=current_user, userdetails=userdetails)
     
     elif userdetails.accounttype == 1:
-        if request.method == "POST":
+        if flask.request.method == "POST":
             # The data is grabbed from the form
-            title = request.form.get("title")
-            logline = request.form.get("logline")
-            message = request.form.get("message")
-            file = request.files['screenplay']
-            start = int(request.form.get("start"))
-            end = int(request.form.get("end"))
-            genres = request.form.getlist("genres")
+            title = flask.request.form.get("title")
+            logline = flask.request.form.get("logline")
+            message = flask.request.form.get("message")
+            file = flask.request.files['screenplay']
+            start = int(flask.request.form.get("start"))
+            end = int(flask.request.form.get("end"))
+            genres = flask.request.form.getlist("genres")
             # The file is saved to the folder
             scriptname = secure_filename(file.filename) 
             file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
             if IsPDF(file.filename) == False:
-                flash("Upload a PDF!", category='error')
+                flask.flash("Upload a PDF!", category='error')
             else:
                 if ValidPageNums(file.filename, start, end) == False:
-                    flash("Invalid page range!", category='error')
+                    flask.flash("Invalid page range!", category='error')
                 else:
                     PyPDF4.PdfFileReader(scriptname)
                     watermark(input_pdf=file.filename,output_pdf="watermarked.pdf", watermark="watermark.pdf")
@@ -350,13 +367,17 @@ def post():
                         db.session.add(newscripthas)
                         db.session.commit()
                     posts = Screenplays.query.all()
-                    return render_template("home.html", user=current_user, posts=posts)
-        return render_template('create_post.html', user=current_user, userdetails=userdetails)
+                    return flask.render_template("home.html", user=current_user, posts=posts)
+        return flask.render_template('create_post.html', user=current_user, userdetails=userdetails)
 
 '''
-        if AreThereSpaces(file.filename) == True:
-            flash("There are spaces in the file name!", category='error')
-        else:
+@views.route("/notifications/<userid>", methods=['POST'])
+@login_required
+def notifications(userid):
+    if current_user.accounttype == 1:
+        # requests = Requests.query.
+    
+    if current_user.accounttype == 2:
 '''
 
 @views.route("/competitions", methods=['GET', 'POST'])
@@ -371,41 +392,41 @@ def competitions():
         comp.submissionnum = subs2.count()
         db.session.commit()
     comps = Competitions.query.order_by(Competitions.submissionnum.desc())
-    if request.method == "POST":
-        sort = request.form.get('sorted')
+    if flask.request.method == "POST":
+        sort = flask.request.form.get('sorted')
         if sort == "New":
             comps = Competitions.query.order_by(Competitions.date_created.desc())
-            flash("Competitions now sorted by newest to oldest.")
-            return render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
+            flask.flash("Competitions now sorted by newest to oldest.")
+            return flask.render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
         elif sort == "Top Of Week":
             filter_after = date.today() - timedelta(days = 7)
             comps2 = Competitions.query.filter(Competitions.date_created >= filter_after)
             comps = comps2.order_by(Competitions.submissionnum.desc())
-            flash("Competitions now sorted by top of this week.")
-            return render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
+            flask.flash("Competitions now sorted by top of this week.")
+            return flask.render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
         elif sort == "Top Of Month":
             filter_after = date.today() - timedelta(days = 30)
             comps2 = Competitions.query.filter(Competitions.date_created >= filter_after)
             comps = comps2.order_by(Competitions.submissionnum.desc())
-            flash("Competitions now sorted by top of this month.")
-            return render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
-        genre = request.form.get("genre")
+            flask.flash("Competitions now sorted by top of this month.")
+            return flask.render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
+        genre = flask.request.form.get("genre")
         genre2 = Genres.query.filter_by(genreid=genre).first()
         compids = CompHas.query.filter_by(genreid=genre).all()
         comps = []
         for i in compids:
             comp = Competitions.query.filter_by(compid=i.compid).first()
             comps.append(comp)
-        flash(f"Now showing all {genre2.genre} competitions.")
+        flask.flash(f"Now showing all {genre2.genre} competitions.")
 
-    return render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
+    return flask.render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
 
 @views.route('/comp/<title>', methods=['GET', 'POST'])
 @login_required
 def comp(title):
     comp = Competitions.query.filter_by(title = title).first()
-    if request.method == "POST":
-        submission = request.files["submissions"]
+    if flask.request.method == "POST":
+        submission = flask.request.files["submissions"]
         scriptname = secure_filename(submission.filename) 
         submission.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
         user = Users.query.filter_by(username = current_user.username).first()
@@ -413,6 +434,23 @@ def comp(title):
         newsub = Submissions(writerid = writer.writerid, compid = comp.compid, submission=scriptname)
         db.session.add(newsub)
         db.session.commit()
-        flash("Submission sent!")
-        return redirect(url_for("views.competitions"))
-    return render_template("comp_full.html",user=current_user, comp=comp)
+        flask.flash("Submission sent!")
+        return flask.redirect(flask.url_for("views.competitions"))
+    return flask.render_template("comp_full.html",user=current_user, comp=comp)
+
+@views.route('/notifications/<userid>')
+@login_required
+def notifications(userid):
+    if current_user.accounttype == 1:
+        writer = Screenwriters.query.filter_by(userid=userid).first()
+        requests = Requests.query.filter_by(writerid = writer.writerid)
+        '''
+        if flask.request.method == "POST":
+            decision = flask.request.form.get("decision")
+            if decision == "Accept":
+                
+            if decision == "Decline":
+        '''
+        
+    return flask.render_template("notifications.html", requests=requests, user=current_user)
+

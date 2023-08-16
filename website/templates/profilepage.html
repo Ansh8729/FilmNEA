@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Page</title>
-    {% if user.accounttype == 1 %}
+    {% if user2.accounttype == 1 %}
         <style>
             .profilepage {
                 background-color: {{ details.backgroundcolour }};
@@ -63,19 +63,19 @@
         {% endif %}
         <br>
         <br>
-        {% if user.profilepic %}
+        {% if user2.profilepic %}
         <img src="{{ url_for('static', filename='images/'+ 'user.profilepic') }}" alt="Profile picture">
         {% else %}
         <img src="/static/images/default.jpg" alt="Default profile picture">
         {% endif %}
         <br>
         <br>
-        <h1>{{  user.username }}</h1>
-        <h5>{{ user.email }}</h5>
-        {% if user.biography != None %}
-        {{ user.biography }}
+        <h1>{{  user2.username }}</h1>
+        <h5>{{ user2.email }}</h5>
+        {% if user2.biography != None %}
+        {{ user2.biography }}
         {% endif %}
-        {% if user.accounttype == 1 %}
+        {% if user2.accounttype == 1 %}
         <p>Experience Level: {{ details.experiencelevel }}</p>
         <br>
         <div id="posts" style="text-align:center" class="container">

@@ -115,8 +115,10 @@
                             <br>
                             <h3>Message:</h3>
                             {{post.message}}
+                            <br>
                             <embed style="text-align: center;" src="{{url_for('static', filename='images/'+post.screenplay)}}" width = "75%" height = "550px"> 
                         </div>
+                        {% if user.accounttype == 1 %}
                         <div class="card border-dark">
                             <div class="card-body">
                             <h3>Comments</h3>
@@ -135,7 +137,13 @@
                                 <button type="submit" class="btn btn-primary">Comment</button>
                             </form>
                         </div>
+                        {% else %}
+                        <form method="POST" action="/request/{{post.scriptid}}">
+                            <button type="submit">Request for Full Access</button>
+                        </form>
+                        {% endif %}
                 </div>
+                <br>
                     {% endfor %}
             {% else %}
             <h1>No posts available</h1>

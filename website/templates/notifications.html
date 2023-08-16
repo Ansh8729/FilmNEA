@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+</head>
+<body>
+    <div class = "row" style="text-align:center">
+        <div class = "col-6">
+            <h1>Screenplay Requests</h1>
+            {% for request in requests %}
+                <div class="card" style="text-align:center">
+                    <h4><a href="/profilepage/{{request.producer.user.id}}">{{request.producer.user.username}}</a> wants full access to your screenplay {{request.script.title}}</h4>
+                    <form method="POST">
+                        <input type="radio" name="decision" id="accept" value="Accept">
+                        <label for="accept">Accept</label>
+                        <input type="radio" name="decision" id="decline" value="Decline">
+                        <label for="decline">Decline</label>
+                        <input type="submit" name="Submit">
+                    </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
+{% endblock %}

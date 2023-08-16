@@ -8,7 +8,7 @@ class Users(db.Model, UserMixin):
     email = db.Column(db.String(150), unique=True)
     username = db.Column(db.String(150), unique=True)
     forename = db.Column(db.String(75), unique=True)
-    surname = db.Column(db.String(75), unique=True)
+    surname = db.Column(db.String(75))
     password = db.Column(db.String(150))
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
     accounttype = db.Column(db.Integer)
@@ -26,6 +26,7 @@ class Screenwriters(db.Model):
     experiencelevel = db.Column(db.Float)
     posts = db.relationship('Screenplays', backref="writer", passive_deletes=True)
     commenters = db.relationship('Comments', backref="writer", passive_deletes=True)
+    requestees = db.relationship('Requests', backref="writer", passive_deletes=True)
 
 class FontStyles(db.Model):
     __tablename__ = "FontStyles"
@@ -43,6 +44,7 @@ class Screenplays(db.Model):
     screenplay = db.Column(db.String(300)) #TO BE CHANGED
     data_created = db.Column(db.DateTime(timezone=True), default=func.now())
     avgrating = db.Column(db.Float)
+    scripts = db.relationship('Requests', backref="script", passive_deletes=True)
 
 class ScriptHas(db.Model):
     __tablename__ = "ScriptHas"
@@ -63,11 +65,13 @@ class Producers(db.Model):
     approved = db.Column(db.Integer)
     otp = db.Column(db.String(10))
     posts = db.relationship('Competitions', backref="producer", passive_deletes=True)
+    posts = db.relationship('Requests', backref="producer", passive_deletes=True)
 
 class Requests(db.Model):
     __tablename__ = "Requests"
     requestid = db.Column(db.Integer, primary_key=True)
     producerid = db.Column(db.Integer, db.ForeignKey('Producers.producerid'))
+    writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'))
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'))
     granted = db.Column(db.Integer)
 
