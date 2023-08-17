@@ -27,6 +27,7 @@ class Screenwriters(db.Model):
     posts = db.relationship('Screenplays', backref="writer", passive_deletes=True)
     commenters = db.relationship('Comments', backref="writer", passive_deletes=True)
     responsees = db.relationship('Responses', backref="writer", passive_deletes=True)
+    entries = db.relationship('CompSubmissions', backref="writer", passive_deletes=True)
 
 class Screenplays(db.Model):
     __tablename__ = "Screenplays"
@@ -80,6 +81,7 @@ class Competitions(db.Model):
     deadline = db.Column(db.DateTime(timezone=True))
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
     submissionnum = db.Column(db.Integer)
+    responses = db.relationship('CompSubmissions', backref="comp", passive_deletes=True)
 
 class CompHas(db.Model):
     __tablename__ = "CompHas"

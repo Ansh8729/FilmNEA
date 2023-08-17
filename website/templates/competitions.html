@@ -24,7 +24,7 @@
       {% for comp in comps %}
           <div class="card border-dark">
               {% if details.accounttype == 1 %}
-              <a href="/comp/{{comp.title}}"><h2>{{comp.title}}</h2></a>
+              <a href="/comp/{{comp.compid}}"><h2>{{comp.title}}</h2></a>
               {% else %}
               <h2>{{comp.title}}</h2>
               {% endif %}

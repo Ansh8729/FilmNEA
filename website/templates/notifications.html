@@ -11,17 +11,17 @@
     <title>Notifications</title>
 </head>
 <body>
+    {% if user.accounttype == 1 %}
     <div class="row" style="text-align:center">
         <div class="col-6">
             <h1>Producer Responses</h1>
             {% for response in responses %}
                 {% if response.responsetype == 1 %}
                     <div class="card" style="text-align:left">
-                        <h4><a href="/profilepage/{{response.producer.user.id}}">{{response.producer.user.username}}</a> says {{response.message}}</h4>
-                        <form method="POST" action="/deleteresponse/{{response.responseid}}">
+                        <h4><a href="/profilepage/{{ response.producer.user.id }}">{{ response.producer.user.username }}</a> says {{ response.message }}</h4>
+                        <form method="POST" action="/deleteresponse/{{ response.responseid }}">
                             <button type="submit" name="Delete">Delete</button>
                         </form>
-                        
                     </div>
                 {% endif %}
             {% endfor %}
@@ -31,7 +31,7 @@
             {% for response in responses %}
                 {% if response.responsetype == 2 %}
                     <div class="card" style="text-align:center">
-                        <h4><a href="/profilepage/{{response.producer.user.id}}">{{response.producer.user.username}}</a> wants full access to your screenplay {{response.request.script.title}}</h4>
+                        <h4><a href="/profilepage/{{ response.producer.user.id }}">{{ response.producer.user.username }}</a> wants full access to your screenplay {{ response.request.script.title }}</h4>
                         <form method="POST">
                             <input type="radio" name="decision" id="accept" value="Accept">
                             <label for="accept">Accept</label>
@@ -44,6 +44,25 @@
             {% endfor %}
         </div>
     </div>
+    {% endif %}
+    
+    {% if user.accounttype == 2 %}
+    <div class="row" style="text-align:center">
+        <h1>Competition Submissions</h1>
+        {% for sub in subs %}
+            <div class="card" style="text-align:center">
+                <p>Submission for {{ sub.comp.title }} by {{ sub.writer.user.username }}</p>
+                <a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a>
+                <br>
+                <form method="POST" action="/sendback/{{sub.writer.user.id}}">
+                    <label for="response">Response:</label>
+                    <input type="text" id="response" name="subresponse">
+                    <input type="submit" name="Submit">
+                </form>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 </body>
 </html>
 {% endblock %}

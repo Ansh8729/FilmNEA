@@ -17,7 +17,7 @@
   <p>{{comp.brief}}</p>
   <br>
   <h2>Submit Your Entry</h2>
-  <form method='POST' enctype='multipart/form-data'>
+  <form method='POST' enctype='multipart/form-data' action="/submit/{{comp.compid}}">
     <input type="file" name="submission"><br><br>
     <input type="submit" name="Submit">
   </form>

@@ -386,25 +386,15 @@ def post():
                     return flask.render_template("home.html", user=current_user, posts=posts)
         return flask.render_template('create_post.html', user=current_user, userdetails=userdetails)
 
-'''
-@views.route("/notifications/<userid>", methods=['POST'])
-@login_required
-def notifications(userid):
-    if current_user.accounttype == 1:
-        # requests = Requests.query.
-    
-    if current_user.accounttype == 2:
-'''
-
 @views.route("/competitions", methods=['GET', 'POST'])
 @login_required
 def competitions():
     userdetails = Users.query.filter_by(username = current_user.username).first()
     comps2 = Competitions.query.all()
-    subs = Submissions.query.all()
+    subs = CompSubmissions.query.all()
     comphas = CompHas.query.all()
     for comp in comps2:
-        subs2 = Submissions.query.filter_by(compid = comp.compid)
+        subs2 = CompSubmissions.query.filter_by(compid = comp.compid)
         comp.submissionnum = subs2.count()
         db.session.commit()
     comps = Competitions.query.order_by(Competitions.submissionnum.desc())
@@ -437,10 +427,10 @@ def competitions():
 
     return flask.render_template("competitions.html", user=current_user, comps=comps, details=userdetails, comphas=comphas)
 
-@views.route('/comp/<title>', methods=['GET', 'POST'])
+@views.route('/comp/<compid>', methods=['GET', 'POST'])
 @login_required
-def comp(title):
-    comp = Competitions.query.filter_by(title = title).first()
+def comp(compid):
+    comp = Competitions.query.filter_by(compid = compid).first()
     if flask.request.method == "POST":
         submission = flask.request.files["submissions"]
         scriptname = secure_filename(submission.filename) 
@@ -454,21 +444,60 @@ def comp(title):
         return flask.redirect(flask.url_for("views.competitions"))
     return flask.render_template("comp_full.html",user=current_user, comp=comp)
 
+@views.route('/submit/<compid>', methods=['GET', 'POST'])
+@login_required
+def submit(compid):
+    file = flask.request.files['submission']
+    scriptname = secure_filename(file.filename) 
+    file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
+    shutil.move(scriptname,'static/images')
+    if IsPDF(file.filename) == False:
+        flask.flash("Upload a PDF!", category='error')
+    else:
+        writer = Screenwriters.query.filter_by(userid=current_user.id).first()
+        comp = Competitions.query.filter_by(compid=compid).first()
+        newsub = CompSubmissions(writerid=writer.writerid, producerid=comp.producerid, compid=compid, submission=file.filename)
+        db.session.add(newsub)
+        db.session.commit()
+        flask.flash("Submission sent!")
+        return flask.redirect(flask.url_for("views.competitions"))
+    
+
 @views.route('/notifications/<userid>', methods=['GET', 'POST'])
 @login_required
 def notifications(userid):
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=userid).first()  
         responses = Responses.query.filter_by(writerid = writer.writerid)
+        subs = ""
         return flask.render_template("notifications.html", responses=responses, user=current_user)
-
+    if current_user.accounttype == 2:
+        producer = Producers.query.filter_by(userid=userid).first()
+        responses = Responses.query.filter_by(producerid = producer.producerid)
+        subs = CompSubmissions.query.filter_by(producerid=producer.producerid)
+        return flask.render_template("notifications.html", responses=responses, subs=subs, user=current_user)
+    
+@views.route('/sendback/<userid>', methods=['GET', 'POST'])
+@login_required
+def sendback(userid):
+    if current_user.accounttype == 2:
+        response = flask.request.form.get('subresponse')
+        producer = Producers.query.filter_by(userid=current_user.id).first()
+        writer = Screenwriters.query.filter_by(userid=userid).first()  
+        sub = CompSubmissions.query.filter(CompSubmissions.producerid == producer.producerid, CompSubmissions.writerid==writer.writerid).first()
+        message = f"{producer.user.username} responded to your submission to their competition {sub.comp.title}: {response}"
+        sub.message = message
+        db.session.commit()
+        flask.flash("Response sent!")
+        return flask.redirect(flask.url_for("views.notifications/{{current_user.id}}"))
+        
 @views.route('/deleteresponse/<responseid>', methods=['GET', 'POST'])
 @login_required
 def deleteresponse(responseid):
     response = Responses.query.filter_by(responseid=responseid).first()
     db.session.delete(response)
     db.session.commit()
-    flask.flash("Response removed")
+    flask.flash("Response removed!")
     return flask.redirect(flask.url_for("views.notifications/{{current_user.id}}"))
 
 
