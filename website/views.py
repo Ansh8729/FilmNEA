@@ -93,6 +93,40 @@ def split_pdf(input, output, start, end): #Cuts the screenplay down to the pages
     with open(output,"wb") as out:
         writer.write(out)
 
+class Stack: 
+    def __init__(self, mymax):
+        self.mymax = mymax
+        self.list = [None] * self.mymax
+        self.pointer = -1
+
+    def isFull(self):
+        return self.pointer == self.mymax - 1
+
+    def isEmpty(self):
+        return self.pointer == -1
+
+    def push(self, num):
+        if self.isFull():
+            return "The stack is full"
+        else:
+            self.pointer += 1
+            self.list[self.pointer] = num
+
+    def pop(self):
+        if self.isEmpty():
+            return "The stack is empty"
+        else:
+            item = self.list[self.pointer]
+            self.list[self.pointer] = None
+            self.pointer -= 1
+            return item
+
+    def peek(self):
+        if self.isEmpty():
+            return "The stack is empty"
+        else:
+            return self.list[self.pointer]
+
 @views.route("/")
 @views.route("/home", methods=['GET', 'POST'])
 @login_required
@@ -462,15 +496,14 @@ def submit(compid):
         flask.flash("Submission sent!")
         return flask.redirect(flask.url_for("views.competitions"))
     
-
 @views.route('/notifications/<userid>', methods=['GET', 'POST'])
 @login_required
 def notifications(userid):
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=userid).first()  
         responses = Responses.query.filter_by(writerid = writer.writerid)
-        subs = ""
-        return flask.render_template("notifications.html", responses=responses, user=current_user)
+        subs = CompSubmissions.query.filter_by(writerid = writer.writerid)
+        return flask.render_template("notifications.html", responses=responses, subs=subs, user=current_user)
     if current_user.accounttype == 2:
         producer = Producers.query.filter_by(userid=userid).first()
         responses = Responses.query.filter_by(producerid = producer.producerid)
@@ -489,7 +522,11 @@ def sendback(userid):
         sub.message = message
         db.session.commit()
         flask.flash("Response sent!")
-        return flask.redirect(flask.url_for("views.notifications/{{current_user.id}}"))
+        producer = Producers.query.filter_by(userid=userid).first()
+        responses = Responses.query.filter_by(producerid = producer.producerid)
+        subs = CompSubmissions.query.filter_by(producerid=producer.producerid)
+        return flask.render_template("notifications.html", responses=responses, subs=subs, user=current_user)
+        
         
 @views.route('/deleteresponse/<responseid>', methods=['GET', 'POST'])
 @login_required
