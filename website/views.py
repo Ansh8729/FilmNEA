@@ -1,7 +1,7 @@
 # from flask import Blueprint, render_template, request, flash, redirect, url_for
 import flask 
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions, CompSubmissions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Responses
+from .models import Users, Screenwriters, Producers, Competitions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Notifications
 from flask_wtf import FlaskForm
 from wtforms import widgets, RadioField, StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField, SelectMultipleField
 from werkzeug.utils import secure_filename
@@ -262,26 +262,28 @@ def response(scriptid):
     request = flask.request.form.get('request')
     if response:
         producer = Producers.query.filter_by(userid = current_user.id).first()
-        response_exists = Responses.query.filter(Responses.producerid == producer.producerid, Responses.scriptid == scriptid, Responses.responsetype == 1).first()
+        response_exists = Notifications.query.filter(Notifications.producerid == producer.producerid, Notifications.scriptid == scriptid, Notifications.responsetype == 1).first()
         if response_exists:
             flask.flash("You've already sent a response for this script.")
+            return flask.redirect(flask.url_for("views.home"))
         else:
             producer = Producers.query.filter_by(userid = current_user.id).first()
             script = Screenplays.query.filter_by(scriptid=scriptid).first()
-            newresponse = Responses(producerid = producer.producerid, writerid=script.writerid, scriptid=scriptid, message=response, responsetype = 1)
+            newresponse = Notifications(producerid = producer.producerid, writerid=script.writerid, scriptid=scriptid, message=response, responsetype = 1)
             db.session.add(newresponse)
             db.session.commit()
             flask.flash(f"Response sent!")
         return flask.redirect(flask.url_for("views.home"))
     elif request:
         producer = Producers.query.filter_by(userid = current_user.id).first()
-        request_exists = Responses.query.filter(Responses.producerid == producer.producerid, Responses.scriptid == scriptid, Responses.responsetype == 2).first()
+        request_exists = Notifications.query.filter(Notifications.producerid == producer.producerid, Notifications.scriptid == scriptid, Notifications.responsetype == 2).first()
         if request_exists:
             flask.flash("You've already sent a request for this script.")
+            return flask.redirect(flask.url_for("views.home"))
         else:
             producer = Producers.query.filter_by(userid = current_user.id).first()
             script = Screenplays.query.filter_by(scriptid=scriptid).first()
-            newrequest = Responses(producerid = producer.producerid, writerid=script.writerid, scriptid=scriptid, responsetype = 2)
+            newrequest = Notifications(producerid = producer.producerid, writerid=script.writerid, scriptid=scriptid, responsetype = 2, requeststatus = 0)
             db.session.add(newrequest)
             db.session.commit()
             flask.flash(f"Request for full access for {script.title} sent!")
@@ -425,10 +427,9 @@ def post():
 def competitions():
     userdetails = Users.query.filter_by(username = current_user.username).first()
     comps2 = Competitions.query.all()
-    subs = CompSubmissions.query.all()
     comphas = CompHas.query.all()
     for comp in comps2:
-        subs2 = CompSubmissions.query.filter_by(compid = comp.compid)
+        subs2 = Notifications.query.filter_by(compid = comp.compid)
         comp.submissionnum = subs2.count()
         db.session.commit()
     comps = Competitions.query.order_by(Competitions.submissionnum.desc())
@@ -471,7 +472,7 @@ def comp(compid):
         submission.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
         user = Users.query.filter_by(username = current_user.username).first()
         writer = Screenwriters.query.filter_by(userid = user.id).first()
-        newsub = CompSubmissions(writerid = writer.writerid, compid = comp.compid, submission=scriptname)
+        newsub = Notifications(writerid = writer.writerid, compid = comp.compid, submission=scriptname)
         db.session.add(newsub)
         db.session.commit()
         flask.flash("Submission sent!")
@@ -490,7 +491,7 @@ def submit(compid):
     else:
         writer = Screenwriters.query.filter_by(userid=current_user.id).first()
         comp = Competitions.query.filter_by(compid=compid).first()
-        newsub = CompSubmissions(writerid=writer.writerid, producerid=comp.producerid, compid=compid, submission=file.filename)
+        newsub = Notifications(writerid=writer.writerid, producerid=comp.producerid, compid=compid, submission=file.filename)
         db.session.add(newsub)
         db.session.commit()
         flask.flash("Submission sent!")
@@ -500,42 +501,65 @@ def submit(compid):
 @login_required
 def notifications(userid):
     if current_user.accounttype == 1:
-        writer = Screenwriters.query.filter_by(userid=userid).first()  
-        responses = Responses.query.filter_by(writerid = writer.writerid)
-        subs = CompSubmissions.query.filter_by(writerid = writer.writerid)
-        return flask.render_template("notifications.html", responses=responses, subs=subs, user=current_user)
+        writer = Screenwriters.query.filter_by(userid=userid).first()
+        notifs = Notifications.query.filter_by(writerid = writer.writerid)
     if current_user.accounttype == 2:
         producer = Producers.query.filter_by(userid=userid).first()
-        responses = Responses.query.filter_by(producerid = producer.producerid)
-        subs = CompSubmissions.query.filter_by(producerid=producer.producerid)
-        return flask.render_template("notifications.html", responses=responses, subs=subs, user=current_user)
+        notifs = Notifications.query.filter_by(producerid = producer.producerid)
+
+    return flask.render_template("notifications.html", notifs=notifs, user=current_user)
     
-@views.route('/sendback/<userid>', methods=['GET', 'POST'])
+@views.route('/sendback/<userid>/<compid>', methods=['GET', 'POST'])
 @login_required
-def sendback(userid):
+def sendback(userid, compid):
     if current_user.accounttype == 2:
         response = flask.request.form.get('subresponse')
         producer = Producers.query.filter_by(userid=current_user.id).first()
         writer = Screenwriters.query.filter_by(userid=userid).first()  
-        sub = CompSubmissions.query.filter(CompSubmissions.producerid == producer.producerid, CompSubmissions.writerid==writer.writerid).first()
+        sub = Notifications.query.filter(Notifications.producerid == producer.producerid, Notifications.writerid==writer.writerid, Notifications.compid == compid)
         message = f"{producer.user.username} responded to your submission to their competition {sub.comp.title}: {response}"
         sub.message = message
         db.session.commit()
         flask.flash("Response sent!")
-        producer = Producers.query.filter_by(userid=userid).first()
-        responses = Responses.query.filter_by(producerid = producer.producerid)
-        subs = CompSubmissions.query.filter_by(producerid=producer.producerid)
-        return flask.render_template("notifications.html", responses=responses, subs=subs, user=current_user)
+        return flask.redirect(flask.url_for("views.notifications", userid=current_user.id))
         
-        
+'''
 @views.route('/deleteresponse/<responseid>', methods=['GET', 'POST'])
 @login_required
 def deleteresponse(responseid):
-    response = Responses.query.filter_by(responseid=responseid).first()
+    response = Notifications.query.filter_by(notifid = responseid).first()
     db.session.delete(response)
     db.session.commit()
     flask.flash("Response removed!")
-    return flask.redirect(flask.url_for("views.notifications/{{current_user.id}}"))
+    if current_user.accounttype == 1:
+        writer = Screenwriters.query.filter_by(userid=current_user.id).first()
+        notifs = Notifications.query.filter_by(writerid = writer.writerid)
+    if current_user.accounttype == 2:
+        producer = Producers.query.filter_by(userid=current_user.id).first()
+        notifs = Notifications.query.filter_by(producerid = producer.producerid)
+    return flask.redirect(flask.url_for("views.notifications", userid=current_user.id))
+'''
+
+@views.route('/requestresponse/<requestid>', methods=['GET', 'POST'])
+@login_required
+def requestresponse(requestid):
+    decision = flask.request.form.get('decision')
+    request = Notifications.query.filter_by(notifid=requestid).first()
+    if decision == "Accept":
+        request.requeststatus = 1
+        request.message = f"{request.writer.user.username} has accepted your request for full access to {request.script.title}! Here's a link to the full file."
+        db.session.commit()
+        flask.flash("Request accepted!")
+    elif decision == "Decline":
+        request.requeststatus = 2
+        request.message = f"{request.writer.user.username} has declined your request for full access to {request.script.title}!"
+        db.session.commit()
+        flask.flash("Request declined!")
+    return flask.redirect(flask.url_for("views.notifications", userid=current_user.id))
+
+    
+
+    
 
 
     

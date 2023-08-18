@@ -15,11 +15,11 @@
     <div class="row" style="text-align:center">
         <div class="col-6">
             <h1>Producer Responses</h1>
-            {% for response in responses %}
+            {% for response in notifs %}
                 {% if response.responsetype == 1 %}
                     <div class="card" style="text-align:left">
                         <h4><a href="/profilepage/{{ response.producer.user.id }}">{{ response.producer.user.username }}</a> says {{ response.message }}</h4>
-                        <form method="POST" action="/deleteresponse/{{ response.responseid }}">
+                        <form method="POST" action="/deleteresponse/{{ response.notifid }}">
                             <button type="submit" name="Delete">Delete</button>
                         </form>
                     </div>
@@ -27,19 +27,23 @@
             {% endfor %}
         </div>
         <div class="col-6">
-            <!--<h1>Screenplay Requests</h1>
-            {% for request in requests %}
-                    <div class="card" style="text-align:center">
-                        <h4><a href="/profilepage/{{ request.producer.user.id }}">{{ request.producer.user.username }}</a> wants full access to your screenplay {{ request.script.title }}</h4>
-                        <form method="POST">
-                            <input type="radio" name="decision" id="accept" value="Accept">
-                            <label for="accept">Accept</label>
-                            <input type="radio" name="decision" id="decline" value="Decline">
-                            <label for="decline">Decline</label>
-                            <input type="submit" name="Submit">
-                        </form>
-                    </div>
-            {% endfor %}-->
+            <h1>Screenplay Requests</h1>
+            {% for request in notifs %}
+                {% if request.responsetype == 2 %}
+                    {% if request.requeststatus == 0 %}
+                        <div class="card" style="text-align:center">
+                            <h4><a href="/profilepage/{{ request.producer.user.id }}">{{ request.producer.user.username }}</a> wants full access to your screenplay {{ request.script.title }}</h4>
+                            <form method="POST" action="/requestresponse/{{request.notifid}}">
+                                <input type="radio" name="decision" id="accept" value="Accept">
+                                <label for="accept">Accept</label>
+                                <input type="radio" name="decision" id="decline" value="Decline">
+                                <label for="decline">Decline</label>
+                                <input type="submit" name="Submit">
+                            </form>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
         </div>
     </div>
     {% endif %}
@@ -47,12 +51,12 @@
     {% if user.accounttype == 2 %}
     <div class="row" style="text-align:center">
         <h1>Competition Submissions</h1>
-        {% for sub in subs %}
+        {% for sub in notifs %}
             <div class="card" style="text-align:center">
                 <p>Submission for {{ sub.comp.title }} by {{ sub.writer.user.username }}</p>
                 <a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a>
                 <br>
-                <form method="POST" action="/sendback/{{sub.writer.user.id}}">
+                <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}">
                     <label for="response">Response:</label>
                     <input type="text" id="response" name="subresponse">
                     <input type="submit" name="Submit">
