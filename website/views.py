@@ -17,19 +17,12 @@ import uuid as uuid
 from . import db
 from dateutil.parser import parse
 from datetime import date, timedelta
+import secrets
 
 views = flask.Blueprint("views", __name__)
 
 def convert_to_datetime(input_str, parserinfo=None):
     return parse(input_str, parserinfo=parserinfo)
-
-'''
-class UploadFileForm(FlaskForm): #Allows users to input the data needed to upload their screenplay.
-    file = FileField("File", validators=[InputRequired()])
-    start = IntegerField("Start page: ", validators=[InputRequired()])
-    end = IntegerField("End page: ", validators=[InputRequired()])
-    submit = SubmitField("Upload File")
-'''
     
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
@@ -42,7 +35,7 @@ def AreThereSpaces(filename): #Checks if the name of the file they have uploaded
         if chars[i] == ' ':
             spaces += 1
     if spaces > 0:
-        flash("Your filename CANNOT have spaces!")
+        flask.flash("Your filename CANNOT have spaces!")
         for i in range(0,len(chars)):
             if chars[i] == ' ':
                 chars[i] = "_"
@@ -57,18 +50,18 @@ def IsPDF(filename): #Checks if the uploaded file is a PDF (the correct format)
     extension = (filename).split(".")
     ext = extension[1]
     if ext != "pdf":
-        flash("Your file is not a PDF!")
+        flask.flash("Your file is not a PDF!")
         os.remove(filename)
 
 def ValidPageNums(filename, start, end): #Checks if the program can output the correct pages (no page numbers going over the length of the screenplay and only 10 pages can be uploaded)
     file2 = PyPDF2.PdfReader(filename)
     nums = len(file2.pages)
     if end > nums:
-        flash("Your screenplay doesn't have "+str(end)+" pages!")
+        flask.flash("Your screenplay doesn't have "+str(end)+" pages!")
         os.remove(filename)
         return False
     elif end-start > 10:
-        flash("You can't upload more than 10 pages!")
+        flask.flash("You can't upload more than 10 pages!")
         os.remove(filename)
         return False
 
@@ -92,40 +85,6 @@ def split_pdf(input, output, start, end): #Cuts the screenplay down to the pages
         writer.add_page(selected_page) # add/embedding of the page
     with open(output,"wb") as out:
         writer.write(out)
-
-class Stack: 
-    def __init__(self, mymax):
-        self.mymax = mymax
-        self.list = [None] * self.mymax
-        self.pointer = -1
-
-    def isFull(self):
-        return self.pointer == self.mymax - 1
-
-    def isEmpty(self):
-        return self.pointer == -1
-
-    def push(self, num):
-        if self.isFull():
-            return "The stack is full"
-        else:
-            self.pointer += 1
-            self.list[self.pointer] = num
-
-    def pop(self):
-        if self.isEmpty():
-            return "The stack is empty"
-        else:
-            item = self.list[self.pointer]
-            self.list[self.pointer] = None
-            self.pointer -= 1
-            return item
-
-    def peek(self):
-        if self.isEmpty():
-            return "The stack is empty"
-        else:
-            return self.list[self.pointer]
 
 @views.route("/")
 @views.route("/home", methods=['GET', 'POST'])
@@ -394,14 +353,21 @@ def post():
             end = int(flask.request.form.get("end"))
             genres = flask.request.form.getlist("genres")
             # The file is saved to the folder
-            scriptname = secure_filename(file.filename) 
+            scriptname = secure_filename(file.filename)
             file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
             if IsPDF(file.filename) == False:
                 flask.flash("Upload a PDF!", category='error')
+                os.remove(file.filename)
             else:
                 if ValidPageNums(file.filename, start, end) == False:
                     flask.flash("Invalid page range!", category='error')
+                    os.remove(file.filename)
                 else:
+                    random_hex = secrets.token_hex(8)
+                    _, f_ext = os.path.splitext(scriptname)
+                    picture_fn = random_hex + f_ext
+                    shutil.copyfile(scriptname, picture_fn)
+                    shutil.move(picture_fn,'static/images')
                     PyPDF4.PdfFileReader(scriptname)
                     watermark(input_pdf=file.filename,output_pdf="watermarked.pdf", watermark="watermark.pdf")
                     os.remove(file.filename)
@@ -410,7 +376,7 @@ def post():
                     os.remove("watermarked.pdf")
                     shutil.move(newname,'static/images')
                     currentwriter = Screenwriters.query.filter_by(userid = current_user.id).first()
-                    newpost = Screenplays(writerid = currentwriter.writerid, title=title, logline=logline, message=message, screenplay=newname)
+                    newpost = Screenplays(writerid = currentwriter.writerid, title=title, logline=logline, message=message, screenplay=newname, fullfile=picture_fn)
                     db.session.add(newpost)
                     db.session.commit()
                     newscript = Screenplays.query.order_by(Screenplays.scriptid.desc()).first()
@@ -523,7 +489,6 @@ def sendback(userid, compid):
         flask.flash("Response sent!")
         return flask.redirect(flask.url_for("views.notifications", userid=current_user.id))
         
-'''
 @views.route('/deleteresponse/<responseid>', methods=['GET', 'POST'])
 @login_required
 def deleteresponse(responseid):
@@ -531,14 +496,7 @@ def deleteresponse(responseid):
     db.session.delete(response)
     db.session.commit()
     flask.flash("Response removed!")
-    if current_user.accounttype == 1:
-        writer = Screenwriters.query.filter_by(userid=current_user.id).first()
-        notifs = Notifications.query.filter_by(writerid = writer.writerid)
-    if current_user.accounttype == 2:
-        producer = Producers.query.filter_by(userid=current_user.id).first()
-        notifs = Notifications.query.filter_by(producerid = producer.producerid)
     return flask.redirect(flask.url_for("views.notifications", userid=current_user.id))
-'''
 
 @views.route('/requestresponse/<requestid>', methods=['GET', 'POST'])
 @login_required

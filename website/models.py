@@ -35,7 +35,8 @@ class Screenplays(db.Model):
     title = db.Column(db.String(300))
     logline = db.Column(db.String(165))
     message = db.Column(db.Text)
-    screenplay = db.Column(db.String(300)) #TO BE CHANGED
+    screenplay = db.Column(db.String(300)) 
+    fullfile = db.Column(db.String(300))
     data_created = db.Column(db.DateTime(timezone=True), default=func.now())
     avgrating = db.Column(db.Float)
     scripts = db.relationship('Notifications', backref="script", passive_deletes=True)
@@ -68,6 +69,7 @@ class Notifications(db.Model):
     writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'))
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'))
     compid = db.Column(db.Integer, db.ForeignKey('Competitions.compid'))
+    commentid = db.Column(db.Integer, db.ForeignKey('Comments.commentid'))
     responsetype = db.Column(db.Integer)
     message = db.Column(db.Text)
     submission = db.Column(db.String(150)) 
@@ -99,8 +101,9 @@ class LikedScreenplays(db.Model):
 
 class Comments(db.Model):
     __tablename__ = "Comments"
-    writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'), primary_key=True)
-    scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'), primary_key=True)
+    commentid = db.Column(db.Integer, primary_key=True)
+    writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'))
+    scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'))
     comment = db.Column(db.String(300))
 
 
