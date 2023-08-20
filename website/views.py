@@ -203,16 +203,35 @@ def create_comment(scriptid):
     if not text:
         flask.flash('Comment cannot be empty.', category='error')
     else:
-        post = Screenplays.query.filter_by(scriptid = scriptid)
+        post = Screenplays.query.filter_by(scriptid = scriptid).first()
         writer = Screenwriters.query.filter_by(userid = current_user.id).first()
         if post:
             comment = Comments(writerid=writer.writerid, scriptid=scriptid, comment=text)
             db.session.add(comment)
             db.session.commit()
+            comment = Comments.query.order_by(Comments.commentid).first()
+            writer = Screenwriters.query.filter_by(userid = current_user.id).first()
+            notif = Notifications(writerid = writer.writerid, commentid=comment.commentid)
+            db.session.add(notif)
+            db.session.commit()
         else:
             flask.flash('Post does not exist.', category='error')
 
     return flask.redirect(flask.url_for('views.home'))
+
+@views.route("/delete-comment/<commentid>", methods=['GET', 'POST'])
+@login_required
+def delete_comment(commentid):
+    notif = Notifications.query.filter_by(commentid=commentid).first()
+    if notif:
+        db.session.delete(notif)
+        db.session.commit()
+    comment = Comments.query.filter_by(commentid=commentid).first()
+    db.session.delete(comment)
+    db.session.commit()
+    flask.flash("Comment removed!")
+    return flask.redirect(flask.url_for('views.home'))
+    
 
 @views.route('/response/<scriptid>',methods=['POST'])
 @login_required
@@ -269,8 +288,8 @@ def delete_post(scriptid):
 @views.route("/profilepage/<userid>")
 @login_required
 def profilepage(userid):
-    user = Users.query.filter_by(id=userid).first()
-    if user.accounttype == 1:
+    user2 = Users.query.filter_by(id=userid).first()
+    if user2.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=userid).first()
         scripts = Screenplays.query.filter_by(writerid = writer.writerid)
         rating = 0
@@ -282,8 +301,8 @@ def profilepage(userid):
         writerdetails = Screenwriters.query.filter_by(userid = current_user.id).first()
         comments = Comments.query.all()
         scripthas = ScriptHas.query.all()
-        return flask.render_template("profilepage.html", user=current_user, posts=scripts, details=writerdetails, comments=comments, scripthas=scripthas)
-    if user.accounttype == 2:
+        return flask.render_template("profilepage.html", user=current_user, posts=scripts, details=writerdetails, comments=comments, scripthas=scripthas, user2=user2)
+    if user2.accounttype == 2:
         return flask.render_template("profilepage.html", user=current_user, user2=user)
 
 
@@ -482,7 +501,7 @@ def sendback(userid, compid):
         response = flask.request.form.get('subresponse')
         producer = Producers.query.filter_by(userid=current_user.id).first()
         writer = Screenwriters.query.filter_by(userid=userid).first()  
-        sub = Notifications.query.filter(Notifications.producerid == producer.producerid, Notifications.writerid==writer.writerid, Notifications.compid == compid)
+        sub = Notifications.query.filter(Notifications.producerid == producer.producerid, Notifications.writerid==writer.writerid, Notifications.compid == compid).first()
         message = f"{producer.user.username} responded to your submission to their competition {sub.comp.title}: {response}"
         sub.message = message
         db.session.commit()

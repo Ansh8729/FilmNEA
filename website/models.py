@@ -40,6 +40,7 @@ class Screenplays(db.Model):
     data_created = db.Column(db.DateTime(timezone=True), default=func.now())
     avgrating = db.Column(db.Float)
     scripts = db.relationship('Notifications', backref="script", passive_deletes=True)
+    scriptscommented = db.relationship('Comments', backref="script", passive_deletes=True)
 
 class ScriptHas(db.Model):
     __tablename__ = "ScriptHas"
@@ -105,5 +106,6 @@ class Comments(db.Model):
     writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'))
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'))
     comment = db.Column(db.String(300))
+    responses = db.relationship('Notifications', backref="comment", passive_deletes=True)
 
 

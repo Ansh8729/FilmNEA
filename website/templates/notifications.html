@@ -14,9 +14,9 @@
     {% if user.accounttype == 1 %}
     <div class="row" style="text-align:center">
         <div class="col-6">
-            <h1>Producer Responses</h1>
+            <h1>Script Responses</h1>
             {% for response in notifs %}
-                {% if response.responsetype == 1 %}
+                {% if response.responsetype == 1 and response.commentid == None %}
                     <div class="card" style="text-align:left">
                         <h4><a href="/profilepage/{{ response.producer.user.id }}">{{ response.producer.user.username }}</a> says {{ response.message }}</h4>
                         <form method="POST" action="/deleteresponse/{{ response.notifid }}">
@@ -24,6 +24,22 @@
                         </form>
                     </div>
                 {% endif %}
+                {% if response.responsetype == None and response.commentid != None %}
+                    <div class="card" style="text-align:left">
+                        <h4><a href="/profilepage/{{ response.comment.writer.user.id }}">{{ response.comment.writer.user.username }}</a> says {{ response.comment.comment }} on {{response.comment.script.title}}</h4>
+                        <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                            <button type="submit" name="Delete">Delete</button>
+                        </form>
+                    </div>
+                {% endif %}
+                {% if response.compid != None %}
+                    <div class="card" style="text-align:left">
+                        <h4>{{ response.message }}</h4>
+                        <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                            <button type="submit" name="Delete">Delete</button>
+                        </form>
+                    </div>
+                {% endif %} 
             {% endfor %}
         </div>
         <div class="col-6">
@@ -52,21 +68,43 @@
     <div class="row" style="text-align:center">
         <div class="col-6">
             <h1>Request Responses</h1>
-            {% for re}
+            {% for response in notifs %}
+                {% if response.requeststatus == 2 %}
+                    <div class="card" style="text-align:center">
+                        {{response.message}}
+                        <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                            <button type="submit" name="Delete">Delete</button>
+                        </form>
+                    </div>
+                {% endif %}
+                {% if response.requeststatus == 1 %}
+                    <div class="card" style="text-align:center">
+                        {{response.message}}
+                        <a target="_blank" href="{{url_for('static', filename='images/'+response.script.fullfile)}}">Full Screenplay File</a>
+                        <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                            <button type="submit" name="Delete">Delete</button>
+                        </form>
+                    </div>
+                {% endif %}
+            {% endfor %}
         </div>
-        <h1>Competition Submissions</h1>
-        {% for sub in notifs %}
-            <div class="card" style="text-align:center">
-                <p>Submission for {{ sub.comp.title }} by {{ sub.writer.user.username }}</p>
-                <a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a>
-                <br>
-                <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}">
-                    <label for="response">Response:</label>
-                    <input type="text" id="response" name="subresponse">
-                    <input type="submit" name="Submit">
-                </form>
-            </div>
-        {% endfor %}
+        <div class="col-6">
+            <h1>Competition Submissions</h1>
+            {% for sub in notifs %}
+                {% if sub.compid != None and message == None %}
+                    <div class="card" style="text-align:center">
+                        <p>Submission for {{ sub.comp.title }} by {{ sub.writer.user.username }}</p>
+                        <a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a>
+                        <br>
+                        <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}">
+                            <label for="response">Response:</label>
+                            <input type="text" id="response" name="subresponse">
+                            <input type="submit" name="Submit">
+                        </form>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
     </div>
     {% endif %}
 </body>
