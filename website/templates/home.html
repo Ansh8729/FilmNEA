@@ -65,7 +65,7 @@
                 <input type="submit" name="sorted" value="Top of Month"></input>
             </form>
             <br>
-            <div id="posts" class="container">
+            <div id="posts" class="container" style="text-align:center">
             {% if posts %}
                 {% for post in posts %}
                 <div class="card border-dark">
@@ -97,7 +97,7 @@
                         <h2>{{post.title}}</h2>
                         By<a href="/profilepage/{{post.writer.user.id}}">{{post.writer.user.username}}</a>
                         {% if post.writer.user.profilepic %}
-                        <img src="{{ url_for('static', filename='images/'+ 'post.writer.user.profilepic') }}" alt="Profile picture">
+                        <img src="{{ url_for('static', filename='images/'+ post.writer.user.profilepic) }}" width = "110px" height = "110px" alt="Profile picture">
                         {% else %}
                         <img src="/static/images/default.jpg" alt="Default profile picture">
                         {% endif %}
@@ -116,7 +116,8 @@
                             <h3>Message:</h3>
                             {{post.message}}
                             <br>
-                            <embed style="text-align: center;" src="{{url_for('static', filename='images/'+post.screenplay)}}" width = "75%" height = "550px"> 
+                            <br>
+                            <embed style="text-align: center;" src="{{url_for('static', filename='images/'+ post.screenplay)}}#toolbar=0" width = "100%" height = "550px%"> 
                         </div>
                         {% if user.accounttype == 1 %}
                         <div class="card border-dark">

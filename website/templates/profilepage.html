@@ -8,13 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Page</title>
     {% if profileuser.accounttype == 1 %}
-        <style>
-            .profilepage {
-                background-color: {{ details.backgroundcolour }};
-            }
-            .profilepage {
-                font-family: {{ details.fontstyle }}
-            }
+            <style>
                 *{
                 margin: 0;
                 padding: 0;
@@ -55,18 +49,28 @@
                 color: #c59b08;
             }
         </style>
+        {% if details.backgroundcolour != None and details.fontstyle != None %}
+        <style>
+            .profilepage {
+                background-color: {{ details.backgroundcolour }};
+            }
+            .profilepage {
+                font-family: {{ details.fontstyle }}
+            }
+        </style>
+        {% endif %}
     {% endif %}
 </head>
 <body class="profilepage">
-        {% if profileuser.id == current_user.id %}
-        <a href="/pageeditor/{current_user.id}"><butto type="button">Edit Page</button></a>
+        {% if profileuser.id == user.id %}
+        <a href="/pageeditor/{{user.id}}"><butto type="button">Edit Page</button></a>
         {% endif %}
         <br>
         <br>
         {% if profileuser.profilepic %}
-        <img src="{{ url_for('static', filename='images/'+ 'profileuser.profilepic') }}" alt="Profile picture">
+        <img src="{{ url_for('static', filename='images/'+ profileuser.profilepic) }}" alt="Profile picture" height="110px" width="110px">
         {% else %}
-        <img src="/static/images/default.jpg" alt="Default profile picture">
+        <img src="/static/images/default.jpg" alt="Default profile picture" height="110px" width="110px">
         {% endif %}
         <br>
         <br>
@@ -76,7 +80,7 @@
         {{ profileuser.biography }}
         {% endif %}
         {% if profileuser.accounttype == 1 %}
-            <p>Experience Level: {{ details.experiencelevel }}</p>
+            <b><p>Experience Level: {{ details.experiencelevel }}</p></b>
             <br>
             <div id="posts" style="text-align:center" class="container">
                 <h1>Screenplays</h1>
@@ -113,7 +117,7 @@
                         <h2>{{post.title}}</h2>
                         By<a href="/profilepage/{{post.writer.user.username}}">{{post.writer.user.username}}</a>
                         {% if post.writer.user.profilepic %}
-                        <img src="{{ url_for('static', filename='images/'+ 'post.writer.user.profilepic') }}" alt="Profile picture">
+                        <img src="{{ url_for('static', filename='images/'+ post.writer.user.profilepic) }}" alt="Profile picture" height="110px" width="110px">
                         {% else %}
                         <img src="/static/images/default.jpg" alt="Default profile picture">
                         {% endif %}

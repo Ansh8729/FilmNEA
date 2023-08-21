@@ -50,20 +50,9 @@ def IsPDF(filename): #Checks if the uploaded file is a PDF (the correct format)
     extension = (filename).split(".")
     ext = extension[1]
     if ext != "pdf":
-        flask.flash("Your file is not a PDF!")
-        os.remove(filename)
-
-def ValidPageNums(filename, start, end): #Checks if the program can output the correct pages (no page numbers going over the length of the screenplay and only 10 pages can be uploaded)
-    file2 = PyPDF2.PdfReader(filename)
-    nums = len(file2.pages)
-    if end > nums:
-        flask.flash("Your screenplay doesn't have "+str(end)+" pages!")
-        os.remove(filename)
         return False
-    elif end-start > 10:
-        flask.flash("You can't upload more than 10 pages!")
-        os.remove(filename)
-        return False
+    else:
+        return True
 
 def watermark(input_pdf, output_pdf, watermark): #Watermarks the pages
     watermark = PyPDF4.PdfFileReader(watermark)
@@ -133,7 +122,7 @@ def GiveReccomendations(id):
 def home():
     if current_user.accounttype == 1:
         recs = GiveReccomendations(current_user.id)
-    posts = Screenplays.query.filter(Screenplays.date_created >= date.today()).all()
+    posts = Screenplays.query.all()
     comments = Comments.query.all()
     scripthas = ScriptHas.query.all()
     if flask.request.method == "POST":
@@ -333,7 +322,7 @@ def pageeditor(userid):
                 writer.fontstyle = font
             db.session.commit()
         flask.flash("Edits made!")
-        return flask.redirect(flask.url_for('views.profilepage'))
+        return flask.redirect(flask.url_for('views.profilepage', userid=current_user.id))
     
     return flask.render_template("pageeditor.html", user=current_user)
 
@@ -373,13 +362,18 @@ def post():
             # The file is saved to the folder
             scriptname = secure_filename(file.filename)
             file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
-            if IsPDF(file.filename) == False:
+            if IsPDF(scriptname) == False:
                 flask.flash("Upload a PDF!", category='error')
-                os.remove(file.filename)
+                os.remove(scriptname)
             else:
-                if ValidPageNums(file.filename, start, end) == False:
-                    flask.flash("Invalid page range!", category='error')
-                    os.remove(file.filename)
+                file2 = PyPDF2.PdfReader(scriptname)
+                nums = len(file2.pages)
+                if end > nums:
+                    flask.flash("Your screenplay doesn't have "+str(end)+" pages!")
+                    os.remove(scriptname)
+                elif end-start > 10:
+                    flask.flash("You can't upload more than 10 pages!")
+                    os.remove(scriptname)
                 else:
                     random_hex = secrets.token_hex(8)
                     _, f_ext = os.path.splitext(scriptname)

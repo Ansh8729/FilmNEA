@@ -7,20 +7,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        .post {
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     {% if userdetails.accounttype == 1 %}
-    <div style="text-align:center" class="container">
+    <div class="post">
         <h1>Create Screenplay Post</h1><br>
         <form method='POST' enctype='multipart/form-data'>
             <label for="title">Title</label>
-            <input type="text" id="title" name="title" class="form-control"><br><br>
+            <input type="text" id="title" name="title" class="form-control" required><br><br>
             <label for="logline">Logline</label>
-            <input type="text" id="logline" name="logline" class="form-control"><br><br>
+            <input type="text" id="logline" name="logline" class="form-control" required><br><br>
             <label for="message">Message</label>
-            <input type="text" id="message" name="message"><br><br>
+            <input type="text" id="message" name="message" required><br><br>
             <label for="screenplay">Upload Screenplay</label>
-            <input type="file" id="screenplay" name="screenplay" class="form-control">
+            <input type="file" id="screenplay" name="screenplay" class="form-control" required>
             <br>
             <br>
             <h4>1. The file must be a PDF.</h4>
@@ -29,9 +34,9 @@
             <h2>Page Range</h2>
             <h4>Note: Coverpage = 0</h4>
             <label for="start">Start Page</label>
-            <input type="number" id="start" name="start" class="form-control"><br><br>
+            <input type="number" id="start" name="start" class="form-control" style="text-align: center;" required><br><br>
             <label for="end">End Page</label>
-            <input type="number" id="end" name="end" class="form-control"><br><br>
+            <input type="number" id="end" name="end" class="form-control" style="text-align: center;" required><br><br>
             <h4>Disclaimer: Your file won't be uploaded if you upload more than 10 pages of your screenplay.</h4><br>
             <h4>Genres:</h4>
             <input type="checkbox" id="drama" name="genres" value="1">
@@ -41,16 +46,9 @@
             <input type="checkbox" id="horror" name="genres" value="3">
             <label for="horror">Horror</label>
             <br><br>
-            <input type="submit" id="submit" name="submit">
-        </form> <!--The Jinja code below allows the warning messages to be displayed when the user inputs invalid data.-->
+            <input type="submit" value="Submit">
+        </form> 
         <br>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %} 
-                    <h3>{{ message }}</h3>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
     </div>
     {% else %}
     <div style="text-align:center" class="container">

@@ -7,7 +7,7 @@ db = SQLAlchemy()
 DB_NAME = "database.db"
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder="/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA/static")
     app.config['SECRET_KEY'] = "helloworld"
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     app.config['UPLOAD_FOLDER'] = '/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA'
