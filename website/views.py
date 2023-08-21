@@ -86,50 +86,54 @@ def split_pdf(input, output, start, end): #Cuts the screenplay down to the pages
     with open(output,"wb") as out:
         writer.write(out)
 
+def GiveReccomendations(id):
+    writer = Screenwriters.query.filter_by(userid = id).first()
+    likedposts = LikedScreenplays.query.filter(LikedScreenplays.rating > 3.5).all()
+    scriptids = []
+    for i in likedposts:
+        if i.writerid == writer.writerid:
+            scriptids.append(i.writerid)
+    if len(scriptids) == 0:
+        return []
+    else:
+        genres = [] 
+        for i in range(len(scriptids)):
+            info = ScriptHas.query.filter(ScriptHas.scriptid == scriptids[i])
+            for j in info:
+                genres.append(j.genreid)
+        finalgenres = []
+        for i in range(len(genres)):
+            genre2 = Genres.query.filter(Genres.genreid == genres[i])
+            for j in genre2:
+                finalgenres.append(j.genreid) 
+        if list(set(finalgenres)) == finalgenres and len(list(set(finalgenres))) > 1:
+            return []
+        else:
+            favgenreid = max(set(finalgenres), key = finalgenres.count)
+            query1 = ScriptHas.query.filter(ScriptHas.genreid == favgenreid)
+            genreids = []
+            for i in query1:
+                genreids.append(i.scriptid)
+            likedids = []
+            recs = [[],[]]
+            query2 = LikedScreenplays.query.all()
+            for j in query2:
+                likedids.append(j.scriptid)
+            for i in genreids:
+                if i not in likedids: #Only the posts that haven't been liked by the user yet are shown as reccomendations.
+                    query3 = Screenplays.query.filter(Screenplays.scriptid == i)
+                    for j in query3:
+                        recs.append([j.title, j.avgrating])
+                        recs.sort()
+            return recs
+
 @views.route("/")
 @views.route("/home", methods=['GET', 'POST'])
 @login_required
 def home():
     if current_user.accounttype == 1:
-        writer = Screenwriters.query.filter_by(userid = current_user.id).first()
-        likedposts = LikedScreenplays.query.filter(LikedScreenplays.rating > 3.5).all()
-        scriptids = []
-        for i in likedposts:
-            if i.writerid == writer.writerid:
-                scriptids.append(i.writerid)
-        if len(scriptids) == 0:
-            recs = []
-        else:
-            genres = [] 
-            for i in range(len(scriptids)):
-                info = ScriptHas.query.filter(ScriptHas.scriptid == scriptids[i])
-                for j in info:
-                    genres.append(j.genreid)
-            finalgenres = []
-            for i in range(len(genres)):
-                genre2 = Genres.query.filter(Genres.genreid == genres[i])
-                for j in genre2:
-                    finalgenres.append(j.genreid) 
-            if list(set(finalgenres)) == finalgenres and len(list(set(finalgenres))) > 1:
-                recs = []
-            else:
-                favgenreid = max(set(finalgenres), key = finalgenres.count)
-                query1 = ScriptHas.query.filter(ScriptHas.genreid == favgenreid)
-                genreids = []
-                for i in query1:
-                    genreids.append(i.scriptid)
-                likedids = []
-                recs = [[],[]]
-                query2 = LikedScreenplays.query.all()
-                for j in query2:
-                    likedids.append(j.scriptid)
-                for i in genreids:
-                    if i not in likedids: #Only the posts that haven't been liked by the user yet are shown as reccomendations.
-                        query3 = Screenplays.query.filter(Screenplays.scriptid == i)
-                        for j in query3:
-                            recs.append([j.title, j.avgrating])
-                            recs.sort()
-    posts = Screenplays.query.all()
+        recs = GiveReccomendations(current_user.id)
+    posts = Screenplays.query.filter(Screenplays.date_created >= date.today()).all()
     comments = Comments.query.all()
     scripthas = ScriptHas.query.all()
     if flask.request.method == "POST":
@@ -137,19 +141,19 @@ def home():
         if sort == "New":
             posts = Screenplays.query.order_by(Screenplays.scriptid.desc())
             flask.flash("Screenplays now sorted by newest to oldest.")
-            return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
+            return flask.redirect(flask.url_for("views.home"))
         elif sort == "Top Of Week":
             filter_after = date.today() - timedelta(days = 7)
             posts2 = Screenplays.query.filter(Screenplays.date_created >= filter_after)
             posts = posts2.order_by(Screenplays.avgrating.desc())
             flask.flash("Screenplays now sorted by top of this week.")
-            return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
+            return flask.redirect(flask.url_for("views.home"))
         elif sort == "Top Of Month":
             filter_after = date.today() - timedelta(days = 30)
             posts2 = Screenplays.query.filter(Screenplays.date_created >= filter_after)
             posts = posts2.order_by(Screenplays.avgrating.desc())
             flask.flash("Competitions now sorted by top of this month.")
-            return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
+            return flask.redirect(flask.url_for("views.home"))
         genre = flask.request.form.get("genre")
         genre2 = Genres.query.filter_by(genreid=genre).first()
         scriptids = ScriptHas.query.filter_by(genreid=genre).all()
@@ -158,8 +162,8 @@ def home():
             script = Screenplays.query.filter_by(scriptid=i.scriptid).first()
             posts.append(script)
         flask.flash(f"Now showing all {genre2.genre} scripts.")
-        return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
-    return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas)
+        return flask.redirect(flask.url_for("views.home"))
+    return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
 
 @views.route("/rate/<scriptid>", methods=['POST'])
 @login_required
@@ -288,8 +292,8 @@ def delete_post(scriptid):
 @views.route("/profilepage/<userid>")
 @login_required
 def profilepage(userid):
-    user2 = Users.query.filter_by(id=userid).first()
-    if user2.accounttype == 1:
+    profileuser = Users.query.filter_by(id=userid).first()
+    if profileuser.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=userid).first()
         scripts = Screenplays.query.filter_by(writerid = writer.writerid)
         rating = 0
@@ -298,31 +302,30 @@ def profilepage(userid):
                 rating += i.avgrating
         writer.experiencelevel = rating*scripts.count()
         db.session.commit()
-        writerdetails = Screenwriters.query.filter_by(userid = current_user.id).first()
         comments = Comments.query.all()
         scripthas = ScriptHas.query.all()
-        return flask.render_template("profilepage.html", user=current_user, posts=scripts, details=writerdetails, comments=comments, scripthas=scripthas, user2=user2)
-    if user2.accounttype == 2:
-        return flask.render_template("profilepage.html", user=current_user, user2=user)
+        return flask.render_template("profilepage.html", user=current_user, posts=scripts, comments=comments, scripthas=scripthas, profileuser=profileuser, details=writer)
+    if profileuser.accounttype == 2:
+        return flask.render_template("profilepage.html", user=current_user, profileuser=profileuser)
 
 
-@views.route("/pageeditor/<username>", methods=['GET', 'POST'])
+@views.route("/pageeditor/<userid>", methods=['GET', 'POST'])
 @login_required
-def pageeditor(username):
+def pageeditor(userid):
     if flask.request.method == "POST":
         file = flask.request.files['profilepic']
         picturefilename = secure_filename(file.filename)
         picname = str(uuid.uuid1()) + "_" + picturefilename
         file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',picname)) 
         shutil.move(picname,'static/images')
-        query = Users.query.filter_by(username = username).first()
-        query.profilepic = picname
-        query.biography = flask.request.form.get('bio')
+        profile = Users.query.filter_by(id = userid).first()
+        profile.profilepic = picname
+        profile.biography = flask.request.form.get('bio')
         db.session.commit()
         if current_user.accounttype == 1:
             colour = flask.request.form.get('colorpicker')
             font = flask.request.form.get('fontstyle')
-            writer = Screenwriters.query.filter_by(userid = current_user.id).first()
+            writer = Screenwriters.query.filter_by(userid = userid).first()
             writer.backgroundcolour = colour
             if font == 0:
                 writer.fontid = None
@@ -330,12 +333,8 @@ def pageeditor(username):
                 writer.fontstyle = font
             db.session.commit()
         flask.flash("Edits made!")
-        writer = Screenwriters.query.filter_by(userid = current_user.id).first()
-        scripts = Screenplays.query.filter_by(writerid = writer.writerid)
-        comments = Comments.query.all()
-        scripthas = ScriptHas.query.all()
-        writerdetails = Screenwriters.query.filter_by(userid = current_user.id).first()
-        return flask.render_template("profilepage.html", user=current_user, posts=scripts, details=writerdetails, comments=comments, scripthas=scripthas)
+        return flask.redirect(flask.url_for('views.profilepage'))
+    
     return flask.render_template("pageeditor.html", user=current_user)
 
 @views.route("/post", methods=['GET', 'POST'])

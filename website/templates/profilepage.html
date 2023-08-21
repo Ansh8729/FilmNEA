@@ -7,13 +7,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Page</title>
-    {% if user2.accounttype == 1 %}
+    {% if profileuser.accounttype == 1 %}
         <style>
             .profilepage {
                 background-color: {{ details.backgroundcolour }};
             }
             .profilepage {
-                font-family: {{ details.fontstyle.font }}
+                font-family: {{ details.fontstyle }}
             }
                 *{
                 margin: 0;
@@ -58,24 +58,24 @@
     {% endif %}
 </head>
 <body class="profilepage">
-        {% if current_user.id == user.id %}
-        <a href="/pageeditor/{userdetails.username}"><butto type="button">Edit Page</button></a>
+        {% if profileuser.id == current_user.id %}
+        <a href="/pageeditor/{current_user.id}"><butto type="button">Edit Page</button></a>
         {% endif %}
         <br>
         <br>
-        {% if user2.profilepic %}
-        <img src="{{ url_for('static', filename='images/'+ 'user.profilepic') }}" alt="Profile picture">
+        {% if profileuser.profilepic %}
+        <img src="{{ url_for('static', filename='images/'+ 'profileuser.profilepic') }}" alt="Profile picture">
         {% else %}
         <img src="/static/images/default.jpg" alt="Default profile picture">
         {% endif %}
         <br>
         <br>
-        <h1>{{  user2.username }}</h1>
-        <h5>{{ user2.email }}</h5>
-        {% if user2.biography != None %}
-        {{ user2.biography }}
+        <h1>{{  profileuser.username }}</h1>
+        <h5>{{ profileuser.email }}</h5>
+        {% if profileuser.biography != None %}
+        {{ profileuser.biography }}
         {% endif %}
-        {% if user2.accounttype == 1 %}
+        {% if profileuser.accounttype == 1 %}
             <p>Experience Level: {{ details.experiencelevel }}</p>
             <br>
             <div id="posts" style="text-align:center" class="container">
