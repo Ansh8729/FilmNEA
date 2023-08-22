@@ -69,24 +69,35 @@
             {% if posts %}
                 {% for post in posts %}
                 <div class="card border-dark">
-                        <form method = "POST" action="/rate/{{post.scriptid}}">
-                            <div class="rate" style="text-align:left">
-                                <input type="radio" id="star5" name="rate" value="5" />
-                                <label for="star5" title="text">5 stars</label>
-                                <input type="radio" id="star4" name="rate" value="4" />
-                                <label for="star4" title="text">4 stars</label>
-                                <input type="radio" id="star3" name="rate" value="3" />
-                                <label for="star3" title="text">3 stars</label>
-                                <input type="radio" id="star2" name="rate" value="2" />
-                                <label for="star2" title="text">2 stars</label>
-                                <input type="radio" id="star1" name="rate" value="1" />
-                                <label for="star1" title="text">1 star</label>
-                            </div>
-                            <br>
-                            <div style="text-align:left">
-                                <input type="submit" value="Submit Rating">
-                            </div>
-                        </form>
+                        {% if user.accounttype == 1 %}
+                        <div style="text-align:left">
+                            <form method = "POST" action="/rate/{{post.scriptid}}">
+                                <div class="rate">
+                                    <input type="radio" id="star5" name="rate" value="5" />
+                                    <label for="star5" title="text">5 stars</label>
+                                    <input type="radio" id="star4" name="rate" value="4" />
+                                    <label for="star4" title="text">4 stars</label>
+                                    <input type="radio" id="star3" name="rate" value="3" />
+                                    <label for="star3" title="text">3 stars</label>
+                                    <input type="radio" id="star2" name="rate" value="2" />
+                                    <label for="star2" title="text">2 stars</label>
+                                    <input type="radio" id="star1" name="rate" value="1" />
+                                    <label for="star1" title="text">1 star</label>
+                                </div>
+                                <br>
+                                <div style="text-align:left">
+                                    <input type="submit" value="Submit Rating">
+                                </div>
+                            </form>
+                            {% endif %}
+                            {% if user.accounttype == 1 %}
+                                {% for like in likes %}
+                                    {% if (like.writer.user.id == user.id) and (like.script.scriptid == post.scriptid) %}
+                                        <p>You rated it: {{like.rating}}/5</p>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
                         {% if user.id == post.writer.user.id %}
                         <div style="text-align:right">
                             <form action = /delete-post/{{post.scriptid}} method="POST">
@@ -99,7 +110,7 @@
                         {% if post.writer.user.profilepic %}
                         <img src="{{ url_for('static', filename='images/'+ post.writer.user.profilepic) }}" width = "110px" height = "110px" alt="Profile picture">
                         {% else %}
-                        <img src="/static/images/default.jpg" alt="Default profile picture">
+                        <img src="/static/images/default.jpg" alt="Default profile picture" width = "110px" height = "110px">
                         {% endif %}
                         <div class="card-body">
                             <div style="text-align:left">

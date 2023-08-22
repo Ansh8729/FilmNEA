@@ -27,6 +27,7 @@ class Screenwriters(db.Model):
     posts = db.relationship('Screenplays', backref="writer", passive_deletes=True)
     commenters = db.relationship('Comments', backref="writer", passive_deletes=True)
     responsees = db.relationship('Notifications', backref="writer", passive_deletes=True)
+    likes = db.relationship('LikedScreenplays', backref="writer", passive_deletes=True)
 
 class Screenplays(db.Model):
     __tablename__ = "Screenplays"
@@ -41,6 +42,7 @@ class Screenplays(db.Model):
     avgrating = db.Column(db.Float)
     scripts = db.relationship('Notifications', backref="script", passive_deletes=True)
     scriptscommented = db.relationship('Comments', backref="script", passive_deletes=True)
+    liked = db.relationship('LikedScreenplays', backref="script", passive_deletes=True)
 
 class ScriptHas(db.Model):
     __tablename__ = "ScriptHas"

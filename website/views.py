@@ -28,23 +28,16 @@ class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
     option_widget = widgets.CheckboxInput()
 
-def AreThereSpaces(filename): #Checks if the name of the file they have uploaded has any spaces
-    spaces = 0
-    chars = list(filename)
-    for i in range(0,len(chars)):
-        if chars[i] == ' ':
-            spaces += 1
-    if spaces > 0:
-        flask.flash("Your filename CANNOT have spaces!")
-        for i in range(0,len(chars)):
-            if chars[i] == ' ':
-                chars[i] = "_"
-        newname = "".join(chars) 
-        os.remove(newname)
-        spaces = 0
-        return True
+def NoSpaces(filename):
+    if filename.count(" ") > 0:
+        chars = list(filename)
+        newname = ""
+        for i in chars:
+            if i != " ":
+                newname += i
+        return newname
     else:
-        return False
+        return filename
     
 def IsPDF(filename): #Checks if the uploaded file is a PDF (the correct format)
     extension = (filename).split(".")
@@ -125,24 +118,25 @@ def home():
     posts = Screenplays.query.all()
     comments = Comments.query.all()
     scripthas = ScriptHas.query.all()
+    likes = LikedScreenplays.query.all()
     if flask.request.method == "POST":
         sort = flask.request.form.get('sorted')
         if sort == "New":
             posts = Screenplays.query.order_by(Screenplays.scriptid.desc())
             flask.flash("Screenplays now sorted by newest to oldest.")
-            return flask.redirect(flask.url_for("views.home"))
+            return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
         elif sort == "Top Of Week":
             filter_after = date.today() - timedelta(days = 7)
             posts2 = Screenplays.query.filter(Screenplays.date_created >= filter_after)
             posts = posts2.order_by(Screenplays.avgrating.desc())
             flask.flash("Screenplays now sorted by top of this week.")
-            return flask.redirect(flask.url_for("views.home"))
+            return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
         elif sort == "Top Of Month":
             filter_after = date.today() - timedelta(days = 30)
             posts2 = Screenplays.query.filter(Screenplays.date_created >= filter_after)
             posts = posts2.order_by(Screenplays.avgrating.desc())
             flask.flash("Competitions now sorted by top of this month.")
-            return flask.redirect(flask.url_for("views.home"))
+            return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
         genre = flask.request.form.get("genre")
         genre2 = Genres.query.filter_by(genreid=genre).first()
         scriptids = ScriptHas.query.filter_by(genreid=genre).all()
@@ -151,8 +145,8 @@ def home():
             script = Screenplays.query.filter_by(scriptid=i.scriptid).first()
             posts.append(script)
         flask.flash(f"Now showing all {genre2.genre} scripts.")
-        return flask.redirect(flask.url_for("views.home"))
-    return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs)
+        return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
+    return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
 
 @views.route("/rate/<scriptid>", methods=['POST'])
 @login_required
@@ -160,15 +154,22 @@ def rate(scriptid):
     rating = flask.request.form.get("rate")
     writer = Screenwriters.query.filter_by(userid = current_user.id).first()
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
-    newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
-    db.session.add(newrating)
-    db.session.commit()
-    ratings = LikedScreenplays.query.filter_by(scriptid = script.scriptid)
+    like_exists = LikedScreenplays.query.filter(LikedScreenplays.writerid == writer.writerid, LikedScreenplays.scriptid==scriptid).first()
+    if like_exists:
+        like_exists.rating = rating
+        db.session.commit()
+        return flask.redirect(flask.url_for('views.home'))
+    else:
+        newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
+        db.session.add(newrating)
+        db.session.commit()
+    ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
     total = 0
     for i in ratings:
         total += i.rating
     script.avgrating = total/ratings.count()
     db.session.commit()
+    flask.flash("Rating submitted!")
     return flask.redirect(flask.url_for('views.home'))
 
 @views.route("/rate2/<scriptid>", methods=['POST'])
@@ -177,16 +178,23 @@ def rate2(scriptid):
     rating = flask.request.form.get("rate")
     writer = Screenwriters.query.filter_by(userid = current_user.id).first()
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
-    newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
-    db.session.add(newrating)
-    db.session.commit()
-    ratings = LikedScreenplays.query.filter_by(scriptid = script.scriptid)
+    like_exists = LikedScreenplays.query.filter(LikedScreenplays.writerid == writer.writerid, LikedScreenplays.scriptid==scriptid).first()
+    if like_exists:
+        like_exists.rating = rating
+        db.session.commit()
+        return flask.redirect(flask.url_for('views.home'))
+    else:
+        newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
+        db.session.add(newrating)
+        db.session.commit()
+    ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
     total = 0
     for i in ratings:
         total += i.rating
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     script.avgrating = total/ratings.count()
     db.session.commit()
+    flask.flash("Rating submitted!")
     return flask.redirect(flask.url_for(f'views.profilepage/{current_user.id}'))
 
 @views.route("/create-comment/<scriptid>", methods=['POST'])
@@ -297,7 +305,6 @@ def profilepage(userid):
     if profileuser.accounttype == 2:
         return flask.render_template("profilepage.html", user=current_user, profileuser=profileuser)
 
-
 @views.route("/pageeditor/<userid>", methods=['GET', 'POST'])
 @login_required
 def pageeditor(userid):
@@ -361,6 +368,7 @@ def post():
             genres = flask.request.form.getlist("genres")
             # The file is saved to the folder
             scriptname = secure_filename(file.filename)
+            scriptname = NoSpaces(scriptname)
             file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
             if IsPDF(scriptname) == False:
                 flask.flash("Upload a PDF!", category='error')
@@ -381,8 +389,8 @@ def post():
                     shutil.copyfile(scriptname, picture_fn)
                     shutil.move(picture_fn,'static/images')
                     PyPDF4.PdfFileReader(scriptname)
-                    watermark(input_pdf=file.filename,output_pdf="watermarked.pdf", watermark="watermark.pdf")
-                    os.remove(file.filename)
+                    watermark(input_pdf=scriptname,output_pdf="watermarked.pdf", watermark="watermark.pdf")
+                    os.remove(scriptname)
                     newname = str(uuid.uuid1()) + "_" + "finalfile.pdf"
                     split_pdf(input="watermarked.pdf",output=newname ,start=start, end=end)
                     os.remove("watermarked.pdf")
