@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 import uuid as uuid
 from . import db
 from dateutil.parser import parse
-from datetime import date, timedelta
+from datetime import datetime, timedelta
 import secrets
 
 views = flask.Blueprint("views", __name__)
@@ -126,26 +126,28 @@ def home():
             flask.flash("Screenplays now sorted by newest to oldest.")
             return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
         elif sort == "Top Of Week":
-            filter_after = date.today() - timedelta(days = 7)
-            posts2 = Screenplays.query.filter(Screenplays.date_created >= filter_after)
-            posts = posts2.order_by(Screenplays.avgrating.desc())
+            filter_after = datetime.now() - timedelta(days = 7)
+            print(filter_after)
+            posts = Screenplays.query.filter(Screenplays.date_created >= filter_after)
             flask.flash("Screenplays now sorted by top of this week.")
             return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
         elif sort == "Top Of Month":
-            filter_after = date.today() - timedelta(days = 30)
-            posts2 = Screenplays.query.filter(Screenplays.date_created >= filter_after)
-            posts = posts2.order_by(Screenplays.avgrating.desc())
+            filter_after = datetime.now() - timedelta(days = 30)
+            posts = Screenplays.query.filter(Screenplays.date_created >= filter_after)
             flask.flash("Competitions now sorted by top of this month.")
             return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
         genre = flask.request.form.get("genre")
-        genre2 = Genres.query.filter_by(genreid=genre).first()
-        scriptids = ScriptHas.query.filter_by(genreid=genre).all()
-        posts = []
-        for i in scriptids:
-            script = Screenplays.query.filter_by(scriptid=i.scriptid).first()
-            posts.append(script)
-        flask.flash(f"Now showing all {genre2.genre} scripts.")
-        return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
+        if genre:
+                genre2 = Genres.query.filter_by(genreid=genre).first()
+                scriptids = ScriptHas.query.filter_by(genreid=genre).all()
+                posts = []
+                for i in scriptids:
+                    script = Screenplays.query.filter_by(scriptid=i.scriptid).first()
+                    posts.append(script)
+                flask.flash(f"Now showing all {genre2.genre} scripts.")
+                return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
+        else:
+            pass
     return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
 
 @views.route("/rate/<scriptid>", methods=['POST'])
@@ -155,14 +157,13 @@ def rate(scriptid):
     writer = Screenwriters.query.filter_by(userid = current_user.id).first()
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     like_exists = LikedScreenplays.query.filter(LikedScreenplays.writerid == writer.writerid, LikedScreenplays.scriptid==scriptid).first()
-    if like_exists:
-        like_exists.rating = rating
-        db.session.commit()
-        return flask.redirect(flask.url_for('views.home'))
-    else:
+    if not like_exists:
         newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
         db.session.add(newrating)
         db.session.commit()
+    else:
+        flask.flash("You've already rated this screenplay!")
+        return flask.redirect(flask.url_for('views.home'))
     ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
     total = 0
     for i in ratings:
@@ -172,21 +173,21 @@ def rate(scriptid):
     flask.flash("Rating submitted!")
     return flask.redirect(flask.url_for('views.home'))
 
-@views.route("/rate2/<scriptid>", methods=['POST'])
+@views.route("/rate2/<userid>/<scriptid>", methods=['POST'])
 @login_required
-def rate2(scriptid):
+def rate2(scriptid, userid):
     rating = flask.request.form.get("rate")
     writer = Screenwriters.query.filter_by(userid = current_user.id).first()
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     like_exists = LikedScreenplays.query.filter(LikedScreenplays.writerid == writer.writerid, LikedScreenplays.scriptid==scriptid).first()
-    if like_exists:
-        like_exists.rating = rating
-        db.session.commit()
-        return flask.redirect(flask.url_for('views.home'))
-    else:
+    if not like_exists:
         newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
         db.session.add(newrating)
         db.session.commit()
+        flask.flash("Rating submitted!")
+    else:
+        flask.flash("You've already rated this screenplay!")
+        return flask.redirect(flask.url_for(f'views.profilepage/{current_user.id}'))
     ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
     total = 0
     for i in ratings:
@@ -194,7 +195,6 @@ def rate2(scriptid):
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     script.avgrating = total/ratings.count()
     db.session.commit()
-    flask.flash("Rating submitted!")
     return flask.redirect(flask.url_for(f'views.profilepage/{current_user.id}'))
 
 @views.route("/create-comment/<scriptid>", methods=['POST'])
