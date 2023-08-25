@@ -121,20 +121,27 @@ def home():
     likes = LikedScreenplays.query.all()
     if flask.request.method == "POST":
         sort = flask.request.form.get('sorted')
-        if sort == "New":
+        if sort == "1":
             posts = Screenplays.query.order_by(Screenplays.scriptid.desc())
             flask.flash("Screenplays now sorted by newest to oldest.")
             return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
-        elif sort == "Top Of Week":
+        elif sort == "2":
             filter_after = datetime.now() - timedelta(days = 7)
-            print(filter_after)
-            posts = Screenplays.query.filter(Screenplays.date_created >= filter_after)
+            posts1 = Screenplays.query.order_by(Screenplays.avgrating)
+            posts = []
+            for i in posts1:
+                if i.date_created >= filter_after:
+                    posts.append(i)
             flask.flash("Screenplays now sorted by top of this week.")
             return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
-        elif sort == "Top Of Month":
+        elif sort == "3":
             filter_after = datetime.now() - timedelta(days = 30)
-            posts = Screenplays.query.filter(Screenplays.date_created >= filter_after)
-            flask.flash("Competitions now sorted by top of this month.")
+            posts1 = Screenplays.query.order_by(Screenplays.avgrating)
+            posts = []
+            for i in posts1:
+                if i.date_created >= filter_after:
+                    posts.append(i)
+            flask.flash("Screenplays now sorted by top of this month.")
             return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
         genre = flask.request.form.get("genre")
         if genre:
@@ -149,27 +156,7 @@ def home():
         else:
             pass
     return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
-'''
-@views.route("/posts/<filter>")
-def posts(filter):
-    if filter == "New":
-        posts = Screenplays.query.order_by(Screenplays.scriptid.desc())
-        flask.flash("Screenplays now sorted by newest to oldest.")
-    elif filter == "Top of Week":
-        filter_after = datetime.now() - timedelta(days = 30)
-        posts = Screenplays.query.filter(Screenplays.date_created >= filter_after)
-        flask.flash("Competitions now sorted by top of this month.")
-    elif filter == "Top of Month":
-        filter_after = datetime.now() - timedelta(days = 30)
-        posts = Screenplays.query.filter(Screenplays.date_created >= filter_after)
-        flask.flash("Competitions now sorted by top of this month.")
-    if current_user.accounttype == 1:
-        recs = GiveReccomendations(current_user.id)
-    comments = Comments.query.all()
-    scripthas = ScriptHas.query.all()
-    likes = LikedScreenplays.query.all()
-    return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
-'''
+
 @views.route("/rate/<scriptid>", methods=['POST'])
 @login_required
 def rate(scriptid):

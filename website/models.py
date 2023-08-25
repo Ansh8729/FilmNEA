@@ -38,7 +38,7 @@ class Screenplays(db.Model):
     message = db.Column(db.Text)
     screenplay = db.Column(db.String(300)) 
     fullfile = db.Column(db.String(300))
-    data_created = db.Column(db.DateTime(timezone=True), default=func.now())
+    date_created = db.Column(db.DateTime(timezone=True), default=func.now())
     avgrating = db.Column(db.Float)
     scripts = db.relationship('Notifications', backref="script", passive_deletes=True)
     scriptscommented = db.relationship('Comments', backref="script", passive_deletes=True)
