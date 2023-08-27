@@ -1,0 +1,145 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+    %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+             *{
+    margin: 0;
+    padding: 0;
+}
+.rate {
+    float: left;
+    height: 46px;
+    padding: 0 10px;
+}
+.rate:not(:checked) > input {
+    position:absolute;
+    top:-9999px;
+}
+.rate:not(:checked) > label {
+    float:right;
+    width:1em;
+    overflow:hidden;
+    white-space:nowrap;
+    cursor:pointer;
+    font-size:30px;
+    color:#ccc;
+}
+.rate:not(:checked) > label:before {
+    content: '★ ';
+}
+.rate > input:checked ~ label {
+    color: #ffc700;    
+}
+.rate:not(:checked) > label:hover,
+.rate:not(:checked) > label:hover ~ label {
+    color: #deb217;  
+}
+.rate > input:checked + label:hover,
+.rate > input:checked + label:hover ~ label,
+.rate > input:checked ~ label:hover,
+.rate > input:checked ~ label:hover ~ label,
+.rate > label:hover ~ input:checked ~ label {
+    color: #c59b08;
+}
+    </style>
+</head>
+<body>
+    {% if user.accounttype == 1 %}
+                        <div style="text-align:left">
+                            <form method = "POST" action="/rate/{{post.scriptid}}">
+                                <div class="rate">
+                                    <input type="radio" id="star5" name="rate" value="5" />
+                                    <label for="star5" title="text">5 stars</label>
+                                    <input type="radio" id="star4" name="rate" value="4" />
+                                    <label for="star4" title="text">4 stars</label>
+                                    <input type="radio" id="star3" name="rate" value="3" />
+                                    <label for="star3" title="text">3 stars</label>
+                                    <input type="radio" id="star2" name="rate" value="2" />
+                                    <label for="star2" title="text">2 stars</label>
+                                    <input type="radio" id="star1" name="rate" value="1" />
+                                    <label for="star1" title="text">1 star</label>
+                                </div>
+                                <br>
+                                <div style="text-align:left">
+                                    <input type="submit" value="Submit Rating">
+                                </div>
+                            </form>
+                            {% endif %}
+                            {% if user.accounttype == 1 %}
+                                {% for like in likes %}
+                                    {% if (like.writer.user.id == user.id) and (like.script.scriptid == post.scriptid) %}
+                                        <p>You rated it: {{like.rating}}/5</p>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+    <div style="text-align: center">
+        <h2>{{post.title}}</h2>
+        By<a href="/profilepage/{{post.writer.user.id}}">{{post.writer.user.username}}</a>
+        {% if post.writer.user.profilepic %}
+        <img src="{{ url_for('static', filename='images/'+ post.writer.user.profilepic) }}" width = "110px" height = "110px" alt="Profile picture">
+        {% else %}
+        <img src="/static/images/default.jpg" alt="Default profile picture" width = "110px" height = "110px">
+        {% endif %}
+    </div>
+    <div style="text-align:left">
+        <h4>Genres:</h4>
+        {% for script in scripthas %}
+            {% if script.scriptid == post.scriptid %}
+                <b>{{script.has.genre}}</b><br>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <h3>{{post.logline}}</h3>
+    <br>
+    <br>
+    <h3>Message:</h3>
+    {{post.message}}
+    <br>
+    <br>
+    <embed style="text-align: center;" src="{{url_for('static', filename='images/'+ post.screenplay)}}#toolbar=0" width = "100%" height = "550px%"> 
+    <br>
+    <br>
+    {% if user.accounttype == 1 %}
+    <h3>Comments</h3>
+                            {% for comment in comments %}
+                                {% if comment.scriptid == post.scriptid %}
+                                    <div style="text-align:left">
+                                        <b><a href="/profilepage/{{comment.writer.user.id}}">{{comment.writer.user.username}}</a></b>:
+                                        {{comment.comment}}
+                                    </div>
+                                    <form method="POST" action="/delete-comment/{{ comment.commentid }}">
+                                        <button type="submit" name="Delete">Delete</button>
+                                    </form>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <br>
+                        <form class="input-group mb-3"method="POST" action="/create-comment/{{post.scriptid}}">
+                            <input type="text" id="text" name="text" class="form-control" placeholder="Comment something!"/>
+                            <button type="submit" class="btn btn-primary">Comment</button>
+                        </form>
+                    </div>
+    {% else %}
+                    <div class="text-align:left">
+                        <form method="POST" name="response" action="/response/{{post.scriptid}}">
+                            <input type="text" name="response" id="response" class="form-control">
+                            <label for="response">Send Response</label>
+                            <input type="submit">
+                        </form>
+                    </div>
+                    <div class="text-align:right">
+                        <form method="POST" action="/response/{{post.scriptid}}" name="request">
+                            <label for="request">Request Full Access</label>
+                            <input name="request" type="submit">
+                        </form>
+                    </div>
+    {% endif %}
+ </body>
+</html>
+{% endblock %}

@@ -1,7 +1,7 @@
 # from flask import Blueprint, render_template, request, flash, redirect, url_for
 import flask 
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Notifications
+from .models import Users, Screenwriters, Producers, Competitions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Notifications, FeaturedScripts
 from flask_wtf import FlaskForm
 from wtforms import widgets, RadioField, StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField, SelectMultipleField
 from werkzeug.utils import secure_filename
@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 import uuid as uuid
 from . import db
 from dateutil.parser import parse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import secrets
 
 views = flask.Blueprint("views", __name__)
@@ -68,94 +68,188 @@ def split_pdf(input, output, start, end): #Cuts the screenplay down to the pages
     with open(output,"wb") as out:
         writer.write(out)
 
-def GiveReccomendations(id):
-    writer = Screenwriters.query.filter_by(userid = id).first()
-    likedposts = LikedScreenplays.query.filter(LikedScreenplays.rating > 3.5).all()
-    scriptids = []
-    for i in likedposts:
-        if i.writerid == writer.writerid:
-            scriptids.append(i.writerid)
-    if len(scriptids) == 0:
-        return []
+def GiveRecommendations(writerid):
+    posts = LikedScreenplays.query.filter(LikedScreenplays.rating > 3.5).all()
+    postids = [] 
+    for i in posts:
+        if i.writerid == writerid:
+            postids.append(i.scriptid) #The ScriptIDs of the posts the user has rated above 3.5 are stored in a list.
+
+    if len(postids) == 0: #Validates if the query returned any data
+        recs = None
+        return recs
     else:
         genres = [] 
-        for i in range(len(scriptids)):
-            info = ScriptHas.query.filter(ScriptHas.scriptid == scriptids[i])
+        for i in range(len(postids)):
+            info = ScriptHas.query.filter(ScriptHas.scriptid == postids[i])
             for j in info:
-                genres.append(j.genreid)
+                genres.append(j.genreid) #The GenreIDs of the liked posts are found
+
         finalgenres = []
         for i in range(len(genres)):
             genre2 = Genres.query.filter(Genres.genreid == genres[i])
             for j in genre2:
                 finalgenres.append(j.genreid) 
         if list(set(finalgenres)) == finalgenres and len(list(set(finalgenres))) > 1:
-            return []
-        else:
-            favgenreid = max(set(finalgenres), key = finalgenres.count)
-            query1 = ScriptHas.query.filter(ScriptHas.genreid == favgenreid)
-            genreids = []
-            for i in query1:
-                genreids.append(i.scriptid)
-            likedids = []
-            recs = [[],[]]
-            query2 = LikedScreenplays.query.all()
-            for j in query2:
-                likedids.append(j.scriptid)
-            for i in genreids:
-                if i not in likedids: #Only the posts that haven't been liked by the user yet are shown as reccomendations.
-                    query3 = Screenplays.query.filter(Screenplays.scriptid == i)
-                    for j in query3:
-                        recs.append([j.title, j.avgrating])
-                        recs.sort()
+            recs = None
             return recs
+        else:
+            favgenreid = max(set(finalgenres), key = finalgenres.count) #The GenreIDs are used to find the liked genre and then the user's most liked genre
+            #If the user doesn't have a particular favourite, nothing is reccomended 
+
+        query1 = ScriptHas.query.filter(ScriptHas.genreid == favgenreid)
+        genreids = []
+        for i in query1:
+            genreids.append(i.scriptid) #The ScriptIDs whose posts are of the user's favourite genre are found
+        
+        likedids = []
+        recs = []
+        query2 = LikedScreenplays.query.all()
+        for j in query2:
+            likedids.append(j.scriptid)
+        for i in genreids:
+            if (i not in likedids): #Only the posts that haven't been liked by the user yet are shown as reccomendations.
+                query3 = Screenplays.query.filter(Screenplays.scriptid == i).first()
+                if query3.writer.user.id != current_user.id:
+                    recs.append(query3)
+        return recs
+
+class Queue: #Code for the queue that is fundamental to this feature
+
+    def __init__(self, mymax):
+        self.mymax = mymax
+        self.queue = [None] * self.mymax
+        self.head = 0
+        self.tail = -1
+        
+    def isFull(self):
+        if self.tail + 1 == self.mymax:
+            return True 
+        else:
+            return False
+
+    def isEmpty(self):
+        if self.head > self.tail:
+            return True
+        else:
+            return False
+
+    def enqueue(self, num):
+        if self.isFull() == False:
+            self.tail += 1
+            self.queue[self.tail] = num
+    
+    def dequeue(self):
+        if self.isEmpty() == False:
+            self.queue[self.head] = None
+            self.head += 1
+
+def FeaturedExists(scriptid): #This function prevents duplicates from being enqueued
+    query = FeaturedScripts.query.filter_by(scriptid = scriptid).first()
+    if query:
+        return True
+    else:
+        return False
+
+def LoadFeatured(queue, date): 
+    posts = Screenplays.query.filter_by(date_created = date) #Posts from today selected
+    sec = 30
+    for post in posts:
+        likes = LikedScreenplays.query.filter(LikedScreenplays.scriptid == post.scriptid, LikedScreenplays.rating >= 4.0)
+        if likes.count() >= 3 and FeaturedExists(post.scriptid) == False: #The screenplay is checked if it qualifies to be featured
+            newfeatured = FeaturedScripts(scriptid = post.scriptid, dequeuedatetime = datetime.now()+timedelta(seconds=sec))
+            db.session.add(newfeatured)
+            db.session.commit()
+            sec += 20
+    scripts = FeaturedScripts.query.filter(FeaturedScripts.featuredid <= 5) #The first 6 records are enqueued from the database to the queue
+    for i in scripts:
+        queue.enqueue(i)
 
 @views.route("/")
 @views.route("/home", methods=['GET', 'POST'])
 @login_required
 def home():
     if current_user.accounttype == 1:
-        recs = GiveReccomendations(current_user.id)
+        writer = Screenwriters.query.filter_by(userid=current_user.id).first()
+        recs = GiveRecommendations(writer.writerid)
     posts = Screenplays.query.all()
     comments = Comments.query.all()
     scripthas = ScriptHas.query.all()
     likes = LikedScreenplays.query.all()
-    if flask.request.method == "POST":
-        sort = flask.request.form.get('sorted')
-        if sort == "1":
+    featured = Queue(5)
+    LoadFeatured(featured, date.today())
+    script = featured.queue[featured.head]
+    if (script != None) and (datetime.now() >= script.dequeuedatetime): #When the screenplay's time is up, the screenplay is dequeued and removed from the table
+        featured.dequeue()
+        feature = FeaturedScripts.query.filter_by(scriptid = script.scriptid).first()
+        db.session.delete(feature)
+        db.session.commit()
+    return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes, script=featured.queue[featured.head], featured=featured)
+
+@views.route("/filter", methods=['GET','POST'])
+@login_required
+def filter():
+    if current_user.accounttype == 1:
+        writer = Screenwriters.query.filter_by(userid=current_user.id).first()
+        recs = GiveRecommendations(writer.writerid)
+    posts = Screenplays.query.all()
+    comments = Comments.query.all()
+    scripthas = ScriptHas.query.all()
+    likes = LikedScreenplays.query.all()
+    genre = flask.request.form.get("genre")
+    genre2 = Genres.query.filter_by(genreid=genre).first()
+    scriptids = ScriptHas.query.filter_by(genreid=genre).all()
+    posts = []
+    for i in scriptids:
+        script = Screenplays.query.filter_by(scriptid=i.scriptid).first()
+        posts.append(script)
+    flask.flash(f"Now showing all {genre2.genre} scripts.")
+    return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
+
+
+@views.route("/sort", methods=['GET','POST'])
+@login_required
+def sort():
+    if current_user.accounttype == 1:
+        writer = Screenwriters.query.filter_by(userid=current_user.id).first()
+        recs = GiveRecommendations(writer.writerid)
+    posts = Screenplays.query.all()
+    comments = Comments.query.all()
+    scripthas = ScriptHas.query.all()
+    likes = LikedScreenplays.query.all()
+    sort = flask.request.form.get('sorted')
+    if sort == "0":
+        return flask.redirect(flask.url_for("views.home"))
+    elif sort == "1":
             posts = Screenplays.query.order_by(Screenplays.scriptid.desc())
             flask.flash("Screenplays now sorted by newest to oldest.")
             return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
-        elif sort == "2":
+    elif sort == "2":
             filter_after = datetime.now() - timedelta(days = 7)
-            posts1 = Screenplays.query.order_by(Screenplays.avgrating)
+            posts1 = Screenplays.query.order_by(Screenplays.avgrating.desc())
             posts = []
             for i in posts1:
                 if i.date_created >= filter_after:
                     posts.append(i)
             flask.flash("Screenplays now sorted by top of this week.")
             return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
-        elif sort == "3":
+    elif sort == "3":
             filter_after = datetime.now() - timedelta(days = 30)
-            posts1 = Screenplays.query.order_by(Screenplays.avgrating)
+            posts1 = Screenplays.query.order_by(Screenplays.avgrating.desc())
             posts = []
             for i in posts1:
                 if i.date_created >= filter_after:
                     posts.append(i)
             flask.flash("Screenplays now sorted by top of this month.")
             return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
-        genre = flask.request.form.get("genre")
-        if genre:
-                genre2 = Genres.query.filter_by(genreid=genre).first()
-                scriptids = ScriptHas.query.filter_by(genreid=genre).all()
-                posts = []
-                for i in scriptids:
-                    script = Screenplays.query.filter_by(scriptid=i.scriptid).first()
-                    posts.append(script)
-                flask.flash(f"Now showing all {genre2.genre} scripts.")
-                return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
-        else:
-            pass
-    return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
+
+
+@views.route("/script/<scriptid>", methods=['GET', 'POST'])
+@login_required
+def script(scriptid):
+    script = Screenplays.query.filter_by(scriptid=scriptid).first()
+    scripthas = ScriptHas.query.all()
+    return flask.render_template("script_full.html", post=script, scripthas=scripthas, user=current_user)
 
 @views.route("/rate/<scriptid>", methods=['POST'])
 @login_required

@@ -48,18 +48,34 @@
     </style>
 </head>
 <body>
+    {% if featured %}
+        <div style="text-align: center">
+            <h2>Featured Screenplay of the Day</h2>
+            {% if script != None %}
+                <h2>{{script.script.title}}</h2>
+                {{script.script.logline}}
+                <p>By: {{script.script.writer.user.username}}</p>
+                <embed style="text-align: center;" src="{{url_for('static', filename='images/'+ script.script.screenplay)}}" width = "75%" height = "550px%">
+            {% else %}
+                <h3>No featured scripts at the moment</h3>
+            {% endif %}
+        </div>
+    {% endif %}
+    <br><br>
     <div class="row">
         <div style="text-align:left" class="col-3">
             <br><br>
             <h2>Genre List</h2>
-            <form action="/home" method="POST">
+            <form action="/filter" method="POST">
                 <button name="genre" value="1" class="btn btn-primary btn-lg">Drama</button><br><br>
                 <button name="genre" value="2" class="btn btn-primary btn-lg">Comedy</button><br><br>
                 <button name="genre" value="3" class="btn btn-primary btn-lg">Horror</button><br><br>
             </form>
         </div>
         <div class="col-6">
-            <form method='POST'>
+            <form method='POST' action="/sort">
+                <input type="radio" name="sorted" id="default" value="0"></input>
+                <label for="default">Default</label>
                 <input type="radio" name="sorted" id="new" value="1"></input>
                 <label for="new">New</label>
                 <input type="radio" name="sorted" id="week" value="2"></input>
@@ -109,7 +125,11 @@
                             </form>
                         </div>
                         {% endif %}
+                        {% if post.screenplay %}
+                        <a href="/script/{{post.scriptid}}" target="_blank"><h2>{{post.title}}</h2></a>
+                        {% else %}
                         <h2>{{post.title}}</h2>
+                        {% endif %}
                         By<a href="/profilepage/{{post.writer.user.id}}">{{post.writer.user.username}}</a>
                         {% if post.writer.user.profilepic %}
                         <img src="{{ url_for('static', filename='images/'+ post.writer.user.profilepic) }}" width = "110px" height = "110px" alt="Profile picture">
@@ -132,7 +152,11 @@
                             {{post.message}}
                             <br>
                             <br>
+                            {% if post.screenplay %}
                             <embed style="text-align: center;" src="{{url_for('static', filename='images/'+ post.screenplay)}}#toolbar=0" width = "100%" height = "550px%"> 
+                            {% else %}
+                            <h2>Screenplay not available</h2>
+                            {% endif %}
                         </div>
                         {% if user.accounttype == 1 %}
                         <div class="card border-dark">
@@ -183,14 +207,18 @@
             <br>
             <br>
             <h1>Recommended</h1>
-            {% if not recs %}
+            {% if recs == None %}
             <div style="text-align:center">
                 <h4>No reccomendations available</h4>
             </div>
             {% else %}
                 {% for i in recs %}
-                    <h3>{{ i[0] }}</h3>
-                    <h4>{{ i[1] }}</h4>  
+                    {% if i.screenplay %}
+                    <a href="/script/{{i.scriptid}}" target="_blank"><h3>{{ i.title }}</h3></a>
+                    {% else %}
+                    <h3>{{i.title}}</h3>
+                    {% endif %}
+                    <h4>{{ i.avgrating }}/5</h4>  
                 {% endfor %}
             {% endif %}
         </div>

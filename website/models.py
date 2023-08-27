@@ -43,6 +43,8 @@ class Screenplays(db.Model):
     scripts = db.relationship('Notifications', backref="script", passive_deletes=True)
     scriptscommented = db.relationship('Comments', backref="script", passive_deletes=True)
     liked = db.relationship('LikedScreenplays', backref="script", passive_deletes=True)
+    scripts2 = db.relationship('ScriptHas', backref="script", passive_deletes=True)
+    liked2 = db.relationship('FeaturedScripts', backref="script", passive_deletes=True)
 
 class ScriptHas(db.Model):
     __tablename__ = "ScriptHas"
@@ -109,5 +111,11 @@ class Comments(db.Model):
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'))
     comment = db.Column(db.String(300))
     responses = db.relationship('Notifications', backref="comment", passive_deletes=True)
+
+class FeaturedScripts(db.Model):
+    __tablename__ = "FeaturedScripts"
+    featuredid = db.Column(db.Integer, primary_key=True)
+    scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'))
+    dequeuedatetime = db.Column(db.DateTime(timezone=True))
 
 
