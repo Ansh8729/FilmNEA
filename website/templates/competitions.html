@@ -7,24 +7,37 @@
   <div class="col-3">
     <br><br>
     <h2>Genre List</h2>
-    <form action="/competitions" method="POST">
-        <button name="genre" value="1" class="btn btn-primary btn-lg">Drama</button><br><br>
-        <button name="genre" value="2" class="btn btn-primary btn-lg">Comedy</button><br><br>
-        <button name="genre" value="3" class="btn btn-primary btn-lg">Horror</button><br><br>
+    <form action="/filter2" method="POST">
+      <button name="genre" value="1" class="btn btn-primary btn-lg">Drama</button><br><br>
+      <button name="genre" value="2" class="btn btn-primary btn-lg">Comedy</button><br><br>
+      <button name="genre" value="3" class="btn btn-primary btn-lg">Horror</button><br><br>
     </form>
   </div>
   <div class="col-6">
-    <form action="{{ url_for('views.competitions') }}" method='POST'>
-      <input type="submit" name="sorted" value="New"></input>
-      <input type="submit" name="sorted" value="Top of Week"></input>
-      <input type="submit" name="sorted" value="Top of Month"></input>
+    <form action="/sort2" method='POST'>
+      <input type="radio" name="sorted" id="default" value="0"></input>
+      <label for="default">Default</label>
+      <input type="radio" name="sorted" id="new" value="1"></input>
+      <label for="new">New</label>
+      <input type="radio" name="sorted" id="week" value="2"></input>
+      <label for="week">Top of Week</label>
+      <input type="radio" name="sorted" id="month" value="3"></input>
+      <label for="month">Top of Month</label>
+      <input type="submit" value="Submit">
     </form>
     <br>
     {% if comps %}
       {% for comp in comps %}
           <div class="card border-dark">
-              {% if details.accounttype == 1 %}
-              <a href="/comp/{{comp.compid}}"><h2>{{comp.title}}</h2></a>
+              {% if user.id == comp.producer.user.id %}
+                        <div style="text-align:right">
+                            <form action = /delete-comp/{{comp.compid}} method="POST">
+                                <input type="submit" value="Delete">
+                            </form>
+                        </div>
+              {% endif %}
+              {% if user.accounttype == 1 %}
+              <a href="/comp/{{comp.compid}}" target="_blank"><h2>{{comp.title}}</h2></a>
               {% else %}
               <h2>{{comp.title}}</h2>
               {% endif %}
@@ -49,7 +62,7 @@
     {% endif %}
   </div>
   <div class="col-3">
-    {% if details.accounttype == 2 %}
+    {% if user.accounttype == 2 %}
     <div align="center">
       <a href="/post"><button type="button" class="btn btn-primary btn-lg">Create a Competition</button></a>
     </div>

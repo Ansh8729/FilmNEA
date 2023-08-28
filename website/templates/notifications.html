@@ -12,100 +12,102 @@
 </head>
 <body>
     {% if user.accounttype == 1 %}
-    <div class="row" style="text-align:center">
-        <div class="col-6">
-            <h1>Script Responses</h1>
-            {% for response in notifs %}
-                {% if response.responsetype == 1 and response.commentid == None %}
-                    <div class="card" style="text-align:left">
-                        <h4><a href="/profilepage/{{ response.producer.user.id }}">{{ response.producer.user.username }}</a> says {{ response.message }}</h4>
-                        <form method="POST" action="/deleteresponse/{{ response.notifid }}">
-                            <button type="submit" name="Delete">Delete</button>
-                        </form>
-                    </div>
-                {% endif %}
-                {% if response.responsetype == None and response.commentid != None %}
-                    <div class="card" style="text-align:left">
-                        <h4><a href="/profilepage/{{ response.comment.writer.user.id }}">{{ response.comment.writer.user.username }}</a> says {{ response.comment.comment }} on {{response.comment.script.title}}</h4>
-                        <form method="POST" action="/deleteresponse/{{ response.notifid }}">
-                            <button type="submit" name="Delete">Delete</button>
-                        </form>
-                    </div>
-                {% endif %}
-                {% if response.compid != None %}
-                    <div class="card" style="text-align:left">
-                        <h4>{{ response.message }}</h4>
-                        <form method="POST" action="/deleteresponse/{{ response.notifid }}">
-                            <button type="submit" name="Delete">Delete</button>
-                        </form>
-                    </div>
-                {% endif %} 
-            {% endfor %}
-        </div>
-        <div class="col-6">
-            <h1>Screenplay Requests</h1>
-            {% for request in notifs %}
-                {% if request.responsetype == 2 %}
-                    {% if request.requeststatus == 0 %}
-                        <div class="card" style="text-align:center">
-                            <h4><a href="/profilepage/{{ request.producer.user.id }}">{{ request.producer.user.username }}</a> wants full access to your screenplay {{ request.script.title }}</h4>
-                            <form method="POST" action="/requestresponse/{{request.notifid}}">
-                                <input type="radio" name="decision" id="accept" value="Accept">
-                                <label for="accept">Accept</label>
-                                <input type="radio" name="decision" id="decline" value="Decline">
-                                <label for="decline">Decline</label>
-                                <input type="submit" name="Submit">
+        <div class="row" style="text-align:center">
+            <div class="col-6">
+                <h1>Script Responses</h1>
+                {% for response in notifs %}
+                    {% if response.responsetype == 1 and response.commentid == None %}
+                        <div class="card" style="text-align:left">
+                            <h4><a href="/profilepage/{{ response.producer.user.id }}">{{ response.producer.user.username }}</a> says {{ response.message }}</h4>
+                            <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                                <button type="submit" name="Delete">Delete</button>
                             </form>
                         </div>
                     {% endif %}
-                {% endif %}
-            {% endfor %}
+                    {% if response.responsetype == None and response.commentid != None %}
+                        <div class="card" style="text-align:left">
+                            <h4><a href="/profilepage/{{ response.comment.writer.user.id }}">{{ response.comment.writer.user.username }}</a> says {{ response.comment.comment }} on {{response.comment.script.title}}</h4>
+                            <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                                <button type="submit" name="Delete">Delete</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                    {% if response.compid != None %}
+                        <div class="card" style="text-align:left">
+                            <h4>{{ response.message }}</h4>
+                            <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                                <button type="submit" name="Delete">Delete</button>
+                            </form>
+                        </div>
+                    {% endif %} 
+                {% endfor %}
+            </div>
+            <div class="col-6">
+                <h1>Screenplay Requests</h1>
+                {% for request in notifs %}
+                    {% if request.responsetype == 2 %}
+                        {% if request.requeststatus == 0 %}
+                            <div class="card" style="text-align:center">
+                                <h4><a href="/profilepage/{{ request.producer.user.id }}">{{ request.producer.user.username }}</a> wants full access to your screenplay {{ request.script.title }}</h4>
+                                <form method="POST" action="/requestresponse/{{request.notifid}}">
+                                    <input type="radio" name="decision" id="accept" value="Accept">
+                                    <label for="accept">Accept</label>
+                                    <input type="radio" name="decision" id="decline" value="Decline">
+                                    <label for="decline">Decline</label>
+                                    <input type="submit" name="Submit">
+                                </form>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
-    </div>
     {% endif %}
     
     {% if user.accounttype == 2 %}
-    <div class="row" style="text-align:center">
-        <div class="col-6">
-            <h1>Request Responses</h1>
-            {% for response in notifs %}
-                {% if response.requeststatus == 2 %}
-                    <div class="card" style="text-align:center">
-                        {{response.message}}
-                        <form method="POST" action="/deleteresponse/{{ response.notifid }}">
-                            <button type="submit" name="Delete">Delete</button>
-                        </form>
-                    </div>
-                {% endif %}
-                {% if response.requeststatus == 1 %}
-                    <div class="card" style="text-align:center">
-                        {{response.message}}
-                        <a target="_blank" href="{{url_for('static', filename='images/'+response.script.fullfile)}}">Full Screenplay File</a>
-                        <form method="POST" action="/deleteresponse/{{ response.notifid }}">
-                            <button type="submit" name="Delete">Delete</button>
-                        </form>
-                    </div>
-                {% endif %}
-            {% endfor %}
+        <div class="row" style="text-align:center">
+            <div class="col-6">
+                <h1>Request Responses</h1>
+                {% for response in notifs %}
+                    {% if response.requeststatus == 2 %}
+                        <div class="card" style="text-align:center">
+                            {{response.message}}
+                            <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                                <button type="submit" name="Delete">Delete</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                    {% if response.requeststatus == 1 %}
+                        <div class="card" style="text-align:center">
+                            {{response.message}}
+                            <a target="_blank" href="{{url_for('static', filename='images/'+response.script.fullfile)}}">Full Screenplay File</a>
+                            <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                                <button type="submit" name="Delete">Delete</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-6">
+                <h1>Competition Submissions</h1>
+                {% for sub in notifs %}
+                    {% if sub.compid %}
+                        {% if message == None %}
+                            <div class="card" style="text-align:center">
+                                <p>Submission for {{ sub.comp.title }} by <a href="/profilepage/{{sub.writer.user.id}}" target="_blank">{{ sub.writer.user.username }}</a></p>
+                                <a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a>
+                                <br>
+                                <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}">
+                                    <label for="response">Response:</label>
+                                    <input type="text" id="response" name="subresponse">
+                                    <input type="submit" name="Submit">
+                                </form>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
-        <div class="col-6">
-            <h1>Competition Submissions</h1>
-            {% for sub in notifs %}
-                {% if sub.compid != None and message == None %}
-                    <div class="card" style="text-align:center">
-                        <p>Submission for {{ sub.comp.title }} by {{ sub.writer.user.username }}</p>
-                        <a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a>
-                        <br>
-                        <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}">
-                            <label for="response">Response:</label>
-                            <input type="text" id="response" name="subresponse">
-                            <input type="submit" name="Submit">
-                        </form>
-                    </div>
-                {% endif %}
-            {% endfor %}
-        </div>
-    </div>
     {% endif %}
 </body>
 </html>

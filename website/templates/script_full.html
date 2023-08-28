@@ -80,12 +80,14 @@
                         </div>
     <div style="text-align: center">
         <h2>{{post.title}}</h2>
-        By<a href="/profilepage/{{post.writer.user.id}}">{{post.writer.user.username}}</a>
         {% if post.writer.user.profilepic %}
         <img src="{{ url_for('static', filename='images/'+ post.writer.user.profilepic) }}" width = "110px" height = "110px" alt="Profile picture">
         {% else %}
         <img src="/static/images/default.jpg" alt="Default profile picture" width = "110px" height = "110px">
         {% endif %}
+        <br>
+        <br>
+        By <a href="/profilepage/{{post.writer.user.id}}">{{post.writer.user.username}}</a>
     </div>
     <div style="text-align:left">
         <h4>Genres:</h4>
@@ -95,7 +97,9 @@
             {% endif %}
         {% endfor %}
     </div>
-    <h3>{{post.logline}}</h3>
+    <br>
+    <h3>Logline</h3>
+    <p>{{post.logline}}</p>
     <br>
     <br>
     <h3>Message:</h3>

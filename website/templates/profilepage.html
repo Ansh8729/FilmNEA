@@ -52,7 +52,7 @@
         {% if details.backgroundcolour != None and details.fontstyle != None %}
         <style>
             .profilepage {
-                background-color: {{ details.backgroundcolour }};
+                background-color: {{ details.backgroundcolour }}
             }
             .profilepage {
                 font-family: {{ details.fontstyle }}
@@ -63,7 +63,7 @@
 </head>
 <body class="profilepage">
         {% if profileuser.id == user.id %}
-        <a href="/pageeditor/{{user.id}}"><butto type="button">Edit Page</button></a>
+        <a href="/pageeditor/{{user.id}}"><button type="button">Edit Page</button></a>
         {% endif %}
         <br>
         <br>
@@ -89,7 +89,7 @@
                 {% else %}
                 {% for post in posts %}
                 <div class="card border-dark">
-                        {% if user.accounttype == 2 %}
+                        {% if user.accounttype == 1 %}
                             <form method = "POST" action="/rate2/{{profileuser.id}}/{{post.scriptid}}">
                                 <div class="rate" style="text-align:left">
                                     <input type="radio" id="star5" name="rate" value="5" />

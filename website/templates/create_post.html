@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-    {% if userdetails.accounttype == 1 %}
+    {% if user.accounttype == 1 %}
     <div class="post">
         <h1>Create Screenplay Post</h1><br>
         <form method='POST' enctype='multipart/form-data'>
@@ -55,13 +55,13 @@
         <form method='POST'>
             <h1>Create Competition</h1>
             <label for="title">Title</label><br>
-            <input type="text" id="title" name="title"><br>
+            <input type="text" id="title" name="title" required><br>
             <br><br>
             <label for="brief">Brief</label><br>
-            <input type="text" id="brief" name="brief">
+            <input type="text" id="brief" name="brief" required>
             <br><br>
             <label for="date">Deadline</label><br>
-            <input type="date" id="date" name="date">
+            <input type="date" id="date" name="date" required>
             <br><br>
             <h4>Genres:</h4>
             <input type="checkbox" id="drama" name="genres" value="1">

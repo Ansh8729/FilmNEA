@@ -39,6 +39,23 @@
           </div>
         </div>
       </div>
+      <div style="text-align: right">
+        {% if user.is_authenticated %} 
+          {% if user.profilepic %}
+            <a href="/profilepage/{{user.id}}"" target=_blank><img src="{{ url_for('static', filename='images/'+ user.profilepic) }}" alt="Profile picture" height="50px%" width="50px%"></a>
+          {% else %}
+            <a href="/profilepage/{{user.id}}"" target=_blank><img src="/static/images/default.jpg" alt="Default profile picture" height="25%" width="25%"></a>
+          {% endif %}
+        {% endif %}
+      </div>
+      <div style="text-align: center; color: white;" >
+        {{ user.username }}
+        {% if user.accounttype == 1 %}
+          Screenwriter
+        {% elif user.accounttype == 2 %}
+          Producer
+        {% endif %}
+      </div>
     </nav>
     {% with messages = get_flashed_messages(with_categories=True) %}
       {% if messages %}
