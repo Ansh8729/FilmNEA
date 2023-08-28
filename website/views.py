@@ -153,14 +153,14 @@ def FeaturedExists(scriptid): #This function prevents duplicates from being enqu
 
 def LoadFeatured(queue, date): 
     posts = Screenplays.query.filter_by(date_created = date) #Posts from today selected
-    min = 2
+    hour = 4
     for post in posts:
         likes = LikedScreenplays.query.filter(LikedScreenplays.scriptid == post.scriptid, LikedScreenplays.rating >= 4.0)
         if likes.count() >= 3 and FeaturedExists(post.scriptid) == False: #The screenplay is checked if it qualifies to be featured
-            newfeatured = FeaturedScripts(scriptid = post.scriptid, dequeuedatetime = datetime.now()+timedelta(minutes=min))
+            newfeatured = FeaturedScripts(scriptid = post.scriptid, dequeuedatetime = datetime.now()+timedelta(hours=hour))
             db.session.add(newfeatured)
             db.session.commit()
-            min += 2
+            hour += 4
     scripts = FeaturedScripts.query.filter(FeaturedScripts.featuredid <= 5) #The first 6 records are enqueued from the database to the queue
     for i in scripts:
         queue.enqueue(i)
