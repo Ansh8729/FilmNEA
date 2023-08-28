@@ -56,7 +56,7 @@
                 <h2>{{script.script.title}}</h2>
                 {{script.script.logline}}
                 <p>By: {{script.script.writer.user.username}}</p>
-                <embed style="text-align: center;" src="{{url_for('static', filename='images/'+ script.script.screenplay)}}" width = "75%" height = "550px%">
+                <embed style="text-align: center;" src="{{url_for('static', filename='images/'+ script.script.screenplay)}}#toolbar=0" width = "75%" height = "550px%">
             {% else %}
                 <h3>No featured scripts at the moment</h3>
             {% endif %}
