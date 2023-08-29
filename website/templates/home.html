@@ -18,7 +18,7 @@
 }
 .rate:not(:checked) > input {
     position:absolute;
-    top:-9999px;
+    top: -99999px;
 }
 .rate:not(:checked) > label {
     float:right;
@@ -31,7 +31,7 @@
 }
 .rate:not(:checked) > label:before {
     content: '★ ';
-}
+} 
 .rate > input:checked ~ label {
     color: #ffc700;    
 }
@@ -106,9 +106,7 @@
                                     <label for="star1" title="text">1 star</label>
                                 </div>
                                 <br>
-                                <div style="text-align:left">
-                                    <input type="submit" value="Submit Rating">
-                                </div>
+                                <input type="submit" value="Submit Rating">
                             </form>
                             {% endif %}
                             {% if user.accounttype == 1 %}
@@ -132,11 +130,14 @@
                         <h2>{{post.title}}</h2>
                         {% endif %}
                         By<a href="/profilepage/{{post.writer.user.id}}">{{post.writer.user.username}}</a>
-                        {% if post.writer.user.profilepic %}
-                        <img src="{{ url_for('static', filename='images/'+ post.writer.user.profilepic) }}" width = "110px" height = "110px" alt="Profile picture">
-                        {% else %}
-                        <img src="/static/images/default.jpg" alt="Default profile picture" width = "110px" height = "110px">
-                        {% endif %}
+                        <br>
+                        <div style="text-align: center;">
+                            {% if post.writer.user.profilepic %}
+                            <img src="{{ url_for('static', filename='images/'+ post.writer.user.profilepic) }}" width = "110px" height = "110px" alt="Profile picture">
+                            {% else %}
+                            <img src="/static/images/default.jpg" alt="Default profile picture" width = "110px" height = "110px">
+                            {% endif %}
+                        </div>
                         <div class="card-body">
                             <div style="text-align:left">
                             <h4>Genres:</h4>

@@ -303,7 +303,7 @@ def rate(scriptid):
         db.session.add(newrating)
         db.session.commit()
     else:
-        flask.flash("You've already rated this screenplay!")
+        flask.flash("You've already rated this screenplay!", category="error")
         return flask.redirect(flask.url_for('views.home'))
     ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
     total = 0
@@ -327,7 +327,7 @@ def rate2(scriptid, userid):
         db.session.commit()
         flask.flash("Rating submitted!")
     else:
-        flask.flash("You've already rated this screenplay!")
+        flask.flash("You've already rated this screenplay!", category="error")
         return flask.redirect(flask.url_for(f'views.profilepage/{current_user.id}'))
     ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
     total = 0
