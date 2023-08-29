@@ -14,6 +14,8 @@ class Users(db.Model, UserMixin):
     accounttype = db.Column(db.Integer)
     profilepic = db.Column(db.String(), nullable=True) 
     biography = db.Column(db.Text)
+    insta = db.Column(db.String(), nullable=True) 
+    twitter = db.Column(db.String(), nullable=True) 
     writers = db.relationship('Screenwriters', backref="user", passive_deletes=True)
     producers = db.relationship('Producers', backref="user", passive_deletes=True)
     
@@ -103,7 +105,6 @@ class LikedScreenplays(db.Model):
     __tablename__ = "LikedScreenplays"
     writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'), primary_key=True)
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'), primary_key=True)
-    title = db.Column(db.String(300))
     rating = db.Column(db.Float)
 
 class Comments(db.Model):

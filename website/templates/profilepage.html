@@ -75,7 +75,13 @@
         <br>
         <br>
         <h1>{{  profileuser.username }}</h1>
-        <h5>{{ profileuser.email }}</h5>
+        Email: <h5>{{ profileuser.email }}</h5>
+        {% if profileuser.insta != None %}
+        Insta: <h5>{{ profileuser.insta }}</h5>
+        {% endif %}
+        {% if profileuser.twitter != None %}
+        Twitter: <h5>{{ profileuser.twitter }}</h5>
+        {% endif %}
         {% if profileuser.biography != None %}
         {{ profileuser.biography }}
         {% endif %}

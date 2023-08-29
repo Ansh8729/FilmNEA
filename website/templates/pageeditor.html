@@ -29,6 +29,12 @@
             placeholder="Enter Biography"
             />
             <br></br>
+            <label for="insta">Instagram: </label>
+            <input type="text" id="insta" name="insta" class="form-control">
+            <br>
+            <label for="twitter">Twitter: </label>
+            <input type="text" id="twitter" name="twitter" class="form-control">
+            <br>
             {% if user.accounttype == 1 %}
             <label for="colorpicker"><h2>Background Colour:</h2></label>
             <input type="color" name="colorpicker" id="colorpicker" value="#ffffff" required>

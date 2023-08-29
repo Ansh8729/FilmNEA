@@ -294,12 +294,12 @@ def script(scriptid):
 @views.route("/rate/<scriptid>", methods=['POST'])
 @login_required
 def rate(scriptid):
-    rating = flask.request.form.get("rate")
+    rating = (flask.request.form.get("rate"))
     writer = Screenwriters.query.filter_by(userid = current_user.id).first()
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     like_exists = LikedScreenplays.query.filter(LikedScreenplays.writerid == writer.writerid, LikedScreenplays.scriptid==scriptid).first()
     if not like_exists:
-        newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
+        newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, rating=rating)
         db.session.add(newrating)
         db.session.commit()
     else:
@@ -322,7 +322,7 @@ def rate2(scriptid, userid):
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     like_exists = LikedScreenplays.query.filter(LikedScreenplays.writerid == writer.writerid, LikedScreenplays.scriptid==scriptid).first()
     if not like_exists:
-        newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, title=script.title, rating=rating)
+        newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, rating=rating)
         db.session.add(newrating)
         db.session.commit()
         flask.flash("Rating submitted!")
@@ -478,6 +478,8 @@ def pageeditor(userid):
         profile = Users.query.filter_by(id = userid).first()
         profile.profilepic = picname
         profile.biography = flask.request.form.get('bio')
+        profile.insta = flask.request.form.get('insta')
+        profile.twitter = flask.request.form.get('twitter')
         db.session.commit()
         if current_user.accounttype == 1:
             colour = flask.request.form.get('colorpicker')
