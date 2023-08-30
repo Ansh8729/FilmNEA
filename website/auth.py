@@ -24,9 +24,18 @@ def login():
         user = Users.query.filter_by(email=email).first()
         if user:
             if check_password_hash(user.password, password):
-                flash("Logged in!", category='success')
-                login_user(user, remember=True)
-                return redirect(url_for('views.home'))
+                if user.accounttype == "2":
+                    producer = Producers.query.filter_by(userid = user.id).first()
+                    if producer.approved == 0:
+                        flash('User is not approved.', category='error')
+                    else:
+                        flash("Logged in!", category='success')
+                        login_user(user, remember=True)
+                        return redirect(url_for('views.home'))
+                else:
+                    flash("Logged in!", category='success')
+                    login_user(user, remember=True)
+                    return redirect(url_for('views.home'))
             else:
                 flash('Password is incorrect.', category='error')
         else:
@@ -79,16 +88,26 @@ def sign_up():
                 db.session.add(new_user)
                 db.session.commit()
                 newuser = Users.query.order_by(Users.id.desc()).first()
-                otp = ""
-                for i in range(6):
-                    num = random.randint(0,9)
-                    otp += str(num)
-                msg = 'Hello, Your OTP is '+otp
-                new_producer = Producers(userid = newuser.id, otp=otp)
-                db.session.add(new_producer)
-                db.session.commit()
-                send_email('writersworldnoreply@gmail.com', 'lolfruollznvecyd', newuser.email, msg)
-                return redirect(url_for('auth.approval'))  
+                email = email.split("@")
+                if email[1] == 'producersguild.org':
+                    otp = ""
+                    for i in range(6):
+                        num = random.randint(0,9)
+                        otp += str(num)
+                    msg = 'Hello, Your OTP is '+otp
+                    new_producer = Producers(userid = newuser.id, otp=otp)
+                    db.session.add(new_producer)
+                    db.session.commit()
+                    send_email('writersworldnoreply@gmail.com', 'lolfruollznvecyd', newuser.email, msg)
+                    return redirect(url_for('auth.approval'))  
+                else:
+                    new_producer = Producers(userid = newuser.id)
+                    db.session.add(new_producer)
+                    db.session.commit()
+                    login_user(new_user, remember=True)
+                    flash('User created!')
+                    return redirect(url_for('views.home'))
+
 
     return render_template("signup.html", user=current_user)
 
