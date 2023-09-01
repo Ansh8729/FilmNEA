@@ -378,16 +378,19 @@ def delete_post(scriptid):
     if flask.request.method == "POST":
         post = Screenplays.query.filter_by(scriptid = scriptid).first()
         scripthas = ScriptHas.query.all()
-        for i in scripthas:
-            if i.scriptid == scriptid:
-                db.session.delete(i)
+        for record in scripthas:
+            if record.scriptid == post.scriptid:
+                db.session.delete(record)
                 db.session.commit()
         comments = Comments.query.filter_by(scriptid = scriptid)
-        for i in comments:
-            db.session.delete(i)
+        for comment in comments:
+            db.session.delete(comment)
+            db.session.commit()
         ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
         for i in ratings:
             db.session.delete(i)
+            db.session.commit()
+        post = Screenplays.query.filter_by(scriptid = scriptid).first()
         db.session.delete(post)
         db.session.commit()
         flask.flash('Post deleted.', category='success')
