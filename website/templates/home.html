@@ -121,7 +121,7 @@
                         {% if user.id == post.writer.user.id %}
                         <div style="text-align:right">
                             <form action = /delete-post/{{post.scriptid}} method="POST">
-                                <input type="submit" value="Delete">
+                                <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this post?')">
                             </form>
                         </div>
                         {% endif %}

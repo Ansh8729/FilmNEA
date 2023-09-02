@@ -18,6 +18,8 @@ from . import db
 from dateutil.parser import parse
 from datetime import datetime, timedelta, date
 import secrets
+import tkinter as tk
+from tkinter import messagebox
 
 views = flask.Blueprint("views", __name__)
 
@@ -375,19 +377,22 @@ def response(scriptid):
 @views.route("/delete-post/<scriptid>", methods=['POST'])
 @login_required
 def delete_post(scriptid):
-    if flask.request.method == "POST":
         post = Screenplays.query.filter_by(scriptid = scriptid).first()
         scripthas = ScriptHas.query.all()
         for record in scripthas:
             if record.scriptid == post.scriptid:
                 db.session.delete(record)
                 db.session.commit()
-        comments = Comments.query.filter_by(scriptid = scriptid)
+        comments = Comments.query.filter_by(scriptid = post.scriptid)
         for comment in comments:
             db.session.delete(comment)
             db.session.commit()
-        ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
+        ratings = LikedScreenplays.query.filter_by(scriptid = post.scriptid)
         for i in ratings:
+            db.session.delete(i)
+            db.session.commit()
+        notifs = LikedScreenplays.query.filter_by(scriptid = post.scriptid)
+        for i in notifs:
             db.session.delete(i)
             db.session.commit()
         post = Screenplays.query.filter_by(scriptid = scriptid).first()
@@ -434,36 +439,70 @@ def profilepage(userid):
 @login_required
 def pageeditor(userid):
     if flask.request.method == "POST":
+        profile = Users.query.filter_by(id = userid).first()
         file = flask.request.files['profilepic']
         if not file:
-            picname = None 
+            if profile.profilepic:
+                profile.profilepic = profile.profilepic
+                db.session.commit()
         else:
             picturefilename = secure_filename(file.filename)
             picname = str(uuid.uuid1()) + "_" + picturefilename
             file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',picname)) 
             shutil.move(picname,'static/images')
-        profile = Users.query.filter_by(id = userid).first()
-        profile.profilepic = picname
-        profile.biography = flask.request.form.get('bio')
-        profile.insta = flask.request.form.get('insta')
-        profile.twitter = flask.request.form.get('twitter')
-        db.session.commit()
+            profile = Users.query.filter_by(id = userid).first()
+            profile.profilepic = picname
+            db.session.commit()
+        bio = flask.request.form.get('bio')
+        if not bio:
+            if profile.biography:
+                profile.biography = profile.biography
+                db.session.commit()
+        else:
+            profile.biography = bio
+            db.session.commit()
+        insta = flask.request.form.get('insta')
+        if not insta:
+            if profile.insta:
+                profile.insta = profile.insta
+                db.session.commit()
+        else:
+            profile.insta = insta
+            db.session.commit()
+        twitter = flask.request.form.get('twitter')
+        if not twitter:
+            if profile.twitter:
+                profile.twitter = profile.twitter
+                db.session.commit()
+        else:
+            profile.twitter = twitter
+            db.session.commit()
         if current_user.accounttype == 1:
+            writer = Screenwriters.query.filter_by(userid = userid).first()
             colour = flask.request.form.get('colorpicker')
+            if colour == '#ffffff':
+                if writer.backgroundcolour:
+                    writer.backgroundcolour = writer.backgroundcolour
+                    db.session.commit()
+            else:
+                writer.backgroundcolour = colour
+                db.session.commit()
+
             font = flask.request.form.get('fontstyle')
             if not font:
-                flask.flash("The fontstyle field is required.")
-                flask.redirect(flask.url_for("views.pageeditor", userid=current_user.id))
+                if writer.fontstyle:
+                    writer.fontstyle = writer.fontstyle
+                    db.session.commit()
             else:
                 writer = Screenwriters.query.filter_by(userid = userid).first()
-                writer.backgroundcolour = colour
                 if font == 0:
                     writer.fontid = None
                 else:
                     writer.fontstyle = font
-                db.session.commit()
-                flask.flash("Edits made!")
-                return flask.redirect(flask.url_for('views.profilepage', userid=current_user.id))
+                    db.session.commit()
+        
+            flask.flash("Edits made!")
+            return flask.redirect(flask.url_for('views.profilepage', userid=current_user.id))
         else:
             flask.flash("Edits made!")
             return flask.redirect(flask.url_for('views.profilepage', userid=current_user.id))

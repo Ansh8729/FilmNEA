@@ -5,13 +5,32 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import smtplib
 import random
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-def send_email(sender, sender_password, receiver, msg):
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
-    server.login(sender, sender_password)
-    server.sendmail(sender, receiver, msg)
-    server.quit()
+def send_email(subject, body, to_email, gmail_username, gmail_password):
+    # Create a MIMEText object to represent the email body
+    message = MIMEMultipart()
+    message.attach(MIMEText(body, 'plain'))
+
+    message['Subject'] = subject
+    message['From'] = gmail_username
+    message['To'] = to_email
+
+    try:
+        # Establish a connection to the Gmail SMTP server
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        # Starts TLS encryption
+        server.starttls()
+        # Logs in to the NoReply gmail account
+        server.login(gmail_username, gmail_password)
+        # Sends the email
+        server.sendmail(gmail_username, to_email, message.as_string())
+        # Closes the SMTP server connection
+        server.quit()
+        print("Email sent successfully!")
+    except Exception as e:
+        print(f"Email could not be sent. Error: {str(e)}")
 
 auth = Blueprint("auth", __name__)
 
@@ -89,7 +108,7 @@ def sign_up():
                 db.session.commit()
                 newuser = Users.query.order_by(Users.id.desc()).first()
                 email = email.split("@")
-                if email[1] == 'producersguild.org':
+                if email[1] == 'producersguild.org' or email[1] == "gmail.com":
                     otp = ""
                     for i in range(6):
                         num = random.randint(0,9)
@@ -98,7 +117,7 @@ def sign_up():
                     new_producer = Producers(userid = newuser.id, otp=otp)
                     db.session.add(new_producer)
                     db.session.commit()
-                    send_email('writersworldnoreply@gmail.com', 'lolfruollznvecyd', newuser.email, msg)
+                    send_email('Writers World OTP Request', msg, newuser.email, 'writersworldnoreply@gmail.com', 'lolfruollznvecyd')
                     return redirect(url_for('auth.approval'))  
                 else:
                     new_producer = Producers(userid = newuser.id)
@@ -107,7 +126,6 @@ def sign_up():
                     login_user(new_user, remember=True)
                     flash('User created!')
                     return redirect(url_for('views.home'))
-
 
     return render_template("signup.html", user=current_user)
 
@@ -128,6 +146,38 @@ def approval():
             flash('Incorrect OTP.', category='error')
 
     return render_template("approval.html")
+
+
+@auth.route("/forgotpassword1", methods=['GET', 'POST'])
+def forgotpassword1():
+    if request.method == "POST":
+        email = request.form.get("email")
+        email_exists = Users.query.filter_by(email=email).first()
+        if email_exists:
+            return redirect(url_for("auth.forgotpassword2", email=email))
+        else:
+            flash("Email is not in database. Create an account.", category="error")
+    return render_template("forgot_password1.html", user=current_user)
+
+@auth.route("/forgotpassword2/<email>", methods=['GET', 'POST'])
+def forgotpassword2(email):
+    if request.method == "POST":
+        password1 = request.form.get("password1")
+        password2 = request.form.get("password2")
+        if password1 == password2:
+            if len(password1) >= 8:
+                password = generate_password_hash(password1, method='scrypt')
+                user = Users.query.filter_by(email=email).first()
+                user.password = password
+                db.session.commit()
+                flash("Password changed!", category="success")
+                return redirect(url_for("auth.login"))
+            else:
+                flash("Password is too short.", category="error")
+        else:
+            flash("Passwords don't match.", category="error")
+
+    return render_template("forgot_password2.html", user=current_user)
 
 @auth.route("/logout")
 @login_required
