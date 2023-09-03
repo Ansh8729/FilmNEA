@@ -92,7 +92,7 @@ def GiveRecommendations(writerid):
             genre2 = Genres.query.filter(Genres.genreid == genres[i])
             for j in genre2:
                 finalgenres.append(j.genreid) 
-        if list(set(finalgenres)) == finalgenres and len(list(set(finalgenres))) > 1:
+        if (list(set(finalgenres)) == finalgenres and len(list(set(finalgenres))) > 1) or len(finalgenres) == 0:
             recs = None
             return recs
         else:
@@ -260,7 +260,7 @@ def script(scriptid):
 @views.route("/rate/<scriptid>", methods=['POST'])
 @login_required
 def rate(scriptid):
-    rating = (flask.request.form.get("rate"))
+    rating = flask.request.form.get("star-input")
     writer = Screenwriters.query.filter_by(userid = current_user.id).first()
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     like_exists = LikedScreenplays.query.filter(LikedScreenplays.writerid == writer.writerid, LikedScreenplays.scriptid==scriptid).first()
@@ -447,12 +447,17 @@ def pageeditor(userid):
                 db.session.commit()
         else:
             picturefilename = secure_filename(file.filename)
-            picname = str(uuid.uuid1()) + "_" + picturefilename
-            file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',picname)) 
-            shutil.move(picname,'static/images')
-            profile = Users.query.filter_by(id = userid).first()
-            profile.profilepic = picname
-            db.session.commit()
+            namecheck = picturefilename.split(".")
+            if namecheck[1] != "png" or namecheck[1] != "jpg":
+                flask.flash("Invalid file format for profile picture.", category="error")
+                return flask.redirect(flask.url_for("views.pageeditor", userid=current_user.id))
+            else:
+                picname = str(uuid.uuid1()) + "_" + picturefilename
+                file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',picname))
+                shutil.move(picname,'static/images')
+                profile = Users.query.filter_by(id = userid).first()
+                profile.profilepic = picname
+                db.session.commit()
         bio = flask.request.form.get('bio')
         if not bio:
             if profile.biography:
@@ -467,16 +472,24 @@ def pageeditor(userid):
                 profile.insta = profile.insta
                 db.session.commit()
         else:
-            profile.insta = insta
-            db.session.commit()
+            if "@" not in insta:
+                flask.flash("No @ included in Insta handle.", category="error")
+                return flask.redirect(flask.url_for("views.pageeditor", userid=current_user.id))
+            else:
+                profile.insta = insta
+                db.session.commit()
         twitter = flask.request.form.get('twitter')
         if not twitter:
             if profile.twitter:
                 profile.twitter = profile.twitter
                 db.session.commit()
         else:
-            profile.twitter = twitter
-            db.session.commit()
+            if "@" not in twitter:
+                flask.flash("No @ included in Twitter handle.", category="error")
+                return flask.redirect(flask.url_for("views.pageeditor", userid=current_user.id))
+            else:
+                profile.twitter = twitter
+                db.session.commit()
         if current_user.accounttype == 1:
             writer = Screenwriters.query.filter_by(userid = userid).first()
             colour = flask.request.form.get('colorpicker')
@@ -545,47 +558,60 @@ def post():
             end = int(flask.request.form.get("end"))
             genres = flask.request.form.getlist("genres")
             # The file is saved to the folder
-            scriptname = secure_filename(file.filename)
-            scriptname = NoSpaces(scriptname)
-            file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
-            if IsPDF(scriptname) == False:
-                flask.flash("Upload a PDF!", category='error')
-                os.remove(scriptname)
-                return flask.redirect(flask.url_for("views.post"))
+            title_exists = Screenplays.query.filter_by(title=title).first()
+            if title_exists:
+                flask.flash("Title has already been used.", category="error")
+                flask.redirect(flask.url_for("views.post"))
             else:
-                file2 = PyPDF2.PdfReader(scriptname)
-                nums = len(file2.pages)
-                if end > nums:
-                    flask.flash("Your screenplay doesn't have "+str(end)+" pages!")
-                    os.remove(scriptname)
-                    return flask.redirect(flask.url_for("views.post"))
-                elif end-start > 10:
-                    flask.flash("You can't upload more than 10 pages!")
-                    os.remove(scriptname)
-                    return flask.redirect(flask.url_for("views.post"))
+                if len(logline) > 165:
+                    flask.flash("Logline is too long!", category="error")
+                    flask.redirect(flask.url_for("views.post"))
                 else:
-                    random_hex = secrets.token_hex(8)
-                    _, f_ext = os.path.splitext(scriptname)
-                    picture_fn = random_hex + f_ext
-                    shutil.copyfile(scriptname, picture_fn)
-                    shutil.move(picture_fn,'static/images')
-                    PyPDF4.PdfFileReader(scriptname)
-                    watermark(input_pdf=scriptname,output_pdf="watermarked.pdf", watermark="watermark.pdf")
-                    os.remove(scriptname)
-                    newname = str(uuid.uuid1()) + "_" + "finalfile.pdf"
-                    split_pdf(input="watermarked.pdf",output=newname ,start=start, end=end)
-                    os.remove("watermarked.pdf")
-                    shutil.move(newname,'static/images')
-                    currentwriter = Screenwriters.query.filter_by(userid = current_user.id).first()
-                    newpost = Screenplays(writerid = currentwriter.writerid, title=title, logline=logline, message=message, screenplay=newname, fullfile=picture_fn)
-                    db.session.add(newpost)
-                    db.session.commit()
-                    newscript = Screenplays.query.order_by(Screenplays.scriptid.desc()).first()
-                    for i in genres:
-                        newscripthas = ScriptHas(scriptid=newscript.scriptid, genreid=i)
-                        db.session.add(newscripthas)
-                        db.session.commit()
-                    return flask.redirect(flask.url_for("views.home"))
+                    if len(message) > 280:
+                        flask.flash("Message is too long!", category="error")
+                        flask.redirect(flask.url_for("views.post"))
+                    else:
+                        scriptname = secure_filename(file.filename)
+                        scriptname = NoSpaces(scriptname)
+                        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
+                        if IsPDF(scriptname) == False:
+                            flask.flash("Upload a PDF!", category='error')
+                            os.remove(scriptname)
+                            return flask.redirect(flask.url_for("views.post"))
+                        else:
+                            file2 = PyPDF2.PdfReader(scriptname)
+                            nums = len(file2.pages)
+                            if end > nums:
+                                flask.flash("Your screenplay doesn't have "+str(end)+" pages!")
+                                os.remove(scriptname)
+                                return flask.redirect(flask.url_for("views.post"))
+                            elif end-start > 10:
+                                flask.flash("You can't upload more than 10 pages!")
+                                os.remove(scriptname)
+                                return flask.redirect(flask.url_for("views.post"))
+                            else:
+                                random_hex = secrets.token_hex(8)
+                                _, f_ext = os.path.splitext(scriptname)
+                                picture_fn = random_hex + f_ext
+                                shutil.copyfile(scriptname, picture_fn)
+                                shutil.move(picture_fn,'static/images')
+                                PyPDF4.PdfFileReader(scriptname)
+                                watermark(input_pdf=scriptname,output_pdf="watermarked.pdf", watermark="watermark.pdf")
+                                os.remove(scriptname)
+                                newname = str(uuid.uuid1()) + "_" + "finalfile.pdf"
+                                split_pdf(input="watermarked.pdf",output=newname ,start=start, end=end)
+                                os.remove("watermarked.pdf")
+                                shutil.move(newname,'static/images')
+                                currentwriter = Screenwriters.query.filter_by(userid = current_user.id).first()
+                                newpost = Screenplays(writerid = currentwriter.writerid, title=title, logline=logline, message=message, screenplay=newname, fullfile=picture_fn)
+                                db.session.add(newpost)
+                                db.session.commit()
+                                newscript = Screenplays.query.order_by(Screenplays.scriptid.desc()).first()
+                                for i in genres:
+                                    newscripthas = ScriptHas(scriptid=newscript.scriptid, genreid=i)
+                                    db.session.add(newscripthas)
+                                    db.session.commit()
+                                return flask.redirect(flask.url_for("views.home"))
         return flask.render_template('create_post.html', user=current_user)
 
 @views.route("/competitions", methods=['GET', 'POST'])
