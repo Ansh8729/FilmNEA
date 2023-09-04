@@ -241,14 +241,17 @@ def filter():
     scripthas = ScriptHas.query.all()
     likes = LikedScreenplays.query.all()
     genre = flask.request.form.get("genre")
-    genre2 = Genres.query.filter_by(genreid=genre).first()
-    scriptids = ScriptHas.query.filter_by(genreid=genre).all()
-    posts = []
-    for i in scriptids:
-        script = Screenplays.query.filter_by(scriptid=i.scriptid).first()
-        posts.append(script)
-    flask.flash(f"Now showing all {genre2.genre} scripts.")
-    return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
+    if genre == "0":
+        return flask.redirect(flask.url_for("views.home"))
+    else:
+        genre2 = Genres.query.filter_by(genreid=genre).first()
+        scriptids = ScriptHas.query.filter_by(genreid=genre).all()
+        posts = []
+        for i in scriptids:
+            script = Screenplays.query.filter_by(scriptid=i.scriptid).first()
+            posts.append(script)
+        flask.flash(f"Now showing all {genre2.genre} scripts.")
+        return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
 
 @views.route("/script/<scriptid>", methods=['GET', 'POST'])
 @login_required
@@ -657,14 +660,17 @@ def sort2():
 def filter2():
     comphas = CompHas.query.all()
     genre = flask.request.form.get("genre")
-    genre2 = Genres.query.filter_by(genreid=genre).first()
-    compids = CompHas.query.filter_by(genreid=genre).all()
-    comps = []
-    for i in compids:
-        comp = Competitions.query.filter_by(compid=i.compid).first()
-        comps.append(comp)
-    flask.flash(f"Now showing all {genre2.genre} competitions.")
-    return flask.render_template("competitions.html", user=current_user, comps=comps, comphas=comphas)
+    if genre == "0":
+        return flask.redirect(flask.url_for("views.competitions"))
+    else:
+        genre2 = Genres.query.filter_by(genreid=genre).first()
+        compids = CompHas.query.filter_by(genreid=genre).all()
+        comps = []
+        for i in compids:
+            comp = Competitions.query.filter_by(compid=i.compid).first()
+            comps.append(comp)
+        flask.flash(f"Now showing all {genre2.genre} competitions.")
+        return flask.render_template("competitions.html", user=current_user, comps=comps, comphas=comphas)
 
 @views.route('/comp/<compid>', methods=['GET', 'POST'])
 @login_required

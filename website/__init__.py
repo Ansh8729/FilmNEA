@@ -24,13 +24,13 @@ def create_app():
 
     with app.app_context():
         db.create_all()
-        genrelist = ['Drama', 'Comedy', 'Horror']
+        genrelist = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Sports', 'Thriller', 'Western']
         for i in range(len(genrelist)):
             newgenre = Genres(genre=genrelist[i])
             db.session.add(newgenre)
             db.session.commit()
         for i in Genres.query.all():
-            if i.genreid > 3:
+            if i.genreid > 13:
                 db.session.delete(i)
                 db.session.commit()
 
