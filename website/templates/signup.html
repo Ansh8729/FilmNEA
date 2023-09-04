@@ -42,13 +42,33 @@
         />
         <br>
         <h5>Account Type:</h5>
-        <input type="radio" id="writer" name="accounttype" value="Screenwriter">
-        <label for="writer">Screenwriter</label><br>
-        <input type="radio" id="producer" name="accounttype" value="Producer">
-        <label for="producer">Producer</label><br>
+        <div class="row">
+            <div class="col-6">
+                <input type="radio" id="writer" name="accounttype" value="Screenwriter">
+                <label for="writer">Screenwriter</label><br>
+                <br>
+                <h6>Features:</h6>
+                <ul>
+                    <li>Post screenplays that can be rated and commented on!</li>
+                    <li>Customisable profile page - you can choose your own font style and background colour!</li>
+                    <li>Submit your screenplays for competitions run by producer accounts!</li>
+                </ul>
+            </div>
+            <div class="col-6">
+                <input type="radio" id="producer" name="accounttype" value="Producer">
+                <label for="producer">Producer</label><br>
+                <br>
+                <h6>Features:</h6>
+                <ul>
+                    <li>Post your own screenplay competitions that screenwriter users can submit to!</li>
+                    <li>View screenwriter users' posts!</li>
+                    <li><b>NOTE: Account associated with producer guilds will need to be approved through OTP verification.</b></li>
+                </ul>
+            </div>
+        </div>
         
         <br/>
-        <div align="center">
+        <div style="text-align:center">
             <button class="btn btn-primary" type="submit">Sign Up</button>
         </div>
      </div>

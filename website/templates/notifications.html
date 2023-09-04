@@ -24,7 +24,7 @@
                             </form>
                         </div>
                     {% endif %}
-                    {% if response.responsetype == None and response.commentid != None %}
+                    {% if response.commentid != None %}
                         <div class="card" style="text-align:left">
                             <h4><a href="/profilepage/{{ response.comment.writer.user.id }}">{{ response.comment.writer.user.username }}</a> says {{ response.comment.comment }} on {{response.comment.script.title}}</h4>
                             <form method="POST" action="/deleteresponse/{{ response.notifid }}">

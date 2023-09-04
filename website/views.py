@@ -535,19 +535,26 @@ def post():
             deadline= str(flask.request.form.get("date"))
             date = convert_to_datetime(deadline)
             if date < datetime.today():
-                flask.flash("Invalid deadline. Set a deadline today or after today.")
+                flask.flash("Invalid deadline. Set a deadline today or after today.", category="error")
                 return flask.redirect(flask.url_for("views.post"))
-            newcomp = Competitions(producerid = num, title=flask.request.form.get("title"), brief=flask.request.form.get("brief"), deadline=date)
-            db.session.add(newcomp)
-            db.session.commit()
-            newcomp = Competitions.query.order_by(Competitions.compid.desc()).first()
-            genres = flask.request.form.getlist("genres")
-            for i in genres:
-                newcomphas = CompHas(compid=newcomp.compid, genreid=i)
-                db.session.add(newcomphas)
-                db.session.commit()
-            flask.flash("Competition created!")
-            return flask.redirect(flask.url_for('views.competitions'))
+            else:
+                title = flask.request.form.get("title")
+                title_exists = Competitions.query.filter_by(title=title).first()
+                if title_exists:
+                    flask.flash("Title is already being used.", category="error")
+                    return flask.redirect(flask.url_for("views.post"))
+                else:
+                    newcomp = Competitions(producerid = num, title=flask.request.form.get("title"), brief=flask.request.form.get("brief"), deadline=date)
+                    db.session.add(newcomp)
+                    db.session.commit()
+                    newcomp = Competitions.query.order_by(Competitions.compid.desc()).first()
+                    genres = flask.request.form.getlist("genres")
+                    for i in genres:
+                        newcomphas = CompHas(compid=newcomp.compid, genreid=i)
+                        db.session.add(newcomphas)
+                        db.session.commit()
+                    flask.flash("Competition created!")
+                    return flask.redirect(flask.url_for('views.competitions'))
         return flask.render_template('create_post.html', user=current_user)
     
     elif current_user.accounttype == 1:
@@ -563,7 +570,7 @@ def post():
             # The file is saved to the folder
             title_exists = Screenplays.query.filter_by(title=title).first()
             if title_exists:
-                flask.flash("Title has already been used.", category="error")
+                flask.flash("Title is already being used.", category="error")
                 flask.redirect(flask.url_for("views.post"))
             else:
                 if len(logline) > 165:
