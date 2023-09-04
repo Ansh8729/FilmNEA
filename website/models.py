@@ -10,12 +10,13 @@ class Users(db.Model, UserMixin):
     forename = db.Column(db.String(75), unique=True)
     surname = db.Column(db.String(75))
     password = db.Column(db.String(150))
-    date_created = db.Column(db.DateTime(timezone=True), default=func.now())
     accounttype = db.Column(db.Integer)
     profilepic = db.Column(db.String(), nullable=True) 
     biography = db.Column(db.Text)
     insta = db.Column(db.String(), nullable=True) 
     twitter = db.Column(db.String(), nullable=True) 
+    date_created = db.Column(db.DateTime(timezone=True), default=func.now())
+
     writers = db.relationship('Screenwriters', backref="user", passive_deletes=True)
     producers = db.relationship('Producers', backref="user", passive_deletes=True)
     
@@ -26,6 +27,7 @@ class Screenwriters(db.Model):
     backgroundcolour = db.Column(db.Integer)
     fontstyle = db.Column(db.String(30))
     experiencelevel = db.Column(db.Float)
+
     posts = db.relationship('Screenplays', backref="writer", passive_deletes=True)
     commenters = db.relationship('Comments', backref="writer", passive_deletes=True)
     responsees = db.relationship('Notifications', backref="writer", passive_deletes=True)
@@ -40,9 +42,10 @@ class Screenplays(db.Model):
     message = db.Column(db.Text)
     screenplay = db.Column(db.String(300)) 
     fullfile = db.Column(db.String(300))
+    avgrating = db.Column(db.Float)
     date_created = db.Column(db.Date, default=func.current_date())
     datetime_created = db.Column(db.DateTime(timezone=True), default=func.now())
-    avgrating = db.Column(db.Float)
+
     scripts = db.relationship('Notifications', backref="script", passive_deletes=True)
     scriptscommented = db.relationship('Comments', backref="script", passive_deletes=True)
     liked = db.relationship('LikedScreenplays', backref="script", passive_deletes=True)
@@ -58,6 +61,7 @@ class Genres(db.Model):
     __tablename__ = "Genres"
     genreid = db.Column(db.Integer, primary_key=True)
     genre = db.Column(db.String(50))
+
     genres = db.relationship('ScriptHas', backref="has")
     genres2 = db.relationship('CompHas', backref="has")
 
@@ -67,22 +71,23 @@ class Producers(db.Model):
     userid = db.Column(db.Integer, db.ForeignKey('Users.id'))
     approved = db.Column(db.Integer)
     otp = db.Column(db.String(10))
+
     posts = db.relationship('Competitions', backref="producer", passive_deletes=True)
     responses = db.relationship('Notifications', backref="producer", passive_deletes=True)
 
 class Notifications(db.Model):
     __tablename__ = "Notifications"
     notifid = db.Column(db.Integer, primary_key=True)
-    producerid = db.Column(db.Integer, db.ForeignKey('Producers.producerid'))
+    responsetype = db.Column(db.Integer)
     writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'))
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'))
-    compid = db.Column(db.Integer, db.ForeignKey('Competitions.compid'))
-    commentid = db.Column(db.Integer, db.ForeignKey('Comments.commentid'))
-    responsetype = db.Column(db.Integer)
-    message = db.Column(db.Text)
-    submission = db.Column(db.String(150)) 
+    producerid = db.Column(db.Integer, db.ForeignKey('Producers.producerid'))
     requeststatus = db.Column(db.Integer)
-    datecreated = db.Column(db.DateTime(timezone=True))
+    commentid = db.Column(db.Integer, db.ForeignKey('Comments.commentid'))
+    compid = db.Column(db.Integer, db.ForeignKey('Competitions.compid'))
+    submission = db.Column(db.String(150)) 
+    message = db.Column(db.Text)
+    datetime_created = db.Column(db.DateTime(timezone=True))
 
 class Competitions(db.Model):
     __tablename__ = "Competitions"
@@ -94,6 +99,7 @@ class Competitions(db.Model):
     date_created = db.Column(db.Date, default=func.current_date())
     datetime_created = db.Column(db.DateTime(timezone=True), default=func.now())
     submissionnum = db.Column(db.Integer)
+    
     responses = db.relationship('Notifications', backref="comp", passive_deletes=True)
 
 class CompHas(db.Model):
@@ -113,6 +119,7 @@ class Comments(db.Model):
     writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'))
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'))
     comment = db.Column(db.String(300))
+    datetime_created = db.Column(db.DateTime(timezone=True), default=func.now())
     responses = db.relationship('Notifications', backref="comment", passive_deletes=True)
 
 class FeaturedScripts(db.Model):

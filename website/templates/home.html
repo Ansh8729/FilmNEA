@@ -135,11 +135,13 @@
                                 {% if comment.scriptid == post.scriptid %}
                                     <div style="text-align:left">
                                         <b><a href="/profilepage/{{comment.writer.user.id}}">{{comment.writer.user.username}}</a></b>:
-                                        {{comment.comment}}
+                                        {% if comment.writer.user.id == user.id %}
+                                            {{comment.comment}}
+                                            <form method="POST" action="/delete-comment/{{ comment.commentid }}"><button type="submit" name="Delete">Delete</button></form>
+                                        {% else %}
+                                            {{comment.comment}}
+                                        {% endif %}
                                     </div>
-                                    <form method="POST" action="/delete-comment/{{ comment.commentid }}">
-                                        <button type="submit" name="Delete">Delete</button>
-                                    </form>
                                 {% endif %}
                             {% endfor %}
                             </div>

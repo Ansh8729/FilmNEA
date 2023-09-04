@@ -69,25 +69,26 @@
     <br>
     <br>
     {% if user.accounttype == 1 %}
-    <h3>Comments</h3>
-                            {% for comment in comments %}
-                                {% if comment.scriptid == post.scriptid %}
-                                    <div style="text-align:left">
-                                        <b><a href="/profilepage/{{comment.writer.user.id}}">{{comment.writer.user.username}}</a></b>:
-                                        {{comment.comment}}
-                                    </div>
-                                    <form method="POST" action="/delete-comment/{{ comment.commentid }}">
-                                        <button type="submit" name="Delete">Delete</button>
-                                    </form>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <br>
-                        <form class="input-group mb-3"method="POST" action="/create-comment/{{post.scriptid}}">
-                            <input type="text" id="text" name="text" class="form-control" placeholder="Comment something!"/>
-                            <button type="submit" class="btn btn-primary">Comment</button>
-                        </form>
+            <h3>Comments</h3>
+            {% for comment in comments %}
+                {% if comment.scriptid == post.scriptid %}
+                    <div style="text-align:left">
+                        <b><a href="/profilepage/{{comment.writer.user.id}}">{{comment.writer.user.username}}</a></b>:
+                        {{comment.comment}}
                     </div>
+                    {% if comment.writer.user.id == user.id %}
+                        <form method="POST" action="/delete-comment/{{ comment.commentid }}">
+                            <button type="submit" name="Delete">Delete</button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            <br>
+            <form class="input-group mb-3"method="POST" action="/create-comment/{{post.scriptid}}">
+                <input type="text" id="text" name="text" class="form-control" placeholder="Comment something!"/>
+                <button type="submit" class="btn btn-primary">Comment</button>
+            </form>
+            </div>
     {% else %}
                     <div class="text-align:left">
                         <form method="POST" name="response" action="/response/{{post.scriptid}}">

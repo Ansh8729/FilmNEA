@@ -258,7 +258,8 @@ def filter():
 def script(scriptid):
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     scripthas = ScriptHas.query.all()
-    return flask.render_template("script_full.html", post=script, scripthas=scripthas, user=current_user)
+    comments = Comments.query.filter_by(scriptid=scriptid)
+    return flask.render_template("script_full.html", post=script, scripthas=scripthas, user=current_user, comments=comments)
 
 @views.route("/rate/<scriptid>", methods=['POST'])
 @login_required
@@ -321,8 +322,8 @@ def create_comment(scriptid):
             db.session.add(comment)
             db.session.commit()
             comment = Comments.query.order_by(Comments.commentid).first()
-            writer = Screenwriters.query.filter_by(userid = current_user.id).first()
-            notif = Notifications(writerid = writer.writerid, commentid=comment.commentid)
+            writer2 = Screenwriters.query.filter_by(userid = post.writer.user.id).first()
+            notif = Notifications(writerid = writer2.writerid, responsetype = 3, commentid=comment.commentid)
             db.session.add(notif)
             db.session.commit()
         else:
@@ -630,9 +631,13 @@ def competitions():
     comps2 = Competitions.query.all()
     comphas = CompHas.query.all()
     for comp in comps2:
-        subs2 = Notifications.query.filter_by(compid = comp.compid)
-        comp.submissionnum = subs2.count()
-        db.session.commit()
+        if datetime.now() > comp.deadline:
+            db.session.delete(comp)
+            db.session.commit()
+        else:
+            subs2 = Notifications.query.filter_by(compid = comp.compid)
+            comp.submissionnum = subs2.count()
+            db.session.commit()
     comps1 = Competitions.query.order_by(Competitions.submissionnum.desc())
     comps = []
     for comp in comps1:

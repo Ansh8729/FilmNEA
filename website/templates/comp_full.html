@@ -19,7 +19,7 @@
   <h2>Submit Your Entry</h2>
   <form method='POST' enctype='multipart/form-data' action="/submit/{{comp.compid}}">
     <input type="file" name="submission"><br><br>
-    <input type="submit" name="Submit">
+    <input type="submit" name="Submit" onclick="return confirm('Are you sure you want to submit this screenplay file for this competition? You will not be able to resubmit.')">
   </form>
 </body>
 </html>

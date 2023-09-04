@@ -16,30 +16,21 @@
             <div class="col-6">
                 <h1>Script Responses</h1>
                 {% for response in notifs %}
-                    {% if response.responsetype == 1 and response.commentid == None %}
+                    {% if response.responsetype == 1 %}
                         <div class="card" style="text-align:left">
                             <h4><a href="/profilepage/{{ response.producer.user.id }}">{{ response.producer.user.username }}</a> says {{ response.message }}</h4>
                             <form method="POST" action="/deleteresponse/{{ response.notifid }}">
                                 <button type="submit" name="Delete">Delete</button>
                             </form>
                         </div>
-                    {% endif %}
-                    {% if response.commentid != None %}
-                        <div class="card" style="text-align:left">
-                            <h4><a href="/profilepage/{{ response.comment.writer.user.id }}">{{ response.comment.writer.user.username }}</a> says {{ response.comment.comment }} on {{response.comment.script.title}}</h4>
+                    {% elif response.responsetype == 3 %}
+                        <div class="card" style="text-align:left">  
+                            <h4><a href="/profilepage/{{ response.comment.writer.user.id }}">{{ response.comment.writer.user.username }}</a> says <i>{{ response.comment.comment }}</i> on <a href="/script/{{response.comment.script.scriptid}}" target="_blank">{{response.comment.script.title}}</a></h4>
                             <form method="POST" action="/deleteresponse/{{ response.notifid }}">
                                 <button type="submit" name="Delete">Delete</button>
                             </form>
                         </div>
                     {% endif %}
-                    {% if response.compid != None %}
-                        <div class="card" style="text-align:left">
-                            <h4>{{ response.message }}</h4>
-                            <form method="POST" action="/deleteresponse/{{ response.notifid }}">
-                                <button type="submit" name="Delete">Delete</button>
-                            </form>
-                        </div>
-                    {% endif %} 
                 {% endfor %}
             </div>
             <div class="col-6">
