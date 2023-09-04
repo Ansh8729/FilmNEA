@@ -158,7 +158,7 @@ def LoadFeatured(queue, date):
     hour = 4
     for post in posts:
         likes = LikedScreenplays.query.filter(LikedScreenplays.scriptid == post.scriptid, LikedScreenplays.rating >= 4.0)
-        if likes.count() >= 10 and FeaturedExists(post.scriptid) == False: #The screenplay is checked if it qualifies to be featured
+        if likes.count() >= 3 and FeaturedExists(post.scriptid) == False: #The screenplay is checked if it qualifies to be featured
             newfeatured = FeaturedScripts(scriptid = post.scriptid, dequeuedatetime = datetime.now()+timedelta(hours=hour))
             db.session.add(newfeatured)
             db.session.commit()

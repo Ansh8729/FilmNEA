@@ -120,6 +120,7 @@ class Comments(db.Model):
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'))
     comment = db.Column(db.String(300))
     datetime_created = db.Column(db.DateTime(timezone=True), default=func.now())
+    
     responses = db.relationship('Notifications', backref="comment", passive_deletes=True)
 
 class FeaturedScripts(db.Model):

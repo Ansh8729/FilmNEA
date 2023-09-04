@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from . import db
-from .models import Users, Screenwriters, Producers
+from .models import Users, Screenwriters, Producers, Genres
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import smtplib
@@ -31,6 +31,17 @@ def send_email(subject, body, to_email, gmail_username, gmail_password):
         print("Email sent successfully!")
     except Exception as e:
         print(f"Email could not be sent. Error: {str(e)}")
+
+def LoadGenres():
+    genrelist = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Sports', 'Thriller', 'Western']
+    for i in range(len(genrelist)):
+            newgenre = Genres(genre=genrelist[i])
+            db.session.add(newgenre)
+            db.session.commit()
+    for i in Genres.query.all():
+            if i.genreid > 13:
+                db.session.delete(i)
+                db.session.commit()
 
 auth = Blueprint("auth", __name__)
 
@@ -79,7 +90,7 @@ def sign_up():
         elif username_exists:
             flash('Username is already in use.', category='error')
         elif password1 != password2:
-            flash('Password don\'t match!', category='error')
+            flash("Passwords don't match!", category='error')
         elif len(username) < 2:
             flash('Username is too short.', category='error')
         elif len(password1) < 8:
@@ -98,9 +109,16 @@ def sign_up():
                 new_writer = Screenwriters(userid = newuser.id)
                 db.session.add(new_writer)
                 db.session.commit()
-                login_user(new_user, remember=True)
-                flash('User created!')
-                return redirect(url_for('views.home'))
+                genres = Genres.query.all()
+                if genres:
+                    login_user(new_user, remember=True)
+                    flash('User created!')
+                    return redirect(url_for('views.home'))
+                else:
+                    LoadGenres()
+                    login_user(new_user, remember=True)
+                    flash('User created!')
+                    return redirect(url_for('views.home'))
             if accounttype == "Producer":
                 new_user = Users(email=email, username=username, forename=forename, surname=surname, password=generate_password_hash(
                 password1, method='scrypt'), accounttype = 2)
@@ -144,9 +162,9 @@ def approval():
             return redirect(url_for('views.home'))
         else:
             flash('Incorrect OTP.', category='error')
+            return redirect(url_for('views.approval'))
 
     return render_template("approval.html")
-
 
 @auth.route("/forgotpassword1", methods=['GET', 'POST'])
 def forgotpassword1():

@@ -24,6 +24,7 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+        '''
         genrelist = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Sports', 'Thriller', 'Western']
         for i in range(len(genrelist)):
             newgenre = Genres(genre=genrelist[i])
@@ -33,6 +34,7 @@ def create_app():
             if i.genreid > 13:
                 db.session.delete(i)
                 db.session.commit()
+        '''
 
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
