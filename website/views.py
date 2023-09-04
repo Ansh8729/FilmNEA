@@ -378,6 +378,43 @@ def response(scriptid):
             flask.flash(f"Request for full access for {script.title} sent!")
         return flask.redirect(flask.url_for("views.home"))
 
+@views.route('/response2/<scriptid>',methods=['POST'])
+@login_required
+def response2(scriptid):
+    response = flask.request.form.get('response')
+    request = flask.request.form.get('request')
+    if response:
+        producer = Producers.query.filter_by(userid = current_user.id).first()
+        response_exists = Notifications.query.filter(Notifications.producerid == producer.producerid, Notifications.scriptid == scriptid, Notifications.responsetype == 1).first()
+        if response_exists:
+            flask.flash("You've already sent a response for this script.")
+            script = Screenplays.query.filter_by(scriptid=scriptid).first()
+            return flask.redirect(flask.url_for("views.profilepage", userid = script.writer.user.id))
+        else:
+            producer = Producers.query.filter_by(userid = current_user.id).first()
+            script = Screenplays.query.filter_by(scriptid=scriptid).first()
+            newresponse = Notifications(producerid = producer.producerid, writerid=script.writerid, scriptid=scriptid, message=response, responsetype = 1)
+            db.session.add(newresponse)
+            db.session.commit()
+            flask.flash(f"Response sent!")
+        script = Screenplays.query.filter_by(scriptid=scriptid).first()
+        return flask.redirect(flask.url_for("views.profilepage", userid = script.writer.user.id))
+    elif request:
+        producer = Producers.query.filter_by(userid = current_user.id).first()
+        request_exists = Notifications.query.filter(Notifications.producerid == producer.producerid, Notifications.scriptid == scriptid, Notifications.responsetype == 2).first()
+        if request_exists:
+            script = Screenplays.query.filter_by(scriptid=scriptid).first()
+            return flask.redirect(flask.url_for("views.profilepage", userid = script.writer.user.id))
+        else:
+            producer = Producers.query.filter_by(userid = current_user.id).first()
+            script = Screenplays.query.filter_by(scriptid=scriptid).first()
+            newrequest = Notifications(producerid = producer.producerid, writerid=script.writerid, scriptid=scriptid, responsetype = 2, requeststatus = 0)
+            db.session.add(newrequest)
+            db.session.commit()
+            flask.flash(f"Request for full access for {script.title} sent!")
+        script = Screenplays.query.filter_by(scriptid=scriptid).first()
+        return flask.redirect(flask.url_for("views.profilepage", userid = script.writer.user.id))
+
 @views.route("/delete-post/<scriptid>", methods=['POST'])
 @login_required
 def delete_post(scriptid):
@@ -435,7 +472,8 @@ def profilepage(userid):
         db.session.commit()
         comments = Comments.query.all()
         scripthas = ScriptHas.query.all()
-        return flask.render_template("profilepage.html", user=current_user, posts=scripts, comments=comments, scripthas=scripthas, profileuser=profileuser, details=writer)
+        likes = LikedScreenplays.query.all()
+        return flask.render_template("profilepage.html", user=current_user, posts=scripts, comments=comments, scripthas=scripthas, profileuser=profileuser, details=writer, likes=likes)
     if profileuser.accounttype == 2:
         return flask.render_template("profilepage.html", user=current_user, profileuser=profileuser)
 
@@ -452,7 +490,9 @@ def pageeditor(userid):
         else:
             picturefilename = secure_filename(file.filename)
             namecheck = picturefilename.split(".")
-            if namecheck[1] != "png" or namecheck[1] != "jpg":
+            print(namecheck)
+            formats = ["png", "jpg"]
+            if namecheck[1] not in formats:
                 flask.flash("Invalid file format for profile picture.", category="error")
                 return flask.redirect(flask.url_for("views.pageeditor", userid=current_user.id))
             else:

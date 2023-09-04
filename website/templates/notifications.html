@@ -18,18 +18,28 @@
                 {% for response in notifs %}
                     {% if response.responsetype == 1 %}
                         <div class="card" style="text-align:left">
-                            <h4><a href="/profilepage/{{ response.producer.user.id }}">{{ response.producer.user.username }}</a> says {{ response.message }}</h4>
+                            <h4><a href="/profilepage/{{ response.producer.user.id }}" target="_blank">{{ response.producer.user.username }}</a> says {{ response.message }}</h4>
                             <form method="POST" action="/deleteresponse/{{ response.notifid }}">
                                 <button type="submit" name="Delete">Delete</button>
                             </form>
                         </div>
                     {% elif response.responsetype == 3 %}
                         <div class="card" style="text-align:left">  
-                            <h4><a href="/profilepage/{{ response.comment.writer.user.id }}">{{ response.comment.writer.user.username }}</a> says <i>{{ response.comment.comment }}</i> on <a href="/script/{{response.comment.script.scriptid}}" target="_blank">{{response.comment.script.title}}</a></h4>
+                            <h4><a href="/profilepage/{{ response.comment.writer.user.id }}" target="_blank">{{ response.comment.writer.user.username }}</a> says <i>{{ response.comment.comment }}</i> on <a href="/script/{{response.comment.script.scriptid}}" target="_blank">{{response.comment.script.title}}</a></h4>
                             <form method="POST" action="/deleteresponse/{{ response.notifid }}">
                                 <button type="submit" name="Delete">Delete</button>
                             </form>
                         </div>
+                    {% endif %}
+                    {% if response.compid != None %}
+                        {% if response.message %}
+                            <div class="card" style="text-align:left">  
+                                <h4><a href="/profilepage/{{ response.producer.user.id }}" target="_blank">{{ response.producer.user.username }}</a> has responded to your submission to {{response.comp.title}}, saying <i>{{ response.message }}</i></h4>
+                                <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                                    <button type="submit" name="Delete">Delete</button>
+                                </form>
+                            </div>
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
             </div>
@@ -39,7 +49,7 @@
                     {% if request.responsetype == 2 %}
                         {% if request.requeststatus == 0 %}
                             <div class="card" style="text-align:center">
-                                <h4><a href="/profilepage/{{ request.producer.user.id }}">{{ request.producer.user.username }}</a> wants full access to your screenplay {{ request.script.title }}</h4>
+                                <h4><a href="/profilepage/{{ request.producer.user.id }}" target="_blank">{{ request.producer.user.username }}</a> wants full access to your screenplay {{ request.script.title }}</h4>
                                 <form method="POST" action="/requestresponse/{{request.notifid}}">
                                     <input type="radio" name="decision" id="accept" value="Accept">
                                     <label for="accept">Accept</label>
@@ -82,8 +92,8 @@
             <div class="col-6">
                 <h1>Competition Submissions</h1>
                 {% for sub in notifs %}
-                    {% if sub.compid %}
-                        {% if message == None %}
+                    {% if sub.compid != None %}
+                        {% if not sub.message %}
                             <div class="card" style="text-align:center">
                                 <p>Submission for {{ sub.comp.title }} by <a href="/profilepage/{{sub.writer.user.id}}" target="_blank">{{ sub.writer.user.username }}</a></p>
                                 <a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a>

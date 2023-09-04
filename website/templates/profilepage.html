@@ -8,53 +8,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Page</title>
     {% if profileuser.accounttype == 1 %}
-    <!--
-            <style>
-                *{
-                margin: 0;
-                padding: 0;
-            }
-            .rate {
-                float: left;
-                height: 46px;
-                padding: 0 10px;
-            }
-            .rate:not(:checked) > input {
-                position:absolute;
-                top:-9999px;
-            }
-            .rate:not(:checked) > label {
-                float:right;
-                width:1em;
-                overflow:hidden;
-                white-space:nowrap;
-                cursor:pointer;
-                font-size:30px;
-                color:#ccc;
-            }
-            .rate:not(:checked) > label:before {
-                content: '★ ';
-            }
-            .rate > input:checked ~ label {
-                color: #ffc700;    
-            }
-            .rate:not(:checked) > label:hover,
-            .rate:not(:checked) > label:hover ~ label {
-                color: #deb217;  
-            }
-            .rate > input:checked + label:hover,
-            .rate > input:checked + label:hover ~ label,
-            .rate > input:checked ~ label:hover,
-            .rate > input:checked ~ label:hover ~ label,
-            .rate > label:hover ~ input:checked ~ label {
-                color: #c59b08;
-            }
-        </style>-->
-        {% if details.backgroundcolour != None and details.fontstyle != None %}
+        {% if details.backgroundcolour != None %} 
         <style>
             .profilepage {
                 background-color: {{ details.backgroundcolour }}
             }
+        </style>
+        {% endif %}
+        {% if details.fontstyle != None %}
+        <style>
             .profilepage {
                 font-family: {{ details.fontstyle }}
             }
@@ -78,7 +40,7 @@
         <h1>{{  profileuser.username }}</h1>
         <h5>Email: {{ profileuser.email }}</h5>
         {% if profileuser.insta %}
-        <h5>Insta: {{ profileuser.insta }}</h5>
+        <h5>Instagram: {{ profileuser.insta }}</h5>
         {% endif %}
         {% if profileuser.twitter %}
         <h5>Twitter: {{ profileuser.twitter }}</h5>
@@ -89,7 +51,7 @@
         {% if profileuser.accounttype == 1 %}
             <b><p>Experience Level: {{ details.experiencelevel }}</p></b>
             <br>
-            <div id="posts" style="text-align:center" class="container">
+            <div id="posts" style="text-align:center">
                 <h1>Screenplays</h1>
                 {% if not posts %}
                     <p>This user has not posted any screenplays</p>
@@ -115,7 +77,15 @@
                                     <input type="submit" value="Submit Rating">
                                 </div>
                             </form>
+                            {% for like in likes %}
+                            {% if (like.writer.user.id == user.id) and (like.script.scriptid == post.scriptid) %}
+                                <p>You rated it: {{like.rating}}/5</p>
+                            {% endif %}
+                        {% endfor %}
                         {% endif %}
+                        <div style="text-align: right">
+                            Average Rating: {{post.avgrating}}
+                        </div>
                         {% if user.id == post.writer.user.id %}
                         <div style="text-align:right">
                             <form action = /delete-post/{{post.scriptid}} method="POST">
@@ -147,29 +117,46 @@
                             <br>
                             <h3>Message:</h3>
                             {{post.message}}
+                            <br><br>
                             {% if post.screenplay %}
-                            <embed style="text-align: center;" src="{{url_for('static', filename='images/'+post.screenplay)}}" width = "75%" height = "550px"> 
+                            <embed style="text-align: center;" src="{{url_for('static', filename='images/'+post.screenplay)}}#toolbar=0" width = "75%" height = "550px"> 
                             {% else %}
                             <h2>Screenplay not available</h2>
                             {% endif %}
                         </div>
                         <div class="card border-dark">
-                            <div class="card-body">
-                            <h3>Comments</h3>
-                            {% for comment in comments %}
-                                {% if comment.scriptid == post.scriptid %}
-                                    <div style="text-align:left">
-                                        <b><a href="/profilepage/{{comment.writer.user.username}}">{{comment.writer.user.username}}</a></b>:
-                                        {{comment.comment}}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                            </div>
-                            <br>
-                            <form class="input-group mb-3"method="POST" action="/create-comment/{{post.scriptid}}">
-                                <input type="text" id="text" name="text" class="form-control" placeholder="Comment something!"/>
-                                <button type="submit" class="btn btn-primary">Comment</button>
-                            </form>
+                            {% if user.accounttype == 1 %}
+                                <div class="card-body">
+                                <h3>Comments</h3>
+                                {% for comment in comments %}
+                                    {% if comment.scriptid == post.scriptid %}
+                                        <div style="text-align:left">
+                                            <b><a href="/profilepage/{{comment.writer.user.username}}">{{comment.writer.user.username}}</a></b>:
+                                            {{comment.comment}}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                </div>
+                                <br>
+                                <form class="input-group mb-3"method="POST" action="/create-comment/{{post.scriptid}}">
+                                    <input type="text" id="text" name="text" class="form-control" placeholder="Comment something!"/>
+                                    <button type="submit" class="btn btn-primary">Comment</button>
+                                </form>
+                            {% else %}
+                                <div class="text-align:left">
+                                    <form method="POST" name="response" action="/response2/{{post.scriptid}}">
+                                        <input type="text" name="response" id="response" class="form-control">
+                                        <label for="response">Send Response</label>
+                                        <input type="submit">
+                                    </form>
+                                </div>
+                                <div class="text-align:right">
+                                    <form method="POST" action="/response2/{{post.scriptid}}" name="request">
+                                        <label for="request">Request Full Access</label>
+                                        <input name="request" type="submit">
+                                    </form>
+                                </div>
+                            {% endif %}
                         </div>
                 </div>
                 {% endfor %}

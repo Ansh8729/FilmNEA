@@ -52,7 +52,10 @@
               {% else %}
               <h2>{{comp.title}}</h2>
               {% endif %}
-              <a href="/profilepage/{{comp.producer.user.username}}">{{comp.producer.user.username}}</a>
+              By: <a href="/profilepage/{{comp.producer.user.username}}">{{comp.producer.user.username}}</a>
+              <br>
+              Submissions: {{comp.submissionnum}}
+              <br>
               <h4>Genres:</h4>
               {% for comp2 in comphas %}
                 {% if comp2.compid == comp.compid %}
@@ -61,8 +64,8 @@
               {% endfor %}
               <div class="card-body">
                   <div class="card-text">{{comp.brief}}</div>
-                      <h5>Deadline:</h5>
-                      {{comp.deadline}}
+                  <br>
+                      <h5>Deadline: {{comp.deadline}}</h5>
                   </div>
               <div class="card-footer text-muted">{{comp.date_created}}</div>
           </div>

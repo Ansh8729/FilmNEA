@@ -9,10 +9,9 @@
     </style>
 </head>
 <body>
-    {{scripts}}
     {% if featured %}
         <div style="text-align: center">
-            <h2>Featured Screenplay of the Day</h2>
+            <h2>Featured Screenplay of the Day #{{script.featuredid}}</h2>
             {% if script != None %}
                 <h2>{{script.script.title}}</h2>
                 {{script.script.logline}}
@@ -63,28 +62,33 @@
                 {% for post in posts %}
                 <div class="card border-dark">
                         {% if user.accounttype == 1 %}
-                            <div style="text-align:left">
-                                    <form class="star-rating" method = "POST" action="/rate/{{post.scriptid}}">
-                                        <input class="radio-input" type="radio" id="star5" name="star-input" value="5" />
-                                        <label class="radio-label" class for="star5" title="5 stars">5 stars</label>
-                                        <input class="radio-input" type="radio" id="star4" name="star-input" value="4" />
-                                        <label class="radio-label" for="star4" title="4 stars">4 stars</label>
-                                        <input class="radio-input" type="radio" id="star3" name="star-input" value="3" />
-                                        <label class="radio-label" for="star3" title="3 stars">3 stars</label>
-                                        <input class="radio-input" type="radio" id="star2" name="star-input" value="2" />
-                                        <label class="radio-label" for="star2" title="2 stars">2 stars</label>
-                                        <input class="radio-input" type="radio" id="star1" name="star-input" value="1" />
-                                        <label class="radio-label" for="star1" title="1 star">1 star</label>
-                                        <br>
-                                        <input type="submit" value="Submit Rating" onclick="return confirm('Are you sure you want to give the screenplay this rating? You will not be able to change your rating.')">
-                                    </form>
-                                    {% for like in likes %}
-                                        {% if (like.writer.user.id == user.id) and (like.script.scriptid == post.scriptid) %}
-                                            <p>You rated it: {{like.rating}}/5</p>
-                                        {% endif %}
-                                    {% endfor %}
-                            </div>
+                            {% if post.writer.user.id != user.id %}
+                                <div style="text-align:left">
+                                        <form class="star-rating" method = "POST" action="/rate/{{post.scriptid}}">
+                                            <input class="radio-input" type="radio" id="star5" name="star-input" value="5" />
+                                            <label class="radio-label" class for="star5" title="5 stars">5 stars</label>
+                                            <input class="radio-input" type="radio" id="star4" name="star-input" value="4" />
+                                            <label class="radio-label" for="star4" title="4 stars">4 stars</label>
+                                            <input class="radio-input" type="radio" id="star3" name="star-input" value="3" />
+                                            <label class="radio-label" for="star3" title="3 stars">3 stars</label>
+                                            <input class="radio-input" type="radio" id="star2" name="star-input" value="2" />
+                                            <label class="radio-label" for="star2" title="2 stars">2 stars</label>
+                                            <input class="radio-input" type="radio" id="star1" name="star-input" value="1" />
+                                            <label class="radio-label" for="star1" title="1 star">1 star</label>
+                                            <br>
+                                            <input type="submit" value="Submit Rating" onclick="return confirm('Are you sure you want to give the screenplay this rating? You will not be able to change your rating.')">
+                                        </form>
+                                        {% for like in likes %}
+                                            {% if (like.writer.user.id == user.id) and (like.script.scriptid == post.scriptid) %}
+                                                <p>You rated it: {{like.rating}}/5</p>
+                                            {% endif %}
+                                        {% endfor %}
+                                </div>
+                            {% endif %}
                         {% endif %}
+                        <div style="text-align: right">
+                            Average Rating: {{post.avgrating}}
+                        </div>
                         {% if user.id == post.writer.user.id %}
                         <div style="text-align:right">
                             <form action = /delete-post/{{post.scriptid}} method="POST">
@@ -175,25 +179,27 @@
             {% endif %}
             </div>
         </div>
-        <div class="col-3">
-            <br>
-            <br>
-            <h1>Recommended</h1>
-            {% if not recs %}
-            <div style="text-align:center">
-                <h4>No recommendations available</h4>
+        {% if user.accounttype == 1 %}
+            <div class="col-3" style="text-align:center">
+                <br>
+                <br>
+                <h2>Recommended Screenplays</h2>
+                {% if not recs %}
+                <div style="text-align:center">
+                    <h4>No recommendations available</h4>
+                </div>
+                {% else %}
+                    {% for i in recs %}
+                        {% if i.screenplay %}
+                        <a href="/script/{{i.scriptid}}" target="_blank"><h3>{{ i.title }}</h3></a>
+                        {% else %}
+                        <h3>{{i.title}}</h3>
+                        {% endif %}
+                        <h4>Rating: {{ i.avgrating }}/5</h4>  
+                    {% endfor %}
+                {% endif %}
             </div>
-            {% else %}
-                {% for i in recs %}
-                    {% if i.screenplay %}
-                    <a href="/script/{{i.scriptid}}" target="_blank"><h3>{{ i.title }}</h3></a>
-                    {% else %}
-                    <h3>{{i.title}}</h3>
-                    {% endif %}
-                    <h4>{{ i.avgrating }}/5</h4>  
-                {% endfor %}
-            {% endif %}
-        </div>
+        {% endif %}
     </div>
 </body>
 </html>
