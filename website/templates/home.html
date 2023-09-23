@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
-    <style>
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     {% if featured %}
         <div style="text-align: center">
             <h2>Featured Screenplay of the Day #{{script.featuredid}}</h2>
@@ -86,9 +86,12 @@
                                 </div>
                             {% endif %}
                         {% endif %}
+                        {% if post.avgrating %}
                         <div style="text-align: right">
                             Average Rating: {{post.avgrating}}
                         </div>
+                        <br>
+                        {% endif %}
                         {% if user.id == post.writer.user.id %}
                         <div style="text-align:right">
                             <form action = /delete-post/{{post.scriptid}} method="POST">

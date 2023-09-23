@@ -7,38 +7,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <style>
-        .post {
-            text-align: center;
-        }
-    </style>
 </head>
 <body>
     {% if user.accounttype == 1 %}
-    <div class="post">
+    <div class="post" style="text-align:center">
         <h1>Create Screenplay Post</h1><br>
         <form method='POST' enctype='multipart/form-data'>
-            <label for="title">Title</label>
-            <input type="text" id="title" name="title" class="form-control" required autocomplete="off"><br><br>
-            <label for="logline">Logline</label>
-            <input type="text" id="logline" name="logline" class="form-control" required autocomplete="off"><br><br>
-            <label for="message">Message</label>
-            <input type="text" id="message" name="message" required autocomplete="off"><br><br>
-            <label for="screenplay">Upload Screenplay</label>
-            <input type="file" id="screenplay" name="screenplay" class="form-control" required>
-            <br>
-            <br>
-            <h4>1. The file must be a PDF.</h4>
-            <h4>2. The file name cannot have any spaces.</h4>
+            <label for="title"><h2>Title</h2></label>
+            <input type="text" id="title" name="title" style = "margin: auto; width:50%" class="form-control" required autocomplete="off"><br><br>
+            <label for="logline"><h2>Logline</h2></label>
+            <input type="text" id="logline" name="logline" style = "margin: auto; width:70%" class="form-control" required autocomplete="off"><br><br>
+            <label for="message"><h2>Message</h2></label>
+            <textarea id="message" name="message" style = "margin: auto; width:50%" class="form-control" required autocomplete="off"></textarea><br><br>
+            <label for="screenplay"><h2>Upload Screenplay (PDF ONLY)</h2></label>
+            <input type="file" id="screenplay" name="screenplay" class="form-control" required style = "margin: auto; width:50%">
             <br>
             <h2>Page Range</h2>
             <h4>Note: Coverpage = 0</h4>
             <label for="start">Start Page</label>
-            <input type="number" id="start" name="start" class="form-control" style="text-align: center;" required><br><br>
+            <input type="number" id="start" name="start" class="form-control" style="text-align: center; margin: auto; width:5%" required><br><br>
             <label for="end">End Page</label>
-            <input type="number" id="end" name="end" class="form-control" style="text-align: center;" required><br><br>
+            <input type="number" id="end" name="end" class="form-control" style="text-align: center; margin: auto; width:5%" required><br><br>
             <h4>Disclaimer: Your file won't be uploaded if you upload more than 10 pages of your screenplay.</h4><br>
-            <h4>Genres:</h4>
+            <h2>Genres:</h2>
             <input type="checkbox" id="action" name="genres" value="1">
             <label for="action">Action</label>
             <br>
