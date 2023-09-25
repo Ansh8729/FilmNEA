@@ -77,16 +77,17 @@
     <div style="text-align:center" class="container">
         <form method='POST'>
             <h1>Create Competition</h1>
-            <label for="title">Title</label><br>
-            <input type="text" id="title" name="title" required><br>
+            <br>
+            <label for="title"><h2>Title</h2></label><br>
+            <input type="text" id="title" name="title" required style="width:400px;margin: auto"><br>
             <br><br>
-            <label for="brief">Brief</label><br>
-            <input type="text" id="brief" name="brief" required autocomplete="off">
+            <label for="brief"><h2>Brief</h2></label><br>
+            <textarea type="text" id="brief" name="brief" required autocomplete="off" style="width:500px;margin: auto"></textarea>
             <br><br>
-            <label for="date">Deadline</label><br>
-            <input type="date" id="date" name="date" required>
+            <label for="date"><h2>Deadline</h2></label><br>
+            <input type="date" id="date" name="date" required style="width:250px;margin: auto">
             <br><br>
-            <h4>Genres:</h4>
+            <h2>Genres</h2>
             <input type="checkbox" id="action" name="genres" value="1">
             <label for="action">Action</label>
             <br>
