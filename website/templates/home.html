@@ -5,6 +5,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    <style>
+        /* CSS styles for the card */
+        .card {
+            width: 500px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            text-align: left; /* Align text to the left */
+            display: flex;
+            flex-direction: column;
+        }
+        .profile-pic {
+            width: 15%;
+            height: 15%;
+            margin-bottom: 50px
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .username {
+            font-weight: bold;
+            text-align: left; /* Align text to the left */
+            margin-left: 15px; /* Add some spacing between the profile pic and username */
+            margin-bottom: 50px;
+        }
+        .logline {
+            margin-top: 10px;
+            text-align: center; /* Align text to the left */
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center; /* Align text to the left */
+        }
+        .genres {
+            margin-top: 10px;
+            text-align: left; /* Align text to the left */
+        }
+        .ratings {
+            margin-top: 10px;
+            text-align: left; /* Align text to the left */
+            display: flex;
+            align-items: center;
+        }
+        .star {
+            color: orange;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .average-rating {
+            margin-left: 10px;
+        }
+        .delete-button {
+            margin-top: 10px;
+            text-align: center; /* Align text to the center */
+        }
+        .pdf-embed {
+            width: 100%;
+            height: 400px; /* Adjust the height as needed */
+        }
+    </style>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
 <body>
@@ -57,21 +120,20 @@
                 <input type="submit" value="Submit">
             </form>
             <br>
-            <div id="posts" class="container" style="text-align:center">
+            <div id="posts">
             {% if posts %}
                 {% for post in posts %}
-                <div class="card border-dark">
-                            <div style="text-align: left; padding: 5%">
-                                {% if post.writer.user.profilepic %}
-                                <img src="{{ url_for('static', filename='images/'+ post.writer.user.profilepic) }}" width = "110px" height = "110px" alt="Profile picture">
-                                {% else %}
-                                <img src="/static/images/default.jpg" alt="Default profile picture" width = "110px" height = "110px">
-                                {% endif %}
-                            </div>
-                            <div style="top: 50%; right: 50%">
-                                <a href="/profilepage/{{post.writer.user.id}}"><h3>{{post.writer.user.username}}</h3></a>
-                            </div>
-                        {% if user.accounttype == 1 %}
+                <div class="card">
+                    <div class="user-info">
+                        {% if post.writer.user.profilepic %}
+                            <img src="{{ url_for('static', filename='images/'+ post.writer.user.profilepic) }}" width = "110px" height = "110px" alt="Profile picture" class="profile-pic">
+                        {% else %}
+                            <img src="/static/images/default.jpg" alt="Default profile picture" width = "110px" height = "110px" class="profile-pic">
+                        {% endif %}
+                        <a href="/profilepage/{{post.writer.user.id}}" class="username"><h4>{{post.writer.user.username}}</h4></a>
+                    </div>
+                    <!--
+                    {% if user.accounttype == 1 %}
                             {% if post.writer.user.id != user.id %}
                                 <div style="text-align:right">
                                         <form class="star-rating" method = "POST" action="/rate/{{post.scriptid}}">
@@ -95,49 +157,38 @@
                                         {% endfor %}
                                 </div>
                             {% endif %}
-                        {% endif %}
-                        {% if post.avgrating %}
-                        <div style="text-align: right">
-                            Average Rating: {{post.avgrating}}
-                        </div>
+                    {% endif %}-->
+                    {% if post.avgrating %}
+                        <span class="average-rating">Average Rating: {{post.avgrating}}</span>
                         <br>
-                        {% endif %}
-                        {% if user.id == post.writer.user.id %}
-                        <div style="text-align:right">
-                            <form action = /delete-post/{{post.scriptid}} method="POST">
-                                <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this post?')">
-                            </form>
-                        </div>
-                        {% endif %}
-                        {% if post.screenplay %}
-                        <a href="/script/{{post.scriptid}}" target="_blank"><h2>{{post.title}}</h2></a>
-                        {% else %}
-                        <h2>{{post.title}}</h2>
-                        {% endif %}
-                        <br>
-                        <div class="card-body">
-                            <div style="text-align:left">
-                            <h4>Genres:</h4>
-                            {% for script in scripthas %}
+                    {% endif %}
+                    {% if user.id == post.writer.user.id %}
+                        <form action = /delete-post/{{post.scriptid}} method="POST">
+                            <input class="delete-button" type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this post?')">
+                        </form>
+                    {% endif %}
+                    {% if post.screenplay %}
+                        <a style="text-align: center" href="/script/{{post.scriptid}}" target="_blank"><h2>{{post.title}}</h2></a>
+                    {% else %}
+                        <div style="text-align: center"><h2>{{post.title}}</h2></div>
+                    {% endif %}
+                    <div class="genres">
+                        <h4>Genres:</h4>
+                        {% for script in scripthas %}
                                 {% if script.scriptid == post.scriptid %}
                                     <b>{{script.has.genre}}</b><br>
                                 {% endif %}
-                            {% endfor %}
-                        </div>
-                            <h3>Logline:</h3>
-                            <p><div class="card-text">{{post.logline}}</div></p>
-                            <br>
-                            <h3>Message:</h3>
-                            {{post.message}}
-                            <br>
-                            <br>
-                            {% if post.screenplay %}
-                            <embed style="text-align: center;" src="{{url_for('static', filename='images/'+ post.screenplay)}}#toolbar=0" width = "100%" height = "550px%"> 
-                            {% else %}
-                            <h2>Screenplay not available</h2>
-                            {% endif %}
-                        </div>
-                        {% if user.accounttype == 1 %}
+                        {% endfor %}
+                    </div>
+                    <p class="logline">Logline: {{post.logline}}</p>
+                    <p class="message">{{post.message}}</p>
+                    {% if post.screenplay %}
+                        <embed class="pdf-embed" style="text-align: center;" src="{{url_for('static', filename='images/'+ post.screenplay)}}#toolbar=0" width = "100%" height = "550px%"> 
+                    {% else %}
+                        <h2>Screenplay not available</h2>
+                    {% endif %}
+                    <br>
+                    {% if user.accounttype == 1 %}
                         <div class="card border-dark">
                             <div class="card-body">
                             <h3>Comments</h3>
@@ -177,6 +228,7 @@
                         </div>
                         {% endif %}
                 </div>
+                        
                 <br>
                     {% endfor %}
             {% else %}
