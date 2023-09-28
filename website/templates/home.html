@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} {% block content%}
-<!DOCTYPE html>
-<html lang="en">
+
+<!--
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -68,10 +68,8 @@
             height: 400px; /* Adjust the height as needed */
         }
     </style>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-</head>
+</head>-->
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     {% if featured %}
         <div style="text-align: center">
             <h2>Featured Screenplay of the Day #{{script.featuredid}}</h2>
@@ -107,7 +105,7 @@
                 <button name="genre" value="13" class="btn btn-primary btn-lg">Western</button><br><br>
             </form>
         </div>
-        <div class="col-6">
+        <div class="col-6" style="text-align:center">
             <form method='POST' action="/sort">
                 <input type="radio" name="sorted" id="default" value="0"></input>
                 <label for="default">Default</label>
@@ -119,6 +117,16 @@
                 <label for="month">Top of Month</label>
                 <input type="submit" value="Submit">
             </form>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Dropdown
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                  <button class="dropdown-item" type="button">Action</button>
+                  <button class="dropdown-item" type="button">Another action</button>
+                  <button class="dropdown-item" type="button">Something else here</button>
+                </div>
+            </div>
             <br>
             <div id="posts">
             {% if posts %}
