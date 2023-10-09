@@ -236,6 +236,8 @@ def filter():
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=current_user.id).first()
         recs = GiveRecommendations(writer.writerid)
+    else:
+        recs = None
     posts = Screenplays.query.all()
     comments = Comments.query.all()
     scripthas = ScriptHas.query.all()
