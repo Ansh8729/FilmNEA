@@ -4,27 +4,33 @@
 <h1 align="center">{% block header %}Competitions{% endblock %}</h1>
 <br>
 <div id="comps" class="row">
-  <div class="col-3">
+  <div class="col-3" style="text-align:center">
     <br><br>
-    <h2>Genre List</h2>
-    <form action="/filter2" method="POST">
-      <button name="genre" value="0" class="btn btn-primary btn-lg">All</button><br><br>
-      <button name="genre" value="1" class="btn btn-primary btn-lg">Action</button><br><br>
-      <button name="genre" value="2" class="btn btn-primary btn-lg">Adventure</button><br><br>
-      <button name="genre" value="3" class="btn btn-primary btn-lg">Comedy</button><br><br>
-      <button name="genre" value="4" class="btn btn-primary btn-lg">Drama</button><br><br>
-      <button name="genre" value="5" class="btn btn-primary btn-lg">Fantasy</button><br><br>
-      <button name="genre" value="6" class="btn btn-primary btn-lg">Horror</button><br><br>
-      <button name="genre" value="7" class="btn btn-primary btn-lg">Musical</button><br><br>
-      <button name="genre" value="8" class="btn btn-primary btn-lg">Mystery</button><br><br>
-      <button name="genre" value="9" class="btn btn-primary btn-lg">Romance</button><br><br>
-      <button name="genre" value="10" class="btn btn-primary btn-lg">Sci-Fi</button><br><br>
-      <button name="genre" value="11" class="btn btn-primary btn-lg">Sports</button><br><br>
-      <button name="genre" value="12" class="btn btn-primary btn-lg">Thriller</button><br><br>
-      <button name="genre" value="13" class="btn btn-primary btn-lg">Western</button><br><br>
-  </form>
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="height:50%; width:50%">
+        Genre List
+      </button>
+      <ul class="dropdown-menu">
+          <form action="/filter2" method="POST" style="text-align:center">
+              <li><button name="genre" value="0" class="btn btn-dark">All</button></li><br>
+              <li><button name="genre" value="1" class="btn btn-dark">Action</button></li><br>
+              <li><button name="genre" value="2" class="btn btn-dark">Adventure</button></li><br>
+              <li><button name="genre" value="3" class="btn btn-dark">Comedy</button></li><br>
+              <li><button name="genre" value="4" class="btn btn-dark">Drama</button></li><br>
+              <li><button name="genre" value="5" class="btn btn-dark">Fantasy</button></li><br>
+              <li><button name="genre" value="6" class="btn btn-dark">Horror</button></li><br>
+              <li><button name="genre" value="7" class="btn btn-dark">Musical</button></li><br>
+              <li><button name="genre" value="8" class="btn btn-dark">Mystery</button></li><br>
+              <li><button name="genre" value="9" class="btn btn-dark">Romance</button></li><br>
+              <li><button name="genre" value="10" class="btn btn-dark">Sci-Fi</button></li><br>
+              <li><button name="genre" value="11" class="btn btn-dark">Sports</button></li><br>
+              <li><button name="genre" value="12" class="btn btn-dark">Thriller</button></li><br>
+              <li><button name="genre" value="13" class="btn btn-dark">Western</button></li><br>
+          </form>
+      </ul>
   </div>
-  <div class="col-6">
+  </div>
+  <div class="col-6" style="text-align:center">
     <form action="/sort2" method='POST'>
       <input type="radio" name="sorted" id="default" value="0"></input>
       <label for="default">Default</label>

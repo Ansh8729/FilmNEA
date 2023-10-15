@@ -447,6 +447,11 @@ def delete_post(scriptid):
 @views.route("delete-comp/<compid>", methods=['POST'])
 @login_required
 def delete_comp(compid):
+    compsubs = Notifications.query.all()
+    for i in compsubs:
+        if i.compid == compid:
+            db.session.delete(i)
+            db.session.commit()
     compgenres = CompHas.query.all()
     for i in compgenres:
         if i.compid == compid:

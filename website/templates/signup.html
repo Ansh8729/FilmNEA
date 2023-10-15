@@ -2,11 +2,13 @@
 {% block title %}Sign Up{% endblock %}
 {% block content %} <!--The Jinja code in the first 3 lines allows this page to "inherit" the navbar from the base template.-->
 <!--Below is the code that creates the sign-up page including input boxes for the email, username and password.-->
-<form method="POST">
-    <h3 align="center">Sign Up</h3>
+<form method="POST" style="text-align: center">
+    <h3>Sign Up</h3>
+    <br>
     <div class="form-group">
-        <label for="email">Email Address</label>
+        <label for="email" style="text-align:center"><h4>Email Address</h4></label>
         <input 
+        style="margin: auto; width:40%"
         type="text" 
         id="email" 
         name="email" 
@@ -14,8 +16,9 @@
         placeholder="Enter Email"
         />
         <br>
-        <label for="username">Username</label>
+        <label for="username"><h4>Username</h4></label>
         <input 
+        style="margin: auto; width:40%"
         type="text" 
         id="username" 
         name="username" 
@@ -23,8 +26,9 @@
         placeholder="Enter Username"
         />
         <br>
-        <label for="password1">Password</label>
+        <label for="password1"><h4>Password</h4></label>
         <input 
+        style="margin: auto; width:40%"
         type="password" 
         id="password1" 
         name="password1" 
@@ -32,8 +36,9 @@
         placeholder="Enter Password"
         />
         <br>
-        <label for="password2">Reenter Password </label>
+        <label for="password2"><h4>Reenter Password</h4></label>
         <input 
+        style="margin: auto; width:40%"
         type="password" 
         id="password2" 
         name="password2" 
@@ -47,8 +52,8 @@
                 <input type="radio" id="writer" name="accounttype" value="Screenwriter">
                 <label for="writer"><h5>Screenwriter</h5></label><br>
                 <br>
-                <h6>Features:</h6>
-                <ul>
+                <h5>Features:</h5>
+                <ul style="text-align: left">
                     <li>Post screenplays that can be rated and commented on!</li>
                     <li>Customisable profile page - you can choose your own font style and background colour!</li>
                     <li>Submit your screenplays for competitions run by producer accounts!</li>
@@ -58,8 +63,8 @@
                 <input type="radio" id="producer" name="accounttype" value="Producer">
                 <label for="producer"><h5>Producer</h5></label><br>
                 <br>
-                <h6>Features:</h6>
-                <ul>
+                <h5>Features:</h5>
+                <ul style="text-align: left">
                     <li>Post your own screenplay competitions that screenwriter users can submit to!</li>
                     <li>View screenwriter users' posts!</li>
                     <li><b>NOTE: Account associated with producer guilds will need to be approved through OTP verification.</b></li>
