@@ -266,7 +266,7 @@ def script(scriptid):
 @views.route("/rate/<scriptid>", methods=['POST'])
 @login_required
 def rate(scriptid):
-    rating = flask.request.form.get("star-input")
+    rating = flask.request.form.get("rate")
     writer = Screenwriters.query.filter_by(userid = current_user.id).first()
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     like_exists = LikedScreenplays.query.filter(LikedScreenplays.writerid == writer.writerid, LikedScreenplays.scriptid==scriptid).first()
@@ -300,7 +300,7 @@ def rate2(scriptid, userid):
         flask.flash("Rating submitted!")
     else:
         flask.flash("You've already rated this screenplay!", category="error")
-        return flask.redirect(flask.url_for(f'views.profilepage/{current_user.id}'))
+        return flask.redirect(flask.url_for("views.profilepage", userid = script.writer.user.id))
     ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
     total = 0
     for i in ratings:
@@ -308,7 +308,7 @@ def rate2(scriptid, userid):
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     script.avgrating = total/ratings.count()
     db.session.commit()
-    return flask.redirect(flask.url_for(f'views.profilepage/{userid}'))
+    return flask.redirect(flask.url_for("views.profilepage", userid = script.writer.user.id))
 
 @views.route("/create-comment/<scriptid>", methods=['POST'])
 @login_required
@@ -735,6 +735,13 @@ def filter2():
 @login_required
 def comp(compid):
     comp = Competitions.query.filter_by(compid = compid).first()
+    writer = Screenwriters.query.filter_by(userid=current_user.id).first()
+    notifs = Notifications.query.filter_by(writerid = writer.writerid)
+    submitted = None
+    for notif in notifs:
+        if notif.compid == compid and submission:
+            submitted = True
+            break
     if flask.request.method == "POST":
         submission = flask.request.files["submissions"]
         scriptname = secure_filename(submission.filename) 
@@ -746,7 +753,7 @@ def comp(compid):
         db.session.commit()
         flask.flash("Submission sent!")
         return flask.redirect(flask.url_for("views.competitions"))
-    return flask.render_template("comp_full.html",user=current_user, comp=comp)
+    return flask.render_template("comp_full.html",user=current_user, comp=comp, submitted=submitted)
 
 @views.route('/submit/<compid>', methods=['GET', 'POST'])
 @login_required
