@@ -230,7 +230,7 @@
                                             <b><a href="/profilepage/{{comment.writer.user.id}}">{{comment.writer.user.username}}</a></b>:
                                             {% if comment.writer.user.id == user.id %}
                                                 {{comment.comment}}
-                                                <form method="POST" action="/delete-comment/{{ comment.commentid }}"><button type="submit" name="Delete">Delete</button></form>
+                                                <form method="POST" action="/delete-comment2/{{ comment.commentid }}"><button type="submit" name="Delete">Delete</button></form>
                                             {% else %}
                                                 {{comment.comment}}
                                             {% endif %}
@@ -238,7 +238,7 @@
                                     {% endif %}
                                 {% endfor %}
                                 </div>
-                                <form class="input-group mb-3"method="POST" action="/create-comment/{{post.scriptid}}">
+                                <form class="input-group mb-3"method="POST" action="/profilepagecomment/{{post.scriptid}}">
                                     <input type="text" id="text" name="text" class="form-control" placeholder="Comment something!"/>
                                     <button type="submit" class="btn btn-primary">Comment</button>
                                 </form>

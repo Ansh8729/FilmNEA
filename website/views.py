@@ -333,9 +333,46 @@ def create_comment(scriptid):
 
     return flask.redirect(flask.url_for('views.home'))
 
+@views.route("/profilepagecomment/<scriptid>", methods=['POST'])
+@login_required
+def ppcomment(scriptid):
+    text = flask.request.form.get('text')
+    if not text:
+        flask.flash('Comment cannot be empty.', category='error')
+    else:
+        post = Screenplays.query.filter_by(scriptid = scriptid).first()
+        writer = Screenwriters.query.filter_by(userid = current_user.id).first()
+        if post:
+            comment = Comments(writerid=writer.writerid, scriptid=scriptid, comment=text)
+            db.session.add(comment)
+            db.session.commit()
+            comment = Comments.query.order_by(Comments.commentid).first()
+            writer2 = Screenwriters.query.filter_by(userid = post.writer.user.id).first()
+            notif = Notifications(writerid = writer2.writerid, responsetype = 3, commentid=comment.commentid)
+            db.session.add(notif)
+            db.session.commit()
+        else:
+            flask.flash('Post does not exist.', category='error')
+
+    script = Screenplays.query.filter_by(scriptid=scriptid).first()
+    return flask.redirect(flask.url_for("views.profilepage", userid = script.writer.user.id))
+
 @views.route("/delete-comment/<commentid>", methods=['GET', 'POST'])
 @login_required
 def delete_comment(commentid):
+    notif = Notifications.query.filter_by(commentid=commentid).first()
+    if notif:
+        db.session.delete(notif)
+        db.session.commit()
+    comment = Comments.query.filter_by(commentid=commentid).first()
+    db.session.delete(comment)
+    db.session.commit()
+    flask.flash("Comment removed!")
+    return flask.redirect(flask.url_for('views.home'))
+
+@views.route("/delete-comment2/<commentid>", methods=['GET', 'POST'])
+@login_required
+def deleteppcomment(commentid):
     notif = Notifications.query.filter_by(commentid=commentid).first()
     if notif:
         db.session.delete(notif)
