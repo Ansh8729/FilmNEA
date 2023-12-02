@@ -14,11 +14,19 @@ def create_app():
 
     db.init_app(app)
 
-    from .views import views
+    # from .views import views
     from .auth import auth
+    from .homepage import homepage
+    from .profile import profile
+    from .comps import comps
+    from .notifs import notifs
 
-    app.register_blueprint(views, url_prefix="/")
+    # app.register_blueprint(views, url_prefix="/")
     app.register_blueprint(auth, url_prefix="/")
+    app.register_blueprint(homepage, url_prefix="/")
+    app.register_blueprint(comps, url_prefix="/")
+    app.register_blueprint(profile, url_prefix="/")
+    app.register_blueprint(notifs, url_prefix="/")
 
     from .models import Users, Genres
 
