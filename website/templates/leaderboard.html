@@ -1,0 +1,19 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body style="text-align:center">
+    <h1>Leaderboard</h1>
+    {% for writer in writers %}
+        <div class="card" style="width: 50%">
+            {{ writer.user.username }}<br>
+            Experience Level: {{ writer.experiencelevel }}
+        </div>
+    {% endfor %}
+</body>
+</html>
+{% endblock %}

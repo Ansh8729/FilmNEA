@@ -192,6 +192,12 @@ def home():
         db.session.commit()
     return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes, script=featured.queue[featured.head], featured=featured)
 
+@homepage.route("/leaderboard", methods=['GET','POST'])
+@login_required
+def leaderboard():
+    writers = Screenwriters.query.all()
+    return flask.render_template("leaderboard.html", writers=writers, user=current_user)
+
 @homepage.route("/sort", methods=['GET','POST'])
 @login_required
 def sort():
