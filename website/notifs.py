@@ -63,5 +63,6 @@ def requestresponse(requestid):
 @notifs.route('/submissions/<compid>', methods=['GET', 'POST'])
 @login_required
 def submissions(compid):
-    notifs = Notifications.query.filter(Notifications.compid != None, Competitions.compid == compid)
-    return flask.render_template('submissions.html', notifs=notifs, user=current_user)
+    notifs = Notifications.query.filter_by(compid = compid)
+    competition = Competitions.query.filter_by(compid=compid).first()
+    return flask.render_template('submissions.html', notifs=notifs, user=current_user, comp=competition)

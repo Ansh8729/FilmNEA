@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content%}
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,10 +6,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+<style>
+    #table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    
+    #table td, #table th {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    
+    #table tr:nth-child(even){background-color: #f2f2f2;}
+    
+    #table th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: #212121;
+      color: white;
+    }
+    </style>
 <body>
-    {% for sub in submissions %}
-        <div class="card" style="text-align:center">
-            <p>Submission for {{ sub.comp.title }} by <a href="/profilepage/{{sub.writer.user.id}}" target="_blank">{{ sub.writer.user.username }}</a></p>
+    <h1 style="text-align:center">Submissions for {{comp.title}}</h1>
+    <br>
+    <table id="table">
+        <tr>
+          <th>Username</th>
+          <th>Submission</th>
+          <th>Response</th>
+        </tr>
+        {% for sub in notifs %}
+            <tr>
+                <td><a href="/profilepage/{{sub.writer.user.id}}" target="_blank">{{ sub.writer.user.username }}</a></td>
+                <td><a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a></td>
+                <td>
+                    <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}">
+                        <input type="text" id="response" name="subresponse" style="width:60%">
+                        <input type="submit" name="Submit">
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+{% endblock %}
+
+<!--
+        <div class="card" style="text-align:center;margin:auto;width:50%">
+            <p><a href="/profilepage/{{sub.writer.user.id}}" target="_blank">Username: {{ sub.writer.user.username }}</a></p>
             <a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a>
             <br>
             <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}">
@@ -17,8 +63,4 @@
                 <input type="text" id="response" name="subresponse">
                 <input type="submit" name="Submit">
             </form>
-        </div>
-    {% endfor %}
-</body>
-</html>
-{% endblock %}
+        </div>-->
