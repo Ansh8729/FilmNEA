@@ -61,11 +61,11 @@ def login():
                     else:
                         flash("Logged in!", category='success')
                         login_user(user, remember=True)
-                        return redirect(url_for('views.home'))
+                        return redirect(url_for('homepage.home'))
                 else:
                     flash("Logged in!", category='success')
                     login_user(user, remember=True)
-                    return redirect(url_for('views.home'))
+                    return redirect(url_for('homepage.home'))
             else:
                 flash('Password is incorrect.', category='error')
         else:
@@ -113,12 +113,12 @@ def sign_up():
                 if genres:
                     login_user(new_user, remember=True)
                     flash('User created!')
-                    return redirect(url_for('views.home'))
+                    return redirect(url_for('homepage.home'))
                 else:
                     LoadGenres()
                     login_user(new_user, remember=True)
                     flash('User created!')
-                    return redirect(url_for('views.home'))
+                    return redirect(url_for('homepage.home'))
             if accounttype == "Producer":
                 new_user = Users(email=email, username=username, forename=forename, surname=surname, password=generate_password_hash(
                 password1, method='scrypt'), accounttype = 2)
@@ -143,7 +143,7 @@ def sign_up():
                     db.session.commit()
                     login_user(new_user, remember=True)
                     flash('User created!')
-                    return redirect(url_for('views.home'))
+                    return redirect(url_for('homepage.home'))
 
     return render_template("signup.html", user=current_user)
 
@@ -159,10 +159,10 @@ def approval():
             db.session.commit()
             login_user(new_user, remember=True)
             flash('User approved and created!', category='success')  
-            return redirect(url_for('views.home'))
+            return redirect(url_for('homepage.home'))
         else:
             flash('Incorrect OTP.', category='error')
-            return redirect(url_for('views.approval'))
+            return redirect(url_for('auth.approval'))
 
     return render_template("approval.html")
 
@@ -201,4 +201,4 @@ def forgotpassword2(email):
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("views.home"))
+    return redirect(url_for("homepage.home"))

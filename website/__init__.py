@@ -14,14 +14,12 @@ def create_app():
 
     db.init_app(app)
 
-    # from .views import views
     from .auth import auth
     from .homepage import homepage
     from .profile import profile
     from .comps import comps
     from .notifs import notifs
 
-    # app.register_blueprint(views, url_prefix="/")
     app.register_blueprint(auth, url_prefix="/")
     app.register_blueprint(homepage, url_prefix="/")
     app.register_blueprint(comps, url_prefix="/")
@@ -32,7 +30,6 @@ def create_app():
 
     with app.app_context():
         db.create_all()
-        '''
         genrelist = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Sports', 'Thriller', 'Western']
         for i in range(len(genrelist)):
             newgenre = Genres(genre=genrelist[i])
@@ -42,7 +39,6 @@ def create_app():
             if i.genreid > 13:
                 db.session.delete(i)
                 db.session.commit()
-        '''
 
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"

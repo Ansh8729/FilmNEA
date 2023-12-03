@@ -195,7 +195,7 @@ def home():
 @homepage.route("/leaderboard", methods=['GET','POST'])
 @login_required
 def leaderboard():
-    writers = Screenwriters.query.all()
+    writers = Screenwriters.query.order_by(Screenwriters.experiencelevel)
     return flask.render_template("leaderboard.html", writers=writers, user=current_user)
 
 @homepage.route("/sort", methods=['GET','POST'])

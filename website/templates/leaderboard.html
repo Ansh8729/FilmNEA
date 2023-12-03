@@ -7,13 +7,13 @@
     <title>Document</title>
 </head>
 <body style="text-align:center">
-    <h1>Leaderboard</h1>
-    {% for writer in writers %}
-        <div class="card" style="width: 50%">
-            {{ writer.user.username }}<br>
-            Experience Level: {{ writer.experiencelevel }}
-        </div>
-    {% endfor %}
+        <h1>Leaderboard</h1>
+        {% for writer in writers %}
+            <div class="card" style="text-align:center;margin: auto; width:30%; padding:10px">
+                <a href="/profilepage/{{writer.user.id}}" target="_blank"><h3>{{writer.user.username}}</h3></a>
+                <h4>Experience Level: {{ writer.experiencelevel }}<h4>
+            </div>
+        {% endfor %}
 </body>
 </html>
 {% endblock %}

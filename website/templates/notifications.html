@@ -69,43 +69,38 @@
         <div class="row" style="text-align:center">
             <div class="col-6">
                 <h1>Request Responses</h1>
-                {% for response in notifs %}
-                    {% if response.requeststatus == 2 %}
-                        <div class="card" style="text-align:center">
-                            {{response.message}}
-                            <form method="POST" action="/deleteresponse/{{ response.notifid }}">
-                                <button type="submit" name="Delete">Delete</button>
-                            </form>
-                        </div>
-                    {% endif %}
-                    {% if response.requeststatus == 1 %}
-                        <div class="card" style="text-align:center">
-                            {{response.message}}
-                            <a target="_blank" href="{{url_for('static', filename='images/'+response.script.fullfile)}}">Full Screenplay File</a>
-                            <form method="POST" action="/deleteresponse/{{ response.notifid }}">
-                                <button type="submit" name="Delete">Delete</button>
-                            </form>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <div class="col-6">
-                <h1>Competition Submissions</h1>
-                {% for sub in notifs %}
-                    {% if sub.compid != None %}
-                        {% if not sub.message %}
+                {% if notifs != None %}
+                    {% for response in notifs %}
+                        {% if response.requeststatus == 2 %}
                             <div class="card" style="text-align:center">
-                                <p>Submission for {{ sub.comp.title }} by <a href="/profilepage/{{sub.writer.user.id}}" target="_blank">{{ sub.writer.user.username }}</a></p>
-                                <a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a>
-                                <br>
-                                <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}">
-                                    <label for="response">Response:</label>
-                                    <input type="text" id="response" name="subresponse">
-                                    <input type="submit" name="Submit">
+                                {{response.message}}
+                                <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                                    <button type="submit" name="Delete">Delete</button>
                                 </form>
                             </div>
                         {% endif %}
-                    {% endif %}
+                        {% if response.requeststatus == 1 %}
+                            <div class="card" style="text-align:center">
+                                {{response.message}}
+                                <a target="_blank" href="{{url_for('static', filename='images/'+response.script.fullfile)}}">Full Screenplay File</a>
+                                <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                                    <button type="submit" name="Delete">Delete</button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <h2>No responses</h2>
+                {% endif %}
+            </div>
+            <div class="col-6">
+                <h1>Competitions</h1>
+                {% for comp in comps %}
+                    <div class="card" style="text-align:left">
+                        {{ comp.title }}<br>
+                        Deadline: {{comp.deadline}}
+                        <a target="_blank" href="/submissions/{{comp.compid}}">Submissions</a>
+                    </div>
                 {% endfor %}
             </div>
         </div>

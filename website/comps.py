@@ -263,3 +263,22 @@ def submit(compid):
         db.session.commit()
         flask.flash("Submission sent!")
         return flask.redirect(flask.url_for("comps.competitions"))
+    
+@comps.route("delete-comp/<compid>", methods=['POST'])
+@login_required
+def delete_comp(compid):
+    compsubs = Notifications.query.all()
+    for i in compsubs:
+        if i.compid == compid:
+            db.session.delete(i)
+            db.session.commit()
+    compgenres = CompHas.query.all()
+    for i in compgenres:
+        if i.compid == compid:
+            db.session.delete(i)
+            db.session.commit()
+    comp = Competitions.query.filter_by(compid=compid).first()
+    db.session.delete(comp)
+    db.session.commit()
+    flask.flash('Competition deleted.', category='success')
+    return flask.redirect(flask.url_for('comps.competitions'))

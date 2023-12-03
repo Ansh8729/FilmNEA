@@ -17,7 +17,8 @@ def notifications(userid):
     if current_user.accounttype == 2:
         producer = Producers.query.filter_by(userid=userid).first()
         notifs = Notifications.query.filter_by(producerid = producer.producerid)
-        return flask.render_template("notifications.html", notifs=notifs, user=current_user)
+        comps = Competitions.query.filter_by(producerid=producer.producerid)
+        return flask.render_template("notifications.html", notifs=notifs, user=current_user, comps=comps)
     
 @notifs.route('/sendback/<userid>/<compid>', methods=['GET', 'POST'])
 @login_required
@@ -58,3 +59,9 @@ def requestresponse(requestid):
         db.session.commit()
         flask.flash("Request declined!")
     return flask.redirect(flask.url_for("notifs.notifications", userid=current_user.id))
+
+@notifs.route('/submissions/<compid>', methods=['GET', 'POST'])
+@login_required
+def submissions(compid):
+    notifs = Notifications.query.filter(Notifications.compid != None, Competitions.compid == compid)
+    return flask.render_template('submissions.html', notifs=notifs, user=current_user)
