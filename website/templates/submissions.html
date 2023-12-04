@@ -26,29 +26,116 @@
       background-color: #212121;
       color: white;
     }
+
+    .sortable-list {
+    max-width: 600px;
+    margin: 0 auto;
+}
+ 
+ul {
+    list-style-type: none;
+    padding: 0;
+    border: 5px solid #000000;
+}
+ 
+li {
+    background-color: #f0f0f0;
+    padding: 10px;
+    margin: 5px;
+    cursor: grab;
+    border: 3px solid #000000;
+}
     </style>
 <body>
     <h1 style="text-align:center">Submissions for {{comp.title}}</h1>
     <br>
-    <table id="table">
-        <tr>
-          <th>Username</th>
-          <th>Submission</th>
-          <th>Response</th>
-        </tr>
-        {% for sub in notifs %}
-            <tr>
-                <td><a href="/profilepage/{{sub.writer.user.id}}" target="_blank">{{ sub.writer.user.username }}</a></td>
-                <td><a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a></td>
-                <td>
-                    <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}">
-                        <input type="text" id="response" name="subresponse" style="width:60%">
-                        <input type="submit" name="Submit">
-                    </form>
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
+    <div class="sortable-list">
+        <ul id="sortable">
+            {% for sub in notifs %}
+                <li draggable="true">
+                    User: <a href="/profilepage/{{sub.writer.user.id}}" target="_blank">{{ sub.writer.user.username }}</a><br>
+                    Submission: <a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+            const sortableList =
+        document.getElementById("sortable");
+    let draggedItem = null;
+
+    sortableList.addEventListener(
+        "dragstart",
+        (e) => {
+            draggedItem = e.target;
+            setTimeout(() => {
+                e.target.style.display =
+                    "none";
+            }, 0);
+    });
+
+    sortableList.addEventListener(
+        "dragend",
+        (e) => {
+            setTimeout(() => {
+                e.target.style.display = "";
+                draggedItem = null;
+            }, 0);
+    });
+
+    sortableList.addEventListener(
+        "dragover",
+        (e) => {
+            e.preventDefault();
+            const afterElement =
+                getDragAfterElement(
+                    sortableList,
+                    e.clientY);
+            const currentElement =
+                document.querySelector(
+                    ".dragging");
+            if (afterElement == null) {
+                sortableList.appendChild(
+                    draggedItem
+                );} 
+            else {
+                sortableList.insertBefore(
+                    draggedItem,
+                    afterElement
+                );}
+        });
+
+    const getDragAfterElement = (
+        container, y
+    ) => {
+        const draggableElements = [
+            ...container.querySelectorAll(
+                "li:not(.dragging)"
+            ),];
+
+        return draggableElements.reduce(
+            (closest, child) => {
+                const box =
+                    child.getBoundingClientRect();
+                const offset =
+                    y - box.top - box.height / 2;
+                if (
+                    offset < 0 &&
+                    offset > closest.offset) {
+                    return {
+                        offset: offset,
+                        element: child,
+                    };} 
+                else {
+                    return closest;
+                }},
+            {
+                offset: Number.NEGATIVE_INFINITY,
+            }
+        ).element;
+    };
+    </script>
 </body>
 </html>
 {% endblock %}
@@ -64,3 +151,25 @@
                 <input type="submit" name="Submit">
             </form>
         </div>-->
+
+<!--<table id="table">
+        <tr>
+          <th>Username</th>
+          <th>Submission</th>
+          <th>Response</th>
+        </tr>
+        {% for sub in notifs %}
+            <tr>
+                <td><a href="/profilepage/{{sub.writer.user.id}}" target="_blank">{{ sub.writer.user.username }}</a></td>
+                <td><a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a></td>
+                <td>
+                    <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}">
+                        {% for i in range(1, notifs.count()+1) %}
+                            <input type="radio" id="box" name="ranking" style="width:60%">
+                            <label>{{i}}</label>
+                        {% endfor %}
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </table>-->
