@@ -24,6 +24,7 @@ def notifications(userid):
 @login_required
 def sendback(userid, compid):
     if current_user.accounttype == 2:
+        ranking = flask.request.form.get('ranking')
         response = flask.request.form.get('subresponse')
         producer = Producers.query.filter_by(userid=current_user.id).first()
         writer = Screenwriters.query.filter_by(userid=userid).first()  
