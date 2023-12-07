@@ -98,7 +98,7 @@
                 {% for comp in comps %}
                     <div class="card" style="text-align:left">
                         {{ comp.title }}<br>
-                        Deadline: {{comp.deadline}}
+                        Deadline: {{comp.deadline_string}}
                         <a target="_blank" href="/submissions/{{comp.compid}}">Submissions</a>
                     </div>
                 {% endfor %}

@@ -96,7 +96,8 @@ class Competitions(db.Model):
     title = db.Column(db.String(300))
     brief = db.Column(db.Text)
     deadline = db.Column(db.DateTime(timezone=True))
-    date_created = db.Column(db.Date, default=func.current_date())
+    deadline_string = db.Column(db.String(300))
+    date_created = db.Column(db.String(300))
     datetime_created = db.Column(db.DateTime(timezone=True), default=func.now())
     submissionnum = db.Column(db.Integer)
     

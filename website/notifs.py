@@ -26,7 +26,7 @@ def ISOtoDate(date):
     if date2[9] == "1":
         day = daynum+"st"
     elif daynum == "02" or daynum == "22":
-        day = daynum+"st"
+        day = daynum+"nd"
     elif daynum == "03" or daynum == "23":
         day = daynum+"rd"
     else:

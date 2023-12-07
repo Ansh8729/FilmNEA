@@ -157,7 +157,7 @@ def comp(compid):
 @login_required
 def submit(compid):
     file = flask.request.files['submission']
-    scriptname = secure_filename(file.filename) 
+    scriptname = NoSpaces(secure_filename(file.filename))
     file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
     shutil.move(scriptname,'static/images')
     if IsPDF(file.filename) == False:
@@ -165,7 +165,7 @@ def submit(compid):
     else:
         writer = Screenwriters.query.filter_by(userid=current_user.id).first()
         comp = Competitions.query.filter_by(compid=compid).first()
-        newsub = Notifications(writerid=writer.writerid, producerid=comp.producerid, compid=compid, submission=file.filename)
+        newsub = Notifications(writerid=writer.writerid, producerid=comp.producerid, compid=compid, submission=NoSpaces(file.filename))
         db.session.add(newsub)
         db.session.commit()
         flask.flash("Submission sent!")
