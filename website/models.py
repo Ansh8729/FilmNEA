@@ -86,6 +86,7 @@ class Notifications(db.Model):
     commentid = db.Column(db.Integer, db.ForeignKey('Comments.commentid'))
     compid = db.Column(db.Integer, db.ForeignKey('Competitions.compid'))
     submission = db.Column(db.String(150)) 
+    ranking = db.Column(db.String(150))
     message = db.Column(db.Text)
     datetime_created = db.Column(db.DateTime(timezone=True))
 

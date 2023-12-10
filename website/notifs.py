@@ -63,11 +63,11 @@ def sendback(userid, compid):
         producer = Producers.query.filter_by(userid=current_user.id).first()
         writer = Screenwriters.query.filter_by(userid=userid).first()  
         sub = Notifications.query.filter(Notifications.producerid == producer.producerid, Notifications.writerid==writer.writerid, Notifications.compid == compid).first()
-        message = f"{producer.user.username} responded to your submission to their competition {sub.comp.title}: {response}"
-        sub.message = message
+        sub.ranking = ranking
+        sub.message = response
         db.session.commit()
         flask.flash("Response sent!")
-        return flask.redirect(flask.url_for("notifs.notifications", userid=current_user.id))
+        return flask.redirect(flask.url_for("notifs.submissions", userid=current_user.id, compid=compid))
         
 @notifs.route('/deleteresponse/<responseid>', methods=['GET', 'POST'])
 @login_required
@@ -101,3 +101,4 @@ def submissions(compid):
     notifs = Notifications.query.filter_by(compid = compid)
     competition = Competitions.query.filter_by(compid=compid).first()
     return flask.render_template('submissions.html', notifs=notifs, user=current_user, comp=competition)
+

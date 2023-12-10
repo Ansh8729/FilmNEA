@@ -165,7 +165,7 @@ def submit(compid):
     else:
         writer = Screenwriters.query.filter_by(userid=current_user.id).first()
         comp = Competitions.query.filter_by(compid=compid).first()
-        newsub = Notifications(writerid=writer.writerid, producerid=comp.producerid, compid=compid, submission=NoSpaces(file.filename))
+        newsub = Notifications(writerid=writer.writerid, producerid=comp.producerid, compid=compid, submission=scriptname)
         db.session.add(newsub)
         db.session.commit()
         flask.flash("Submission sent!")

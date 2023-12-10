@@ -15,6 +15,7 @@
         <div class="row" style="text-align:center">
             <div class="col-6">
                 <h1>Script Responses</h1>
+                <br>
                 {% for response in notifs %}
                     {% if response.responsetype == 1 %}
                         <div class="card" style="text-align:left">
@@ -33,8 +34,13 @@
                     {% endif %}
                     {% if response.compid != None %}
                         {% if response.message %}
-                            <div class="card" style="text-align:left">  
-                                <h4><a href="/profilepage/{{ response.producer.user.id }}" target="_blank">{{ response.producer.user.username }}</a> has responded to your submission to {{response.comp.title}}, saying <i>{{ response.message }}</i></h4>
+                            <div class="card" style="text-align:center"> 
+                                {% if response.ranking == 0 %}
+                                    <h4>Your submission to {{response.comp.title}} didn't make the Top 5.</h4>
+                                {% else %}
+                                    <h4>Your submission to {{response.comp.title}} has been awarded</h4><h3>{{response.ranking}} place!</h3>
+                                {% endif %}
+                                <h5>Response to your submission by <a href="/profilepage/{{ response.producer.user.id }}" target="_blank">{{ response.producer.user.username }}</a>:<br> <i>{{ response.message }}</i></h5>
                                 <form method="POST" action="/deleteresponse/{{ response.notifid }}">
                                     <button type="submit" name="Delete">Delete</button>
                                 </form>
@@ -45,6 +51,7 @@
             </div>
             <div class="col-6">
                 <h1>Screenplay Requests</h1>
+                <br>
                 {% for request in notifs %}
                     {% if request.responsetype == 2 %}
                         {% if request.requeststatus == 0 %}
@@ -99,7 +106,7 @@
                     <div class="card" style="text-align:left">
                         {{ comp.title }}<br>
                         Deadline: {{comp.deadline_string}}
-                        <a target="_blank" href="/submissions/{{comp.compid}}">Submissions</a>
+                        <a target="_blank" href="/submissions/{{comp.compid}}">Submissions: {{comp.submissionnum}}</a>
                     </div>
                 {% endfor %}
             </div>

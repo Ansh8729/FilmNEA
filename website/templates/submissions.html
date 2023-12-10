@@ -56,29 +56,31 @@ li {
           <th>Response</th>
         </tr>
         {% for sub in notifs %}
-            <tr>
-                <td><a href="/profilepage/{{sub.writer.user.id}}" target="_blank">{{ sub.writer.user.username }}</a></td>
-                <td><a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a></td>
-                <td>
-                    <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}" style="text-align: center">
-                        <input type="radio" id="box" name="ranking" value="1">
-                        <label>1st&nbsp&nbsp&nbsp</label>
-                        <input type="radio" id="box" name="ranking" value="2">
-                        <label>2nd&nbsp&nbsp&nbsp</label>
-                        <input type="radio" id="box" name="ranking" value="3">
-                        <label>3rd&nbsp&nbsp&nbsp</label>
-                        <input type="radio" id="box" name="ranking" value="4">
-                        <label>4th&nbsp&nbsp&nbsp</label>
-                        <input type="radio" id="box" name="ranking" value="5">
-                        <label>5th&nbsp&nbsp&nbsp</label>
-                        <input type="radio" id="box" name="ranking" value="runnerup">
-                        <label>Runner Up&nbsp&nbsp&nbsp</label>
-                        <label for="response">Response:</label>
-                        <input type="text" id="response" name="subresponse">
-                        <input type="submit" name="Submit">
-                    </form>
-                </td>
-            </tr>
+            {% if not sub.message %}
+                <tr>
+                    <td><a href="/profilepage/{{sub.writer.user.id}}" target="_blank">{{ sub.writer.user.username }}</a></td>
+                    <td><a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a></td>
+                    <td>
+                        <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}" style="text-align: center">
+                            <input type="radio" id="box" name="ranking" value="1st">
+                            <label>1st&nbsp&nbsp&nbsp</label>
+                            <input type="radio" id="box" name="ranking" value="2nd">
+                            <label>2nd&nbsp&nbsp&nbsp</label>
+                            <input type="radio" id="box" name="ranking" value="3rd">
+                            <label>3rd&nbsp&nbsp&nbsp</label>
+                            <input type="radio" id="box" name="ranking" value="4th">
+                            <label>4th&nbsp&nbsp&nbsp</label>
+                            <input type="radio" id="box" name="ranking" value="5th">
+                            <label>5th&nbsp&nbsp&nbsp</label>
+                            <input type="radio" id="box" name="ranking" value="0">
+                            <label>Below 5th Place&nbsp&nbsp&nbsp</label>
+                            <label for="response">Response:</label>
+                            <input type="text" id="response" name="subresponse">
+                            <input type="submit" name="Submit">
+                        </form>
+                    </td>
+                </tr>
+            {% endif %}
         {% endfor %}
     </table>
 </body>
