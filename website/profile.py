@@ -1,7 +1,7 @@
 # from flask import Blueprint, render_template, request, flash, redirect, url_for
 import flask 
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Notifications, FeaturedScripts
+from .models import Users, Screenwriters, Producers, Competitions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Notifications, Awards
 from flask_wtf import FlaskForm
 from wtforms import widgets, RadioField, StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField, SelectMultipleField
 from werkzeug.utils import secure_filename
@@ -34,15 +34,25 @@ def profilepage(userid):
         writer = Screenwriters.query.filter_by(userid=userid).first()
         scripts = Screenplays.query.filter_by(writerid = writer.writerid)
         rating = 0
-        for i in scripts:
-            if i.avgrating != None:
-                rating += i.avgrating
-        writer.experiencelevel = rating*scripts.count()
+        for script in scripts:
+            if script.avgrating != None:
+                rating += script.avgrating
+        score = 0
+        awards = Awards.query.filter_by(writerid = writer.writerid)
+        for award in awards:
+            if award.ranking == "1st":
+                score += 3
+            if award.ranking == "2nd":
+                score += 2
+            if award.ranking == "3rd":
+                score += 1
+        writer.experiencelevel = rating*scripts.count()+score
         db.session.commit()
         comments = Comments.query.all()
         scripthas = ScriptHas.query.all()
         likes = LikedScreenplays.query.all()
-        return flask.render_template("profilepage.html", user=current_user, posts=scripts, comments=comments, scripthas=scripthas, profileuser=profileuser, details=writer, likes=likes)
+        awards = Awards.query.filter_by(writerid = writer.writerid)
+        return flask.render_template("profilepage.html", user=current_user, posts=scripts, comments=comments, scripthas=scripthas, profileuser=profileuser, details=writer, likes=likes, awards=awards)
     if profileuser.accounttype == 2:
         return flask.render_template("profilepage.html", user=current_user, profileuser=profileuser)
 

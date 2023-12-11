@@ -49,6 +49,28 @@
   }
     </style>
     <style>
+        #table {
+          border-collapse: collapse;
+          width: 90%;
+        }
+        
+        #table td, #table th {
+          border: 1px solid #ddd;
+          padding: 8px;
+        }
+        
+        #table tr:nth-child(even){background-color: #f2f2f2;}
+        
+        #table th {
+          padding-top: 12px;
+          padding-bottom: 12px;
+          text-align: left;
+          background-color: #212121;
+          color: white;
+        }
+
+    </style>
+    <style>
         body { background-color: #eff1f3; font-family:futura; font-weight: bold;}
         .card {
             width: 600px;
@@ -119,33 +141,87 @@
     {% endif %}
 </head>
 <body class="profilepage">
-        {% if profileuser.id == user.id %}
-        <a href="/pageeditor/{{user.id}}"><button type="button">Edit Profile</button></a>
-        {% endif %}
-        <br>
-        <br>
-        {% if profileuser.profilepic %}
-        <img src="{{ url_for('static', filename='images/'+ profileuser.profilepic) }}" alt="Profile picture" height="110px" width="110px">
-        {% else %}
-        <img src="/static/images/default.jpg" alt="Default profile picture" height="110px" width="110px">
-        {% endif %}
-        <br>
-        <br>
-        <h1>{{  profileuser.username }}</h1>
-        <h5>Email: {{ profileuser.email }}</h5>
-        {% if profileuser.insta %}
-        <h5>Instagram: {{ profileuser.insta }}</h5>
-        {% endif %}
-        {% if profileuser.twitter %}
-        <h5>Twitter: {{ profileuser.twitter }}</h5>
-        {% endif %}
-        {% if profileuser.biography %}
-        <h6>{{ profileuser.biography }}</h6>
-        {% endif %}
-        {% if profileuser.accounttype == 1 %}
-            <b><p>Experience Level: {{ details.experiencelevel }}</p></b>
+        <div class="row">
+            <div class="col-3">
+                {% if profileuser.id == user.id %}
+                <a href="/pageeditor/{{user.id}}"><button type="button">Edit Profile</button></a>
+                {% endif %}
+                <br>
+                <br>
+                {% if profileuser.profilepic %}
+                <img src="{{ url_for('static', filename='images/'+ profileuser.profilepic) }}" alt="Profile picture" height="110px" width="110px">
+                {% else %}
+                <img src="/static/images/default.jpg" alt="Default profile picture" height="110px" width="110px">
+                {% endif %}
+                <br>
+                <br>
+                <h1>{{  profileuser.username }}</h1>
+                <h5>Email: {{ profileuser.email }}</h5>
+                {% if profileuser.insta %}
+                <h5>Instagram: {{ profileuser.insta }}</h5>
+                {% endif %}
+                {% if profileuser.twitter %}
+                <h5>Twitter: {{ profileuser.twitter }}</h5>
+                {% endif %}
+                {% if profileuser.biography %}
+                <h6>{{ profileuser.biography }}</h6>
+                {% endif %}
+                {% if profileuser.accounttype == 1 %}
+                    <b><p>Experience Level: {{ details.experiencelevel }}</p></b>
+                {% endif %}
+                <br>
+            </div>
+            {% if profileuser.accounttype == 1 %}
+            <div class="col-9" style="display: flex; justify-content: center">
+                <table id="table" style="width: 350px">
+                    <tr>
+                        <th style="width: 100px">Award</th>
+                        <th>Competitions</th>
+                    </tr>
+                    <tr>
+                        <td><img src="/static/images/gold.png" alt="Gold medal" height="90px" width="90px"></td>
+                        <td>
+                            <ul>
+                                {% for award in awards %}
+                                    {% if award.ranking == "1st" %}
+                                        <li>{{award.comp.title}}</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><img src="/static/images/silver.png" alt="Silver medal" height="90px" width="90px"></td>
+                        <td>
+                            <ul>
+                                {% for award in awards %}
+                                    {% if award.ranking == "2nd" %}
+                                        <li>{{award.comp.title}}</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><img src="/static/images/bronze.png" alt="Bronze medal" height="90px" width="90px"></td>
+                        <td>
+                            <ul>
+                                {% for award in awards %}
+                                    {% if award.ranking == "3rd" %}
+                                        <li>{{award.comp.title}}</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            {% endif %}
+        </div>
             <br>
+            {% if profileuser.accounttype == 1 %}
             <div id="posts" style="text-align:center">
+                <br>
                 <h1>Screenplays</h1>
                 <br>
                 {% if not posts %}
@@ -263,7 +339,6 @@
                 {% endif %}
             </div>
         {% endif %}
-    </div>
 </body>
 </html>
 {% endblock %}

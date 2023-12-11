@@ -34,11 +34,20 @@
                     {% endif %}
                     {% if response.compid != None %}
                         {% if response.message %}
-                            <div class="card" style="text-align:center"> 
+                            <div class="card" style="align-items: center;justify-content: center">
                                 {% if response.ranking == 0 %}
                                     <h4>Your submission to {{response.comp.title}} didn't make the Top 5.</h4>
                                 {% else %}
                                     <h4>Your submission to {{response.comp.title}} has been awarded</h4><h3>{{response.ranking}} place!</h3>
+                                    <br>
+                                    {% if response.ranking == "1st" %}
+                                        <img src="/static/images/gold.png" alt="Gold medal" height="25%" width="25%">
+                                    {% elif response.ranking == "2nd" %}
+                                        <img src="/static/images/silver.png" alt="Gold medal" height="25%" width="25%">
+                                    {% elif response.ranking == "3rd" %}
+                                        <img src="/static/images/bronze.png" alt="Gold medal" height="25%" width="25%">
+                                    {% endif %}
+                                    <br>
                                 {% endif %}
                                 <h5>Response to your submission by <a href="/profilepage/{{ response.producer.user.id }}" target="_blank">{{ response.producer.user.username }}</a>:<br> <i>{{ response.message }}</i></h5>
                                 <form method="POST" action="/deleteresponse/{{ response.notifid }}">

@@ -103,6 +103,7 @@ class Competitions(db.Model):
     submissionnum = db.Column(db.Integer)
     
     responses = db.relationship('Notifications', backref="comp", passive_deletes=True)
+    awards = db.relationship('Awards', backref="comp", passive_deletes=True)
 
 class CompHas(db.Model):
     __tablename__ = "CompHas"
@@ -131,4 +132,12 @@ class FeaturedScripts(db.Model):
     scriptid = db.Column(db.Integer, db.ForeignKey('Screenplays.scriptid'))
     dequeuedatetime = db.Column(db.DateTime(timezone=True))
 
+class Awards(db.Model):
+    __tablename__ = "Awards"
+    writerid = db.Column(db.Integer, db.ForeignKey('Screenwriters.writerid'), primary_key=True)
+    compid = db.Column(db.Integer, db.ForeignKey('Competitions.compid'), primary_key=True)
+    ranking = db.Column(db.String(150))
+
+
+    
 

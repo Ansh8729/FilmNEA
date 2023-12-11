@@ -1,7 +1,7 @@
 # from flask import Blueprint, render_template, request, flash, redirect, url_for
 import flask 
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Notifications, FeaturedScripts
+from .models import Users, Screenwriters, Producers, Competitions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Notifications, Awards
 import uuid as uuid
 from . import db
 import datetime
@@ -66,8 +66,13 @@ def sendback(userid, compid):
         sub.ranking = ranking
         sub.message = response
         db.session.commit()
+        award = Awards(writerid = writer.writerid, compid=compid, ranking=ranking)
+        db.session.add(award)
+        db.session.commit()
         flask.flash("Response sent!")
         return flask.redirect(flask.url_for("notifs.submissions", userid=current_user.id, compid=compid))
+    else:
+        flask.flash("That feature is only available for producers.", category="error")
         
 @notifs.route('/deleteresponse/<responseid>', methods=['GET', 'POST'])
 @login_required
