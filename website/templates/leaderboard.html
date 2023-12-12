@@ -8,14 +8,20 @@
 </head>
 <body style="text-align:center">
         <h1>Leaderboard</h1>
-        {% for writer in writers %}
-            {% if writer.experiencelevel %}
-                <div class="card" style="text-align:center;margin: auto; width:30%; padding:10px">
-                    <a href="/profilepage/{{writer.user.id}}" target="_blank"><h3>{{writer.user.username}}</h3></a>
-                    <h4>Experience Level: {{ writer.experiencelevel }}<h4>
-                </div>
+        {% if writers %}
+            {% for writer in writers %}
+                    <div class="card" style="text-align:center;margin: auto; width:30%; padding:10px">
+                        <a href="/profilepage/{{writer.user.id}}" target="_blank"><h3>{{writer.user.username}}</h3></a>
+                        <h4>Experience Level: {{ writer.experiencelevel }}<h4>
+                    </div>
+            {% endfor %}
+        {% else %}
+            <h1>Leaderboard currently unavailable</h1>
+            {% if currentuser.accounttype == 1 %}
+                <h2>Want to be the first on the board?</h2>
+                <h3>Put out posts or submit to competitions to increase your experience level!</h3>
             {% endif %}
-        {% endfor %}
+        {% endif %}
 </body>
 </html>
 {% endblock %}

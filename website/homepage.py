@@ -198,10 +198,31 @@ def ISOtoDate(date):
     year = ''.join(date2[0:4])
     return f"{day} {month} {year}"
 
+def UpdateNotifications(userid):
+    if current_user.accounttype == 1:
+        writer = Screenwriters.query.filter_by(userid=userid).first()
+        notifs = Notifications.query.filter_by(writerid=writer.writerid)
+        if notifs:
+            current_user.notifnum = notifs.count()
+            db.session.commit()
+        else:
+            current_user.notifnum = 0
+            db.session.commit()
+    if current_user.accounttype == 2:
+        producer = Producers.query.filter_by(userid=userid)
+        notifs = Notifications.query.filter_by(producerid=producer.producerid)
+        if notifs:
+            current_user.notifnum = notifs.count()
+            db.session.commit()
+        else:
+            current_user.notifnum = 0
+            db.session.commit()
+
 @homepage.route("/")
 @homepage.route("/home", methods=['GET', 'POST'])
 @login_required
 def home():
+    UpdateNotifications(current_user.id)
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=current_user.id).first()
         recs = GiveRecommendations(writer.writerid)
@@ -228,12 +249,14 @@ def home():
 @homepage.route("/leaderboard", methods=['GET','POST'])
 @login_required
 def leaderboard():
-    writers = Screenwriters.query.order_by(Screenwriters.experiencelevel)
+    UpdateNotifications(current_user.id)
+    writers = Screenwriters.query.filter(Screenwriters.experiencelevel > 0).order_by(Screenwriters.experiencelevel)
     return flask.render_template("leaderboard.html", writers=writers, user=current_user)
 
 @homepage.route("/sort", methods=['GET','POST'])
 @login_required
 def sort():
+    UpdateNotifications(current_user.id)
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=current_user.id).first()
         recs = GiveRecommendations(writer.writerid)
@@ -270,6 +293,7 @@ def sort():
 @homepage.route("/filter", methods=['GET','POST'])
 @login_required
 def filter():
+    UpdateNotifications(current_user.id)
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=current_user.id).first()
         recs = GiveRecommendations(writer.writerid)
@@ -295,6 +319,7 @@ def filter():
 @homepage.route("/script/<scriptid>", methods=['GET', 'POST'])
 @login_required
 def script(scriptid):
+    UpdateNotifications(current_user.id)
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     scripthas = ScriptHas.query.all()
     comments = Comments.query.filter_by(scriptid=scriptid)

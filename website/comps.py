@@ -77,10 +77,31 @@ def IsPDF(filename): #Checks if the uploaded file is a PDF (the correct format)
         return False
     else:
         return True
+    
+def UpdateNotifications(userid):
+    if current_user.accounttype == 1:
+        writer = Screenwriters.query.filter_by(userid=userid).first()
+        notifs = Notifications.query.filter_by(writerid=writer.writerid)
+        if notifs:
+            current_user.notifnum = notifs.count()
+            db.session.commit()
+        else:
+            current_user.notifnum = 0
+            db.session.commit()
+    if current_user.accounttype == 2:
+        producer = Producers.query.filter_by(userid=userid)
+        notifs = Notifications.query.filter_by(producerid=producer.producerid)
+        if notifs:
+            current_user.notifnum = notifs.count()
+            db.session.commit()
+        else:
+            current_user.notifnum = 0
+            db.session.commit()
 
 @comps.route("/competitions", methods=['GET', 'POST'])
 @login_required
 def competitions():
+    UpdateNotifications(current_user.id)
     allcomps = Competitions.query.all()
     for comp in allcomps:
         subs2 = Notifications.query.filter_by(compid = comp.compid)
@@ -93,6 +114,7 @@ def competitions():
 @comps.route("/sort2", methods=['GET','POST'])
 @login_required
 def sort2():
+    UpdateNotifications(current_user.id)
     comphas = CompHas.query.all()
     sort = flask.request.form.get('sorted')
     if sort == "0":
@@ -115,6 +137,7 @@ def sort2():
 @comps.route("/filter2", methods=['GET','POST'])
 @login_required
 def filter2():
+    UpdateNotifications(current_user.id)
     comphas = CompHas.query.all()
     genre = flask.request.form.get("genre")
     if genre == "0":
@@ -132,6 +155,7 @@ def filter2():
 @comps.route('/comp/<compid>', methods=['GET', 'POST'])
 @login_required
 def comp(compid):
+    UpdateNotifications(current_user.id)
     comp = Competitions.query.filter_by(compid = compid).first()
     writer = Screenwriters.query.filter_by(userid=current_user.id).first()
     notifs = Notifications.query.filter_by(writerid = writer.writerid)

@@ -15,6 +15,7 @@ class Users(db.Model, UserMixin):
     biography = db.Column(db.Text)
     insta = db.Column(db.String(), nullable=True) 
     twitter = db.Column(db.String(), nullable=True) 
+    notifnum = db.Column(db.Integer)
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
 
     writers = db.relationship('Screenwriters', backref="user", passive_deletes=True)
