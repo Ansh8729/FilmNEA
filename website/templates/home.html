@@ -43,7 +43,7 @@
         body { background-color: #eff1f3; font-family:futura; font-weight: bold;}
         /* CSS styles for the card */
         .card {
-            width: 600px;
+            width: 550px;
             border: 1px solid #ccc;
             padding: 10px;
             margin: 10px;
@@ -104,10 +104,10 @@
                 <div style="text-align: center">
                     <h2>Featured Screenplay of the Day</h2><br>
                     {% if script != None %}
-                        <h2>{{script.script.title}}</h2>
+                        <h2><a style="text-align: center" href="/script/{{script.script.scriptid}}" target="_blank">{{script.script.title}}</a></h2>
                         {{script.script.logline}}
-                        <p>By: {{script.script.writer.user.username}}</p>
-                        <embed style="text-align: center;" src="{{url_for('static', filename='images/'+ script.script.screenplay)}}#toolbar=0" width = "75%" height = "550px%">
+                        <p>By: <a href="/profilepage/{{script.script.writer.user.id}}" class="username"><h4>{{script.script.writer.user.username}}</h4></a></p>
+                        <embed style="text-align: center;" src="{{url_for('static', filename='images/'+ script.script.screenplay)}}#toolbar=0" style="width: 200px; height: 300px">
                     {% else %}
                         <h4>No featured scripts at the moment</h4>
                     {% endif %}
@@ -221,7 +221,7 @@
                     {% endif %}
                     <br>
                     {% if user.accounttype == 1 %}
-                        <div class="card border-dark" style="width:550px; margin-left: 2.5% ;">
+                        <div class="card border-dark" style="width:500px">
                             <div class="card-body">
                             <h3>Comments</h3>
                             {% for comment in comments %}
