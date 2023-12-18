@@ -71,9 +71,9 @@ def split_pdf(input, output, start, end): #Cuts the screenplay down to the pages
 def GiveRecommendations(writerid):
     posts = LikedScreenplays.query.filter(LikedScreenplays.rating > 3.5).all()
     postids = [] 
-    for i in posts:
-        if i.writerid == writerid:
-            postids.append(i.scriptid) #The ScriptIDs of the posts the user has rated above 3.5 are stored in a list.
+    for post in posts:
+        if post.writerid == writerid:
+            postids.append(post.scriptid) #The ScriptIDs of the posts the user has rated above 3.5 are stored in a list.
 
     if len(postids) == 0: #Validates if the query returned any data
         recs = None
@@ -81,15 +81,15 @@ def GiveRecommendations(writerid):
     else:
         genres = [] 
         for i in range(len(postids)):
-            info = ScriptHas.query.filter(ScriptHas.scriptid == postids[i])
-            for j in info:
-                genres.append(j.genreid) #The GenreIDs of the liked posts are found
+            genreinfo = ScriptHas.query.filter(ScriptHas.scriptid == postids[i])
+            for genre in genreinfo:
+                genres.append(genre.genreid) #The GenreIDs of the liked posts are found
 
         finalgenres = []
         for i in range(len(genres)):
             genre2 = Genres.query.filter(Genres.genreid == genres[i])
-            for j in genre2:
-                finalgenres.append(j.genreid) 
+            for genre in genre2:
+                finalgenres.append(genre.genreid) 
         if (list(set(finalgenres)) == finalgenres and len(list(set(finalgenres))) > 1) or len(finalgenres) == 0:
             recs = None
             return recs
@@ -97,21 +97,21 @@ def GiveRecommendations(writerid):
             favgenreid = max(set(finalgenres), key = finalgenres.count) #The GenreIDs are used to find the liked genre and then the user's most liked genre
             #If the user doesn't have a particular favourite, nothing is reccomended 
 
-        query1 = ScriptHas.query.filter(ScriptHas.genreid == favgenreid)
+        favscripts = ScriptHas.query.filter(ScriptHas.genreid == favgenreid)
         genreids = []
-        for i in query1:
-            genreids.append(i.scriptid) #The ScriptIDs whose posts are of the user's favourite genre are found
+        for script in favscripts:
+            genreids.append(favscripts.scriptid) #The ScriptIDs whose posts are of the user's favourite genre are found
         
         likedids = []
         recs = []
-        query2 = LikedScreenplays.query.all()
-        for j in query2:
-            likedids.append(j.scriptid)
-        for i in genreids:
-            if (i not in likedids): #Only the posts that haven't been liked by the user yet are shown as reccomendations.
-                query3 = Screenplays.query.filter(Screenplays.scriptid == i).first()
-                if query3.writer.user.id != current_user.id:
-                    recs.append(query3)
+        scripts = LikedScreenplays.query.all()
+        for script in scripts:
+            likedids.append(script.scriptid)
+        for id in genreids:
+            if (id not in likedids): #Only the posts that haven't been liked by the user yet are shown as reccomendations.
+                script = Screenplays.query.filter(Screenplays.scriptid == id).first()
+                if script.writer.user.id != current_user.id:
+                    recs.append(script)
         return recs
 
 class Queue: #Code for the queue that is fundamental to this feature
@@ -162,8 +162,8 @@ def LoadFeatured(queue, date):
             db.session.commit()
             hour += 4
     scripts = FeaturedScripts.query.filter(FeaturedScripts.featuredid <= 5) #The first 6 records are enqueued from the database to the queue
-    for i in scripts:
-        queue.enqueue(i)
+    for script in scripts:
+        queue.enqueue(script)
 
 def ISOtoDate(date):
     months = {
@@ -228,11 +228,11 @@ def home():
         recs = GiveRecommendations(writer.writerid)
     else:
         recs = None
-    posts1 = Screenplays.query.order_by(Screenplays.avgrating.desc())
+    sortedposts = Screenplays.query.order_by(Screenplays.avgrating.desc())
     posts = []
-    for i in posts1:
-        if i.date_created == date.today():
-            posts.append(i)
+    for post in sortedposts:
+        if post.date_created == date.today():
+            posts.append(post)
     comments = Comments.query.all()
     scripthas = ScriptHas.query.all()
     likes = LikedScreenplays.query.all()
@@ -524,14 +524,14 @@ def post():
                                 _, f_ext = os.path.splitext(scriptname)
                                 picture_fn = random_hex + f_ext
                                 shutil.copyfile(scriptname, picture_fn)
-                                shutil.move(picture_fn,'static/images')
+                                shutil.move(picture_fn,'static/files')
                                 PyPDF4.PdfFileReader(scriptname)
                                 watermark(input_pdf=scriptname,output_pdf="watermarked.pdf", watermark="watermark.pdf")
                                 os.remove(scriptname)
                                 newname = str(uuid.uuid1()) + "_" + "finalfile.pdf"
                                 split_pdf(input="watermarked.pdf",output=newname ,start=start, end=end)
                                 os.remove("watermarked.pdf")
-                                shutil.move(newname,'static/images')
+                                shutil.move(newname,'static/files')
                                 currentwriter = Screenwriters.query.filter_by(userid = current_user.id).first()
                                 newpost = Screenplays(writerid = currentwriter.writerid, title=title, logline=logline, message=message, screenplay=newname, fullfile=picture_fn)
                                 db.session.add(newpost)

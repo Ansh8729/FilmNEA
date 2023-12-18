@@ -183,7 +183,7 @@ def submit(compid):
     file = flask.request.files['submission']
     scriptname = NoSpaces(secure_filename(file.filename))
     file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
-    shutil.move(scriptname,'static/images')
+    shutil.move(scriptname,'static/files')
     if IsPDF(file.filename) == False:
         flask.flash("Upload a PDF!", category='error')
     else:

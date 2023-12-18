@@ -40,7 +40,7 @@
             {% if not sub.message %}
                 <tr>
                     <td><a href="/profilepage/{{sub.writer.user.id}}" target="_blank">{{ sub.writer.user.username }}</a></td>
-                    <td><a target="_blank" href="/static/images/{{sub.submission}}" >Link to submission</a></td>
+                    <td><a target="_blank" href="/static/files/{{sub.submission}}" >Link to submission</a></td>
                     <td>
                         <form method="POST" action="/sendback/{{sub.writer.user.id}}/{{sub.comp.compid}}" style="text-align: center">
                             <input type="radio" id="box" name="ranking" value="1st">
