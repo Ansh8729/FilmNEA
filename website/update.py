@@ -4,7 +4,7 @@ from .models import Screenwriters, Producers, Notifications, Screenplays, Awards
 from flask_login import current_user
 from datetime import datetime
 
-def UpdateNotifications(userid):
+def UpdateNotificationNumber(userid): # Updates the number of unseen notification a user has 
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=userid).first()
         notifs = Notifications.query.filter_by(writerid=writer.writerid)
@@ -24,7 +24,7 @@ def UpdateNotifications(userid):
             current_user.notifnum = 0
             db.session.commit()
 
-def UpdateExperienceLevel(userid):
+def UpdateExperienceLevel(userid): # Updates a screenwriter user's experience level based on any new ratings and awards they've gotten
     writer = Screenwriters.query.filter_by(userid=userid).first()
     scripts = Screenplays.query.filter_by(writerid = writer.writerid)
     rating = 0
@@ -43,9 +43,17 @@ def UpdateExperienceLevel(userid):
         writer.experiencelevel = rating*scripts.count()+score
         db.session.commit()
 
-def UpdateCompetitions(producerid):
+def UpdateCompetitions(producerid): # Updates a producer's list of competitions by removing ones that are over
     comps = Competitions.query.filter_by(producerid=producerid)
     for comp in comps:
-        if comp.submissionnum == 0 and datetime.now() > comp.deadline:
+        notifs = Notifications.query.filter_by(compid = comp.compid and Notifications.message != None)
+        if notifs.count() == 0 and datetime.now() > comp.deadline:
             db.session.delete(comp)
             db.session.commit()
+
+def UpdateSubmissionNums(): # Updates the submission numbers for all competitions that are still running
+    allcomps = Competitions.query.all()
+    for comp in allcomps:
+        submissions = Notifications.query.filter_by(compid = comp.compid)
+        comp.submissionnum = submissions.count()
+        db.session.commit()

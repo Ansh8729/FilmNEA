@@ -13,8 +13,8 @@ from datetime import datetime, timedelta, date
 import secrets
 import PyPDF2
 import PyPDF4
-from .subroutines import NoSpaces, IsPDF, watermark, split_pdf
-from .update import UpdateNotifications
+from .subroutines import NoSpaces, IsPDF, Watermark, ExtractPDF
+from .update import UpdateNotificationNumber
 from .convert import convert_to_datetime, ISOtoDate 
 from .load import GiveRecommendations, LoadFeatured
 
@@ -28,7 +28,7 @@ class MultiCheckboxField(SelectMultipleField):
 @homepage.route("/home", methods=['GET', 'POST'])
 @login_required
 def home():
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=current_user.id).first()
         recs = GiveRecommendations(writer.writerid)
@@ -55,14 +55,14 @@ def home():
 @homepage.route("/leaderboard", methods=['GET','POST'])
 @login_required
 def leaderboard():
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     writers = Screenwriters.query.filter(Screenwriters.experiencelevel > 0).order_by(Screenwriters.experiencelevel)
     return flask.render_template("leaderboard.html", writers=writers, user=current_user)
 
 @homepage.route("/sort", methods=['GET','POST'])
 @login_required
 def sort():
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=current_user.id).first()
         recs = GiveRecommendations(writer.writerid)
@@ -99,7 +99,7 @@ def sort():
 @homepage.route("/filter", methods=['GET','POST'])
 @login_required
 def filter():
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=current_user.id).first()
         recs = GiveRecommendations(writer.writerid)
@@ -125,7 +125,7 @@ def filter():
 @homepage.route("/script/<scriptid>", methods=['GET', 'POST'])
 @login_required
 def script(scriptid):
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     scripthas = ScriptHas.query.all()
     comments = Comments.query.filter_by(scriptid=scriptid)
@@ -303,10 +303,10 @@ def post():
                                 shutil.copyfile(scriptname, picture_fn)
                                 shutil.move(picture_fn,'static/files')
                                 PyPDF4.PdfFileReader(scriptname)
-                                watermark(input_pdf=scriptname,output_pdf="watermarked.pdf", watermark="watermark.pdf")
+                                Watermark(input_pdf=scriptname,output_pdf="watermarked.pdf", watermark="watermark.pdf")
                                 os.remove(scriptname)
                                 newname = str(uuid.uuid1()) + "_" + "finalfile.pdf"
-                                split_pdf(input="watermarked.pdf",output=newname ,start=start, end=end)
+                                ExtractPDF(input="watermarked.pdf",output=newname ,start=start, end=end)
                                 os.remove("watermarked.pdf")
                                 shutil.move(newname,'static/files')
                                 currentwriter = Screenwriters.query.filter_by(userid = current_user.id).first()

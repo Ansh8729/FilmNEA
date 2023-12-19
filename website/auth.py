@@ -4,7 +4,7 @@ from .models import Users, Screenwriters, Producers, Genres
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
-from .subroutines import send_email
+from .subroutines import SendEmail
 from .load import LoadGenres
 
 auth = Blueprint("auth", __name__)
@@ -99,7 +99,7 @@ def sign_up():
                     new_producer = Producers(userid = newuser.id, otp=otp)
                     db.session.add(new_producer)
                     db.session.commit()
-                    send_email('Writers World OTP Request', msg, newuser.email, 'writersworldnoreply@gmail.com', 'lolfruollznvecyd')
+                    SendEmail('Writers World OTP Request', msg, newuser.email, 'writersworldnoreply@gmail.com', 'lolfruollznvecyd')
                     return redirect(url_for('auth.approval'))  
                 else:
                     new_producer = Producers(userid = newuser.id)

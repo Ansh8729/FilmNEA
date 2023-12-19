@@ -11,7 +11,7 @@ import uuid as uuid
 from . import db
 from datetime import datetime, timedelta, date
 from .subroutines import NoSpaces, IsPDF
-from .update import UpdateNotifications
+from .update import UpdateNotificationNumber, UpdateSubmissionNums
 
 comps = flask.Blueprint("comps", __name__)
     
@@ -22,12 +22,8 @@ class MultiCheckboxField(SelectMultipleField):
 @comps.route("/competitions", methods=['GET', 'POST'])
 @login_required
 def competitions():
-    UpdateNotifications(current_user.id)
-    allcomps = Competitions.query.all()
-    for comp in allcomps:
-        subs2 = Notifications.query.filter_by(compid = comp.compid)
-        comp.submissionnum = subs2.count()
-        db.session.commit()
+    UpdateNotificationNumber(current_user.id)
+    UpdateSubmissionNums()
     comps = Competitions.query.filter(datetime.now() < Competitions.deadline).order_by(Competitions.submissionnum.desc())
     comphas = CompHas.query.all()
     return flask.render_template("competitions.html", user=current_user, comps=comps, comphas=comphas)
@@ -35,7 +31,7 @@ def competitions():
 @comps.route("/sort2", methods=['GET','POST'])
 @login_required
 def sort2():
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     comphas = CompHas.query.all()
     sort = flask.request.form.get('sorted')
     if sort == "0":
@@ -58,7 +54,7 @@ def sort2():
 @comps.route("/filter2", methods=['GET','POST'])
 @login_required
 def filter2():
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     comphas = CompHas.query.all()
     genre = flask.request.form.get("genre")
     if genre == "0":
@@ -76,7 +72,7 @@ def filter2():
 @comps.route('/comp/<compid>', methods=['GET', 'POST'])
 @login_required
 def comp(compid):
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     comp = Competitions.query.filter_by(compid = compid).first()
     writer = Screenwriters.query.filter_by(userid=current_user.id).first()
     notifs = Notifications.query.filter_by(writerid = writer.writerid)

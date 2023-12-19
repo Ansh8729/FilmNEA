@@ -3,8 +3,9 @@ from email.mime.multipart import MIMEMultipart
 import smtplib
 import PyPDF4 
 import PyPDF2
+import flask
 
-def send_email(subject, body, to_email, gmail_username, gmail_password):
+def SendEmail(subject, body, to_email, gmail_username, gmail_password): # Sends an email
     # Create a MIMEText object to represent the email body
     message = MIMEMultipart()
     message.attach(MIMEText(body, 'plain'))
@@ -24,11 +25,11 @@ def send_email(subject, body, to_email, gmail_username, gmail_password):
         server.sendmail(gmail_username, to_email, message.as_string())
         # Closes the SMTP server connection
         server.quit()
-        print("Email sent successfully!")
-    except Exception as e:
-        print(f"Email could not be sent. Error: {str(e)}")
+        flask.flash("Email sent successfully!", category='success')  
+    except Exception as error:
+        flask.flash(f"Email could not be sent. Error: {str(error)}", category="error")
 
-def NoSpaces(filename):
+def NoSpaces(filename): # Removes spaces from a file's name
     if filename.count(" ") > 0:
         chars = list(filename)
         newname = ""
@@ -39,7 +40,7 @@ def NoSpaces(filename):
     else:
         return filename
     
-def IsPDF(filename): #Checks if the uploaded file is a PDF (the correct format)
+def IsPDF(filename): # Checks if a file is in the PDF format
     extension = (filename).split(".")
     ext = extension[1]
     if ext != "pdf":
@@ -47,24 +48,24 @@ def IsPDF(filename): #Checks if the uploaded file is a PDF (the correct format)
     else:
         return True
     
-def watermark(input_pdf, output_pdf, watermark): #Watermarks the pages
+def Watermark(InputPDF, OutputPDF, watermark): # Watermarks the pages of a given PDF
     watermark = PyPDF4.PdfFileReader(watermark)
-    page_watermark=watermark.getPage(0)
-    input_pdf_reader=PyPDF4.PdfFileReader(input_pdf)
-    output_pdf_writer=PyPDF4.PdfFileWriter()
-    for page in range(input_pdf_reader.getNumPages()):
-        page=input_pdf_reader.getPage(page)
-        page.mergePage(page_watermark)
-        output_pdf_writer.addPage(page)
-    with open(output_pdf, "wb") as output:
-        output_pdf_writer.write(output)
+    PageWatermark = watermark.getPage(0)
+    InputFile = PyPDF4.PdfFileReader(InputPDF)
+    OutputFile = PyPDF4.PdfFileWriter()
+    for page in range(InputFile.getNumPages()):
+        page = InputFile.getPage(page)
+        page.mergePage(PageWatermark)
+        OutputFile.addPage(page)
+    with open(OutputPDF, "wb") as output:
+        OutputFile.write(output)
 
-def split_pdf(input, output, start, end): #Cuts the screenplay down to the pages selected by the user
+def ExtractPDF(input, output, start, end): # Extracts a specific range of pages from a PDF
     reader = PyPDF2.PdfReader(input)
     writer = PyPDF2.PdfWriter()
-    for page_num in range(start,end): # loop through pages
+    for page_num in range(start,end): 
         selected_page = reader.pages[page_num]
-        writer.add_page(selected_page) # add/embedding of the page
+        writer.add_page(selected_page)
     with open(output,"wb") as out:
         writer.write(out)
 

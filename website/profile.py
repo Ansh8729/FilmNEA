@@ -7,14 +7,14 @@ import shutil
 from werkzeug.utils import secure_filename
 import uuid as uuid
 from . import db
-from .update import UpdateNotifications, UpdateExperienceLevel
+from .update import UpdateNotificationNumber, UpdateExperienceLevel
 
 profile = flask.Blueprint("profile", __name__)
     
 @profile.route("/profilepage/<userid>")
 @login_required
 def profilepage(userid):
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     profileuser = Users.query.filter_by(id=userid).first()
     if profileuser.accounttype == 1:
         UpdateExperienceLevel(current_user.id)
@@ -31,7 +31,7 @@ def profilepage(userid):
 @profile.route("/pageeditor/<userid>", methods=['GET', 'POST'])
 @login_required
 def pageeditor(userid):
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     if flask.request.method == "POST":
         profile = Users.query.filter_by(id = userid).first()
         file = flask.request.files['profilepic']

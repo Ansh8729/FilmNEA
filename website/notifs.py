@@ -4,13 +4,13 @@ from flask_login import login_required, current_user
 from .models import Screenwriters, Producers, Competitions, Notifications, Awards
 import uuid as uuid
 from . import db
-from .update import UpdateNotifications, UpdateExperienceLevel, UpdateCompetitions
+from .update import UpdateNotificationNumber, UpdateExperienceLevel, UpdateCompetitions
 
 notifs = flask.Blueprint("notifs", __name__)
 
 @notifs.route('/notifications/<userid>', methods=['GET', 'POST'])
 def notifications(userid):
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=userid).first()
         notifs = Notifications.query.filter_by(writerid = writer.writerid)
@@ -25,7 +25,7 @@ def notifications(userid):
 @notifs.route('/sendback/<userid>/<compid>', methods=['GET', 'POST'])
 @login_required
 def sendback(userid, compid):
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     if current_user.accounttype == 2:
         ranking = flask.request.form.get('ranking')
         response = flask.request.form.get('subresponse')
@@ -73,7 +73,7 @@ def requestresponse(requestid):
 @notifs.route('/submissions/<compid>', methods=['GET', 'POST'])
 @login_required
 def submissions(compid):
-    UpdateNotifications(current_user.id)
+    UpdateNotificationNumber(current_user.id)
     notifs = Notifications.query.filter_by(compid = compid)
     competition = Competitions.query.filter_by(compid=compid).first()
     return flask.render_template('submissions.html', notifs=notifs, user=current_user, comp=competition)
