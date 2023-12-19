@@ -1,69 +1,15 @@
-# from flask import Blueprint, render_template, request, flash, redirect, url_for
 import flask 
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Notifications, Awards
-from flask_wtf import FlaskForm
-from wtforms import widgets, RadioField, StringField, SubmitField, FileField, TextAreaField, SelectField, IntegerField, DateField, SelectMultipleField
+from .models import Users, Screenwriters, Producers, Screenplays, LikedScreenplays, Comments, ScriptHas, Notifications, Awards
 from werkzeug.utils import secure_filename
 import os
 import shutil
 from werkzeug.utils import secure_filename
 import uuid as uuid
 from . import db
-from dateutil.parser import parse
-from datetime import datetime, timedelta
+from .update import UpdateNotifications, UpdateExperienceLevel
 
 profile = flask.Blueprint("profile", __name__)
-
-def NoSpaces(filename):
-    if filename.count(" ") > 0:
-        chars = list(filename)
-        newname = ""
-        for i in chars:
-            if i != " ":
-                newname += i
-        return newname
-    else:
-        return filename
-    
-def UpdateNotifications(userid):
-    if current_user.accounttype == 1:
-        writer = Screenwriters.query.filter_by(userid=userid).first()
-        notifs = Notifications.query.filter_by(writerid=writer.writerid)
-        if notifs:
-            current_user.notifnum = notifs.count()
-            db.session.commit()
-        else:
-            current_user.notifnum = 0
-            db.session.commit()
-    if current_user.accounttype == 2:
-        producer = Producers.query.filter_by(userid=userid)
-        notifs = Notifications.query.filter_by(producerid=producer.producerid)
-        if notifs:
-            current_user.notifnum = notifs.count()
-            db.session.commit()
-        else:
-            current_user.notifnum = 0
-            db.session.commit()
-
-def UpdateExperienceLevel(userid):
-    writer = Screenwriters.query.filter_by(userid=userid).first()
-    scripts = Screenplays.query.filter_by(writerid = writer.writerid)
-    rating = 0
-    for script in scripts:
-        if script.avgrating != None:
-            rating += script.avgrating
-    score = 0
-    awards = Awards.query.filter_by(writerid = writer.writerid)
-    for award in awards:
-        if award.ranking == "1st":
-            score += 3
-        if award.ranking == "2nd":
-            score += 2
-        if award.ranking == "3rd":
-            score += 1
-        writer.experiencelevel = rating*scripts.count()+score
-        db.session.commit()
     
 @profile.route("/profilepage/<userid>")
 @login_required
@@ -96,7 +42,6 @@ def pageeditor(userid):
         else:
             picturefilename = secure_filename(file.filename)
             namecheck = picturefilename.split(".")
-            print(namecheck)
             formats = ["png", "jpg"]
             if namecheck[1] not in formats:
                 flask.flash("Invalid file format for profile picture.", category="error")

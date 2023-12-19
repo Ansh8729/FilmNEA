@@ -1,102 +1,23 @@
 # from flask import Blueprint, render_template, request, flash, redirect, url_for
 import flask 
 from flask_login import login_required, current_user
-from .models import Users, Screenwriters, Producers, Competitions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Notifications, FeaturedScripts
+from .models import Users, Screenwriters, Competitions, Genres, CompHas, Notifications
 from wtforms import widgets, SelectMultipleField
 from werkzeug.utils import secure_filename
 import os
-from wtforms.validators import InputRequired
-import PyPDF4 
-from PyPDF4 import PdfFileReader, PdfFileWriter
 import shutil
-import PyPDF2
-from PyPDF2 import PdfReader, PdfWriter
 from werkzeug.utils import secure_filename
 import uuid as uuid
 from . import db
-from dateutil.parser import parse
 from datetime import datetime, timedelta, date
-
-def ISOtoDate(date):
-    months = {
-    "01": "January",
-    "02": "February",
-    "03": "March",
-    "04":"April",
-    "05":"May",
-    "06":"June",
-    "07":"July",
-    "08":"August",
-    "09":"September",
-    "10":"October",
-    "11":"November",
-    "12":"December"}
-    datestr = str(datetime.fromisoformat(date))
-    date2 = list(datestr)[0:10]
-    daynum = ''.join(date2[8]+date2[9])
-    if date2[9] == "1":
-        day = daynum+"st"
-    elif daynum == "02" or daynum == "22":
-        day = daynum+"st"
-    elif daynum == "03" or daynum == "23":
-        day = daynum+"rd"
-    else:
-        day = daynum +"th"
-    if day[0] == "0":
-        day = list(day)
-        day = day[1:6]
-        day = ''.join(day)
-    month = months[''.join(date2[5]+date2[6])]
-    year = ''.join(date2[0:4])
-    return f"{day} {month} {year}"
+from .subroutines import NoSpaces, IsPDF
+from .update import UpdateNotifications
 
 comps = flask.Blueprint("comps", __name__)
-
-def convert_to_datetime(input_str, parserinfo=None):
-    return parse(input_str, parserinfo=parserinfo)
     
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
     option_widget = widgets.CheckboxInput()
-
-def NoSpaces(filename):
-    if filename.count(" ") > 0:
-        chars = list(filename)
-        newname = ""
-        for i in chars:
-            if i != " ":
-                newname += i
-        return newname
-    else:
-        return filename
-    
-def IsPDF(filename): #Checks if the uploaded file is a PDF (the correct format)
-    extension = (filename).split(".")
-    ext = extension[1]
-    if ext != "pdf":
-        return False
-    else:
-        return True
-    
-def UpdateNotifications(userid):
-    if current_user.accounttype == 1:
-        writer = Screenwriters.query.filter_by(userid=userid).first()
-        notifs = Notifications.query.filter_by(writerid=writer.writerid)
-        if notifs:
-            current_user.notifnum = notifs.count()
-            db.session.commit()
-        else:
-            current_user.notifnum = 0
-            db.session.commit()
-    if current_user.accounttype == 2:
-        producer = Producers.query.filter_by(userid=userid)
-        notifs = Notifications.query.filter_by(producerid=producer.producerid)
-        if notifs:
-            current_user.notifnum = notifs.count()
-            db.session.commit()
-        else:
-            current_user.notifnum = 0
-            db.session.commit()
 
 @comps.route("/competitions", methods=['GET', 'POST'])
 @login_required

@@ -3,45 +3,9 @@ from . import db
 from .models import Users, Screenwriters, Producers, Genres
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-import smtplib
 import random
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-
-def send_email(subject, body, to_email, gmail_username, gmail_password):
-    # Create a MIMEText object to represent the email body
-    message = MIMEMultipart()
-    message.attach(MIMEText(body, 'plain'))
-
-    message['Subject'] = subject
-    message['From'] = gmail_username
-    message['To'] = to_email
-
-    try:
-        # Establish a connection to the Gmail SMTP server
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        # Starts TLS encryption
-        server.starttls()
-        # Logs in to the NoReply gmail account
-        server.login(gmail_username, gmail_password)
-        # Sends the email
-        server.sendmail(gmail_username, to_email, message.as_string())
-        # Closes the SMTP server connection
-        server.quit()
-        print("Email sent successfully!")
-    except Exception as e:
-        print(f"Email could not be sent. Error: {str(e)}")
-
-def LoadGenres():
-    genrelist = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Sports', 'Thriller', 'Western']
-    for i in range(len(genrelist)):
-            newgenre = Genres(genre=genrelist[i])
-            db.session.add(newgenre)
-            db.session.commit()
-    for i in Genres.query.all():
-            if i.genreid > 13:
-                db.session.delete(i)
-                db.session.commit()
+from .subroutines import send_email
+from .load import LoadGenres
 
 auth = Blueprint("auth", __name__)
 
