@@ -8,12 +8,12 @@ def UpdateNotificationNumber(userid): # Updates the number of unseen notificatio
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=userid).first()
         notifs = Notifications.query.filter_by(writerid=writer.writerid)
-        if notifs:
-            current_user.notifnum = notifs.count()
-            db.session.commit()
-        else:
-            current_user.notifnum = 0
-            db.session.commit()
+        number = 0
+        for notif in notifs:
+            if notif.message != None:
+                number += 1
+        current_user.notifnum = number
+        db.session.commit()
     if current_user.accounttype == 2:
         producer = Producers.query.filter_by(userid=userid).first()
         notifs = Notifications.query.filter_by(producerid=producer.producerid)

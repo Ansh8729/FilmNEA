@@ -303,7 +303,7 @@ def post():
                                 shutil.copyfile(scriptname, picture_fn)
                                 shutil.move(picture_fn,'static/files')
                                 PyPDF4.PdfFileReader(scriptname)
-                                Watermark(input_pdf=scriptname,output_pdf="watermarked.pdf", watermark="watermark.pdf")
+                                Watermark(scriptname,"watermarked.pdf", "watermark.pdf")
                                 os.remove(scriptname)
                                 newname = str(uuid.uuid1()) + "_" + "finalfile.pdf"
                                 ExtractPDF(input="watermarked.pdf",output=newname ,start=start, end=end)

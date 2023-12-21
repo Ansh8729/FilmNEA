@@ -6,7 +6,8 @@ from flask_login import LoginManager
 db = SQLAlchemy()
 DB_NAME = "database.db"
 
-def create_app():
+def create_app(): 
+    # Initialises the secret key, the URI of the database and the folder where files are uploaded to
     app = Flask(__name__, static_folder="/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA/static")
     app.config['SECRET_KEY'] = "helloworld"
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
@@ -14,6 +15,7 @@ def create_app():
 
     db.init_app(app)
 
+    # The back-end files are imported and registered as blueprints 
     from .auth import auth
     from .homepage import homepage
     from .profile import profile
@@ -26,20 +28,15 @@ def create_app():
     app.register_blueprint(profile, url_prefix="/")
     app.register_blueprint(notifs, url_prefix="/")
 
-    from .models import Users, Genres
+    from .models import Users
+    from .load import LoadGenres
 
+    # The app is created and the genres are added to the Genres table
     with app.app_context():
         db.create_all()
-        genrelist = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Sports', 'Thriller', 'Western']
-        for i in range(len(genrelist)):
-            newgenre = Genres(genre=genrelist[i])
-            db.session.add(newgenre)
-            db.session.commit()
-        for i in Genres.query.all():
-            if i.genreid > 13:
-                db.session.delete(i)
-                db.session.commit()
+        LoadGenres()
 
+    # The login system is set up 
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
     login_manager.init_app(app)

@@ -24,51 +24,81 @@
             <br>
             <h2>Page Range</h2>
             <h4>Note: Coverpage = 0</h4>
-            <label for="start">Start Page</label>
-            <input type="number" id="start" name="start" class="form-control" style="text-align: center; margin: auto; width:5%" required><br><br>
-            <label for="end">End Page</label>
-            <input type="number" id="end" name="end" class="form-control" style="text-align: center; margin: auto; width:5%" required><br><br>
+            <div class="row">
+                <div class="col-6">
+                    <label for="start">Start Page</label>
+                    <input type="number" id="start" name="start" class="form-control" style="margin: auto; width:70px" required><br><br>
+                </div>
+                <div class="col-6">
+                    <label for="end">End Page</label>
+                    <input type="number" id="end" name="end" class="form-control" style="margin: auto; width:70px" required><br><br>
+                </div>
+            </div>
             <h4>Disclaimer: Your file won't be uploaded if you upload more than 10 pages of your screenplay.</h4><br>
             <h2>Genres:</h2>
-            <input type="checkbox" id="action" name="genres" value="1">
-            <label for="action">Action</label>
+            <table style="margin-left: auto; margin-right: auto">
+                <tr>
+                    <td>
+                        <input type="checkbox" id="action" name="genres" value="1">
+                        <label for="action">Action&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="adv" name="genres" value="2">
+                        <label for="adv">Adventure&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="comedy" name="genres" value="3">
+                        <label for="comedy">Comedy&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="drama" name="genres" value="4">
+                        <label for="drama">Drama</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="checkbox" id="fantasy" name="genres" value="5">
+                        <label for="fantasy">Fantasy&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="horror" name="genres" value="6">
+                        <label for="horror">Horror&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="musical" name="genres" value="7">
+                        <label for="musical">Musical&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="mystery" name="genres" value="8">
+                        <label for="mystery">Mystery</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="checkbox" id="romance" name="genres" value="9">
+                        <label for="romance">Romance&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="scifi" name="genres" value="10">
+                        <label for="scifi">Sci-Fi&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="sports" name="genres" value="11">
+                        <label for="sports">Sports&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="thriller" name="genres" value="12">
+                        <label for="thriller">Thriller</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="checkbox" id="west" name="genres" value="13">
+                        <label for="west">Western</label>
+                    </td>
+                </tr>
+            </table>
             <br>
-            <input type="checkbox" id="adv" name="genres" value="2">
-            <label for="adv">Adventure</label>
-            <br>
-            <input type="checkbox" id="comedy" name="genres" value="3">
-            <label for="comedy">Comedy</label>
-            <br>
-            <input type="checkbox" id="drama" name="genres" value="4">
-            <label for="drama">Drama</label>
-            <br>
-            <input type="checkbox" id="fantasy" name="genres" value="5">
-            <label for="fantasy">Fantasy</label>
-            <br>
-            <input type="checkbox" id="horror" name="genres" value="6">
-            <label for="horror">Horror</label>
-            <br>
-            <input type="checkbox" id="musical" name="genres" value="7">
-            <label for="musical">Musical</label>
-            <br>
-            <input type="checkbox" id="mystery" name="genres" value="8">
-            <label for="mystery">Mystery</label>
-            <br>
-            <input type="checkbox" id="romance" name="genres" value="9">
-            <label for="romance">Romance</label>
-            <br>
-            <input type="checkbox" id="scifi" name="genres" value="10">
-            <label for="scifi">Sci-Fi</label>
-            <br>
-            <input type="checkbox" id="sports" name="genres" value="11">
-            <label for="sports">Sports</label>
-            <br>
-            <input type="checkbox" id="thriller" name="genres" value="12">
-            <label for="thriller">Thriller</label>
-            <br>
-            <input type="checkbox" id="west" name="genres" value="13">
-            <label for="west">Western</label>
-            <br><br>
             <input type="submit" value="Submit">
         </form> 
         <br>
@@ -88,44 +118,68 @@
             <input type="date" id="date" name="date" required style="width:250px;margin: auto">
             <br><br>
             <h2>Genres</h2>
-            <input type="checkbox" id="action" name="genres" value="1">
-            <label for="action">Action</label>
-            <br>
-            <input type="checkbox" id="adv" name="genres" value="2">
-            <label for="adv">Adventure</label>
-            <br>
-            <input type="checkbox" id="comedy" name="genres" value="3">
-            <label for="comedy">Comedy</label>
-            <br>
-            <input type="checkbox" id="drama" name="genres" value="4">
-            <label for="drama">Drama</label>
-            <br>
-            <input type="checkbox" id="fantasy" name="genres" value="5">
-            <label for="fantasy">Fantasy</label>
-            <br>
-            <input type="checkbox" id="horror" name="genres" value="6">
-            <label for="horror">Horror</label>
-            <br>
-            <input type="checkbox" id="musical" name="genres" value="7">
-            <label for="musical">Musical</label>
-            <br>
-            <input type="checkbox" id="mystery" name="genres" value="8">
-            <label for="mystery">Mystery</label>
-            <br>
-            <input type="checkbox" id="romance" name="genres" value="9">
-            <label for="romance">Romance</label>
-            <br>
-            <input type="checkbox" id="scifi" name="genres" value="10">
-            <label for="scifi">Sci-Fi</label>
-            <br>
-            <input type="checkbox" id="sports" name="genres" value="11">
-            <label for="sports">Sports</label>
-            <br>
-            <input type="checkbox" id="thriller" name="genres" value="12">
-            <label for="thriller">Thriller</label>
-            <br>
-            <input type="checkbox" id="west" name="genres" value="13">
-            <label for="west">Western</label>
+            <table style="margin-left: auto; margin-right: auto">
+                <tr>
+                    <td>
+                        <input type="checkbox" id="action" name="genres" value="1">
+                        <label for="action">Action&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="adv" name="genres" value="2">
+                        <label for="adv">Adventure&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="comedy" name="genres" value="3">
+                        <label for="comedy">Comedy&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="drama" name="genres" value="4">
+                        <label for="drama">Drama</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="checkbox" id="fantasy" name="genres" value="5">
+                        <label for="fantasy">Fantasy&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="horror" name="genres" value="6">
+                        <label for="horror">Horror&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="musical" name="genres" value="7">
+                        <label for="musical">Musical&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="mystery" name="genres" value="8">
+                        <label for="mystery">Mystery</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="checkbox" id="romance" name="genres" value="9">
+                        <label for="romance">Romance&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="scifi" name="genres" value="10">
+                        <label for="scifi">Sci-Fi&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="sports" name="genres" value="11">
+                        <label for="sports">Sports&nbsp</label>
+                    </td>
+                    <td>
+                        <input type="checkbox" id="thriller" name="genres" value="12">
+                        <label for="thriller">Thriller</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="checkbox" id="west" name="genres" value="13">
+                        <label for="west">Western</label>
+                    </td>
+                </tr>
+            </table>
             <br><br>
             <input type="submit" id="submit" name="submit">
         </form>

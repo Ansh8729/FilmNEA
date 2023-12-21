@@ -20,7 +20,8 @@ def login():
             if check_password_hash(user.password, password):
                 if user.accounttype == "2":
                     producer = Producers.query.filter_by(userid = user.id).first()
-                    if producer.approved == 0:
+                    email = email.split("@")
+                    if producer.approved == 0 and email[1] == 'producersguild.org': # Producer accounts from the guild are not logged in if they haven't gotten approved via OTP verification
                         flash('User is not approved.', category='error')
                     else:
                         flash("Logged in!", category='success')
@@ -39,7 +40,7 @@ def login():
 
 @auth.route("/sign-up", methods=['GET', 'POST'])
 def sign_up():
-    if request.method == 'POST':
+    if request.method == 'POST': 
         email = request.form.get("email")
         username = request.form.get("username")
         password1 = request.form.get("password1")
@@ -55,7 +56,7 @@ def sign_up():
             flash('Username is already in use.', category='error')
         elif password1 != password2:
             flash("Passwords don't match!", category='error')
-        elif len(username) < 2:
+        elif len(username) < 6:
             flash('Username is too short.', category='error')
         elif len(password1) < 8:
             flash('Password is too short.', category='error')
@@ -90,7 +91,7 @@ def sign_up():
                 db.session.commit()
                 newuser = Users.query.order_by(Users.id.desc()).first()
                 email = email.split("@")
-                if email[1] == 'producersguild.org' or email[1] == "gmail.com":
+                if email[1] == 'producersguild.org': # Producer accounts from the guild have to be approved using OTP verification
                     otp = ""
                     for i in range(6):
                         num = random.randint(0,9)

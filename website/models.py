@@ -18,6 +18,7 @@ class Users(db.Model, UserMixin):
     notifnum = db.Column(db.Integer)
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
 
+    # Back references like this allow for tables to be linked, allowing data to be accessed without multiple queries
     writers = db.relationship('Screenwriters', backref="user", passive_deletes=True)
     producers = db.relationship('Producers', backref="user", passive_deletes=True)
     

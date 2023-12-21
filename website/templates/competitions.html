@@ -58,7 +58,7 @@
               {% else %}
               <h2>{{comp.title}}</h2>
               {% endif %}
-              By: <a href="/profilepage/{{comp.producer.user.username}}">{{comp.producer.user.username}}</a>
+              By: <a href="/profilepage/{{comp.producer.user.id}}">{{comp.producer.user.username}}</a>
               <br>
               Submissions: {{comp.submissionnum}}
               <br>
@@ -78,7 +78,7 @@
           <br/> 
       {% endfor %}
     {% else %}
-    <h1>No competitions available</h1>
+      <h1>No competitions available</h1>
     {% endif %}
   </div>
   <div class="col-3">
