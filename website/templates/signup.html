@@ -1,81 +1,91 @@
 {% extends "base.html" %}
 {% block title %}Sign Up{% endblock %}
 {% block content %} <!--The Jinja code in the first 3 lines allows this page to "inherit" the navbar from the base template.-->
-<!--Below is the code that creates the sign-up page including input boxes for the email, username and password.-->
-<form method="POST" style="text-align: center">
-    <h3>Sign Up</h3>
-    <br>
-    <div class="form-group">
-        <label for="email" style="text-align:center"><h4>Email Address</h4></label>
-        <input 
-        style="margin: auto; width:40%"
-        type="text" 
-        id="email" 
-        name="email" 
-        class="form-control" 
-        placeholder="Enter Email"
-        />
+<form method="POST" style="text-align: center; padding: 10px">
+    <style>
+        .card {
+            margin: auto;
+            width: 60%;
+            height: 50%;
+            padding: 10px;
+            border-color: black;
+            text-align: center
+        }
+    </style>
+    <div class="card">
+        <h3>Sign Up</h3>
         <br>
-        <label for="username"><h4>Username</h4></label>
-        <input 
-        style="margin: auto; width:40%"
-        type="text" 
-        id="username" 
-        name="username" 
-        class="form-control" 
-        placeholder="Enter Username"
-        />
-        <br>
-        <label for="password1"><h4>Password</h4></label>
-        <input 
-        style="margin: auto; width:40%"
-        type="password" 
-        id="password1" 
-        name="password1" 
-        class="form-control" 
-        placeholder="Enter Password"
-        />
-        <br>
-        <label for="password2"><h4>Reenter Password</h4></label>
-        <input 
-        style="margin: auto; width:40%"
-        type="password" 
-        id="password2" 
-        name="password2" 
-        class="form-control" 
-        placeholder="Enter Password Again"
-        />
-        <br>
-        <h4>Account Type:</h4>
-        <div class="row">
-            <div class="col-6">
-                <input type="radio" id="writer" name="accounttype" value="Screenwriter">
-                <label for="writer"><h5>Screenwriter</h5></label><br>
-                <br>
-                <h5>Features:</h5>
-                <ul style="text-align: left">
-                    <li>Post screenplays that can be rated and commented on!</li>
-                    <li>Customisable profile page - you can choose your own font style and background colour!</li>
-                    <li>Submit your screenplays for competitions run by producer accounts!</li>
-                </ul>
+        <div class="form-group">
+            <label for="email" style="text-align:center"><h4>Email Address</h4></label>
+            <input 
+            style="margin: auto; width:40%"
+            type="text" 
+            id="email" 
+            name="email" 
+            class="form-control" 
+            placeholder="Enter Email"
+            />
+            <br>
+            <label for="username"><h4>Username</h4></label>
+            <input 
+            style="margin: auto; width:40%"
+            type="text" 
+            id="username" 
+            name="username" 
+            class="form-control" 
+            placeholder="Enter Username"
+            />
+            <br>
+            <label for="password1"><h4>Password</h4></label>
+            <input 
+            style="margin: auto; width:40%"
+            type="password" 
+            id="password1" 
+            name="password1" 
+            class="form-control" 
+            placeholder="Enter Password"
+            />
+            <br>
+            <label for="password2"><h4>Reenter Password</h4></label>
+            <input 
+            style="margin: auto; width:40%"
+            type="password" 
+            id="password2" 
+            name="password2" 
+            class="form-control" 
+            placeholder="Enter Password Again"
+            />
+            <br>
+            <h4>Account Type:</h4><br>
+            <div class="row">
+                <div class="col-6">
+                    <input type="radio" id="writer" name="accounttype" value="Screenwriter">
+                    <label for="writer"><h5>Screenwriter</h5></label><br>
+                    <br>
+                    <h5>Features:</h5>
+                    <ul style="text-align: left">
+                        <li>Post screenplays that can be rated and commented on!</li>
+                        <li>Customisable profile page - you can choose your own font style and background colour!</li>
+                        <li>Submit your screenplays for competitions run by producer accounts!</li>
+                    </ul>
+                </div>
+                <div class="col-6">
+                    <input type="radio" id="producer" name="accounttype" value="Producer">
+                    <label for="producer"><h5>Producer</h5></label><br>
+                    <br>
+                    <h5>Features:</h5>
+                    <ul style="text-align: left">
+                        <li>Post your own screenplay competitions that screenwriter users can submit to!</li>
+                        <li>View screenwriter users' posts!</li>
+                        <li><b>NOTE: Account associated with producer guilds will need to be approved through OTP verification.</b></li>
+                    </ul>
+                </div>
             </div>
-            <div class="col-6">
-                <input type="radio" id="producer" name="accounttype" value="Producer">
-                <label for="producer"><h5>Producer</h5></label><br>
-                <br>
-                <h5>Features:</h5>
-                <ul style="text-align: left">
-                    <li>Post your own screenplay competitions that screenwriter users can submit to!</li>
-                    <li>View screenwriter users' posts!</li>
-                    <li><b>NOTE: Account associated with producer guilds will need to be approved through OTP verification.</b></li>
-                </ul>
+            <br>
+            <div style="text-align:center">
+                <button class="btn btn-primary" type="submit">Sign Up</button>
             </div>
         </div>
-        
-        <br/>
-        <div style="text-align:center">
-            <button class="btn btn-primary" type="submit">Sign Up</button>
-        </div>
-     </div>
+    </div>
 </form>
 {% endblock %}

@@ -1,39 +1,53 @@
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
 {% block content %} <!--The Jinja code in the first 3 lines allows this page to "inherit" the navbar from the base template.-->
-<!--Below is the code that creates the login area including input boxes for an email and password.-->
-<form method="POST" style="text-align: center; margin: auto; margin-top: 10%;">
-    <h2>Login</h2>
+<form method="POST" style="margin-top: 10%;">
+    <style>
+        .card {
+            margin: auto;
+            width: 40%;
+            height: 50%;
+            padding: 15px;
+            border-color: black;
+            text-align: center
+        }
+    </style>
+    <h1 style="text-align: center">Writers World</h1>
     <br>
-    <div class="form-group">
-        <label for="email"><h3>Email Address</h3></label>
-        <input 
-        style="margin: auto; width:40%"
-        type="text" 
-        id="email" 
-        name="email" 
-        class="form-control" 
-        placeholder="Enter Email"
-        />
+    <div class="card">
+        <h2>Login</h2>
         <br>
-        <label for="password"><h3>Password</h3></label>
-        <input 
-        style="margin: auto; width:40%"
-        type="password" 
-        id="password" 
-        name="password" 
-        class="form-control" 
-        placeholder="Enter Password"
-        />
-        <br />
-        <div align="center">
+        <div class="form-group">
+            <label for="email"><h3>Email Address</h3></label>
+            <input 
+            style="margin: auto; width:60%"
+            type="text" 
+            id="email" 
+            name="email" 
+            class="form-control" 
+            placeholder="Enter Email"
+            />
+            <br>
+            <label for="password"><h3>Password</h3></label>
+            <input 
+            style="margin: auto; width:60%"
+            type="password" 
+            id="password" 
+            name="password" 
+            class="form-control" 
+            placeholder="Enter Password"
+            />
+            <a class="nav-item nav-link" href="/forgotpassword1">Forgot password?</a>
+            <br>
             <button class="btn btn-primary" type="submit">Login</button>
+            <br>
+            <br>
+            <a class="nav-item nav-link" href="/sign-up">Don't have an account? Sign up!</a>
+            </div>
         </div>
-     </div>
+    </div>
 </form>
-<h2>      </h2>
+<br>
 <div style="text-align:center">
-    <a class="nav-item nav-link" href="/sign-up">Don't have an account? Sign up!</a>
-    <a class="nav-item nav-link" href="/forgotpassword1">Forgot password?</a>
 </div>
 {% endblock %}
