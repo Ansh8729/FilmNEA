@@ -7,10 +7,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        .card {
+            margin: auto;
+            width: 60%;
+            height: 50%;
+            padding: 15px;
+            border-color: black;
+            text-align: center
+        }
+    </style>
 </head>
 <body>
     {% if user.accounttype == 1 %}
-    <div class="post" style="text-align:center">
+    <div class="card" style="text-align:center">
         <h1>Create Screenplay Post</h1><br>
         <form method='POST' enctype='multipart/form-data'>
             <label for="title"><h2>Title</h2></label>

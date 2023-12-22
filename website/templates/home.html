@@ -1,7 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Login{% endblock %}
+{% block title %}Home{% endblock %}
 {% block content %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
     <title>Home</title>
+    <!--
     <style>
         .slidecontainer {
           width: 100%;
@@ -38,20 +38,16 @@
           cursor: pointer;
         }
         
-        </style>
+        </style>-->
     <style>
         body { background-color: #eff1f3; font-family:futura; font-weight: bold;}
-        /* CSS styles for the card */
         .card {
-            width: 550px;
+            width: 600px;
             border: 1px solid #ccc;
             padding: 10px;
-            margin: 10px;
+            margin-left: auto;
+            margin-right: auto;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            background-color: #fff;
-            text-align: left; /* Align text to the left */
-            display: flex;
-            flex-direction: column;
         }
         .profile-pic {
             width: 15%;
@@ -61,44 +57,84 @@
         .user-info {
             display: flex;
             align-items: center;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            padding: 5px;
         }
         .username {
             font-weight: bold;
-            text-align: left; /* Align text to the left */
-            margin-left: 15px; /* Add some spacing between the profile pic and username */
+            text-align: left; 
+            margin-left: 15px; 
             margin-bottom: 50px;
         }
         .logline {
-            margin-top: 10px;
-            text-align: center; /* Align text to the left */
+            text-align: left;
+            position: absolute;
+            left: 200px;
+            top: 199px
         }
         .message {
             margin-top: 20px;
-            text-align: center; /* Align text to the left */
+            text-align: center; 
         }
         .genres {
             margin-top: 5px;
-            text-align: center; /* Align text to the left */
+            text-align: left; 
         }
         .average-rating {
-            margin-left: 10px;
+            text-align: left;
         }
         .delete-button {
-            margin-top: 10px;
-            text-align: center; /* Align text to the center */
+            text-align: right; 
+            margin-left: 510px;
         }
         .pdf-embed {
             width: 100%;
-            height: 400px; /* Adjust the height as needed */
+            height: 400px; 
         }
     </style>
+    <style>
+        .star-slider {
+          position: relative;
+          width: 300px;
+          margin: 50px;
+        }
+    
+        .star-slider input[type="range"] {
+          width: 100%;
+          height: 20px;
+          background: #ddd;
+          border-radius: 10px;
+          outline: none;
+          margin: 0;
+          padding: 0;
+          cursor: pointer;
+        }
+    
+        .star-slider input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 30px;
+          height: 30px;
+          background: url('star.png') no-repeat center center;
+          background-size: contain;
+          border: none;
+          cursor: pointer;
+          margin-top: -5px;
+        }
+    
+        .star-slider input[type="range"]::-webkit-slider-thumb:hover {
+          background-color: #ffcc00;
+        }
+      </style>
 </head>
 <body>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <br><br>
     <div class="row">
-        <div style="text-align:center" class="col-3">
+        <div style="text-align:center; margin-left: auto; margin-right: auto" class="col-3">
             <br><br>
             {% if featured %}
                 <div style="text-align: center">
@@ -138,7 +174,7 @@
                 </ul>
             </div>
         </div>
-        <div class="col-6" style="text-align:center">
+        <div class="col-6" style="text-align:center; margin-left: auto; margin-right: auto">
             <form method='POST' action="/sort">
                 <input type="radio" name="sorted" id="default" value="0"></input>
                 <label for="default">Default&nbsp</label>
@@ -155,6 +191,11 @@
             {% if posts %}
                 {% for post in posts %}
                 <div class="card">
+                    {% if user.id == post.writer.user.id %}
+                        <form action = /delete-post/{{post.scriptid}} method="POST">
+                            <input class="delete-button" type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this post?')">
+                        </form>
+                    {% endif %}
                     <div class="user-info">
                         {% if post.writer.user.profilepic %}
                             <img src="{{ url_for('static', filename='images/'+ post.writer.user.profilepic) }}" width = "110px" height = "110px" alt="Profile picture" class="profile-pic">
@@ -163,57 +204,77 @@
                         {% endif %}
                         <a href="/profilepage/{{post.writer.user.id}}" class="username"><h4>{{post.writer.user.username}}</h4></a>
                     </div>
-                    {% if user.accounttype == 1 %}
-                            {% if post.writer.user.id != user.id %}
-                                <div style="text-align:left">
-                                    <form method = "POST" action="/rate/{{post.scriptid}}">
-                                        <input type="range" class="slider" name="rate" min="1" max="5" id="id3">
-                                        <br>
-                                        Rating: <span id="f" style="font-weight:bold;color:black"></span>/5
-                                        <script>
-                                            var slidePic = document.getElementById("id3");
-                                            var y = document.getElementById("f");
-                                            y.innerHTML = slidePic.value;
-
-                                            slidePic.oninput = function() {
-                                                y.innerHTML = this.value;
-                                            }
-                                        </script>
-                                        <br>
-                                        <input type="submit" value="Submit Rating">
-                                    </form>
-                                    {% for like in likes %}
-                                            {% if (like.writer.user.id == user.id) and (like.script.scriptid == post.scriptid) %}
-                                                <p>You rated it: {{like.rating}}/5</p>
-                                            {% endif %}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                    {% endif %}
-                    {% if post.avgrating %}
-                        <span class="average-rating">Average Rating: {{post.avgrating}}</span>
-                        <br>
-                    {% endif %}
-                    {% if user.id == post.writer.user.id %}
-                        <form action = /delete-post/{{post.scriptid}} method="POST">
-                            <input class="delete-button" type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this post?')">
-                        </form>
-                    {% endif %}
                     {% if post.screenplay %}
-                        <a style="text-align: center" href="/script/{{post.scriptid}}" target="_blank"><h2>{{post.title}}</h2></a>
+                        <a href="/script/{{post.scriptid}}" target="_blank"><h2>{{post.title}}</h2></a>
                     {% else %}
-                        <div style="text-align: center"><h2>{{post.title}}</h2></div>
-                    {% endif %}
-                    <div class="genres">
-                        <h4>Genres:</h4>
-                        {% for script in scripthas %}
-                                {% if script.scriptid == post.scriptid %}
-                                    <b>{{script.has.genre}}</b><br>
+                        <h2>{{post.title}}</h2>
+                     {% endif %}
+                    <br>
+                    <div class="row">
+                        <div class="col-4" style="text-align: left">
+                            <h4>Genres:</h4>
+                                {% for script in scripthas %}
+                                        {% if script.scriptid == post.scriptid %}
+                                            <b>{{script.has.genre}}</b><br>
+                                        {% endif %}
+                                {% endfor %}
+                        </div>
+                        <br>
+                        <div class="col-4" style="text-align: left;">
+                            <h4>Logline:</h4>
+                            <p>{{post.logline}}</p>
+                        </div>
+                        <div class="col-4">
+                            {% if user.accounttype == 1 %}
+                                {% if post.writer.user.id != user.id %}
+                                    <div style="text-align:center">
+                                        <form method = "POST" action="/rate/{{post.scriptid}}">
+                                            <div class="star-slider">
+                                                <input type="range" min="1" max="5" step="0.5" value="3" id="starRating">
+                                                <p>Rating: <span id="ratingValue">3</span> stars</p>
+                                            </div>
+                                              
+                                            <script>
+                                                const slider = document.getElementById('starRating');
+                                                const ratingDisplay = document.getElementById('ratingValue');
+                                              
+                                                slider.addEventListener('input', () => {
+                                                  ratingDisplay.textContent = slider.value;
+                                                });
+                                            </script>
+                                            <!--
+                                            <input type="range" class="slider" name="rate" min="1" max="5" id="star">
+                                            <br>
+                                            Rating: <span id="f" style="font-weight:bold;color:black"></span>/5
+                                            <script>
+                                                var slidePic = document.getElementById("star");
+                                                var y = document.getElementById("f");
+                                                y.innerHTML = slidePic.value;
+                                                slidePic.oninput = function() {
+                                                    y.innerHTML = this.value;
+                                                }
+                                            </script>-->
+                                            <br><br>
+                                            <input type="submit" value="Submit Rating">
+                                        </form>
+                                    </div>
                                 {% endif %}
-                        {% endfor %}
+                            {% endif %}
+                        </div>
                     </div>
-                    <p class="logline">Logline: {{post.logline}}</p>
+                    <br>
+                    <div class="average-rating">
+                        {% for like in likes %}
+                            {% if (like.writer.user.id == user.id) and (like.script.scriptid == post.scriptid) %}
+                                <p>You rated it: {{like.rating}}/5</p>
+                            {% endif %}
+                        {% endfor %}
+                        {% if post.avgrating %}
+                        <span class="average-rating">Average Rating: {{post.avgrating}}</span>
+                        {% endif %}
+                    </div>
                     <p class="message">{{post.message}}</p>
+                    <br>
                     {% if post.screenplay %}
                         <embed class="pdf-embed" style="text-align: center;" src="{{url_for('static', filename='files/'+ post.screenplay)}}#toolbar=0" width = "100%" height = "550px%"> 
                     {% else %}
@@ -268,7 +329,7 @@
             </div>
         </div>
         {% if user.accounttype == 1 %}
-            <div class="col-3" style="text-align:center">
+            <div class="col-3" style="text-align:center; margin-left: auto; margin-right: auto">
                 <br>
                 <br>
                 <h2>Recommended Screenplays</h2>

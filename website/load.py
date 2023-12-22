@@ -67,7 +67,7 @@ def GiveRecommendations(writerid): # Returns a list of 3 screenplay recommendati
         ScriptsofFavGenre = ScriptHas.query.filter(ScriptHas.genreid == favgenreid)
         ScriptShortlist = []
         for script in ScriptsofFavGenre:
-            ScriptShortlist.append(ScriptsofFavGenre.scriptid) 
+            ScriptShortlist.append(script.scriptid) 
         
         LikedScriptIDs = [script.scriptid for script in LikedScreenplays.query.all()]
         recs = []

@@ -18,7 +18,7 @@ def login():
         user = Users.query.filter_by(email=email).first()
         if user:
             if check_password_hash(user.password, password):
-                if user.accounttype == "2":
+                if user.accounttype == 2:
                     producer = Producers.query.filter_by(userid = user.id).first()
                     email = email.split("@")
                     if producer.approved == 0 and email[1] == 'producersguild.org': # Producer accounts from the guild are not logged in if they haven't gotten approved via OTP verification
