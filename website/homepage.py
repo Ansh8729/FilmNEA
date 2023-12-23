@@ -167,6 +167,7 @@ def create_comment(scriptid):
             comment = Comments(writerid=writer.writerid, scriptid=scriptid, comment=text)
             db.session.add(comment)
             db.session.commit()
+            flask.flash("Comment created!")
             comment = Comments.query.order_by(Comments.commentid).first()
             writer2 = Screenwriters.query.filter_by(userid = post.writer.user.id).first()
             notif = Notifications(writerid = writer2.writerid, responsetype = 3, commentid=comment.commentid)

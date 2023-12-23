@@ -8,58 +8,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Page</title>
     <style>
-        *{
-      margin: 0;
-      padding: 0;
-  }
-  .rate {
-      float: left;
-      height: 46px;
-      padding: 0 10px;
-  }
-  .rate:not(:checked) > input {
-      position:absolute;
-      top:-9999px;
-  }
-  .rate:not(:checked) > label {
-      float:right;
-      width:1em;
-      overflow:hidden;
-      white-space:nowrap;
-      cursor:pointer;
-      font-size:30px;
-      color:#ccc;
-  }
-  .rate:not(:checked) > label:before {
-      content: '★ ';
-  }
-  .rate > input:checked ~ label {
-      color: #ffc700;    
-  }
-  .rate:not(:checked) > label:hover,
-  .rate:not(:checked) > label:hover ~ label {
-      color: #deb217;  
-  }
-  .rate > input:checked + label:hover,
-  .rate > input:checked + label:hover ~ label,
-  .rate > input:checked ~ label:hover,
-  .rate > input:checked ~ label:hover ~ label,
-  .rate > label:hover ~ input:checked ~ label {
-      color: #c59b08;
-  }
-    </style>
-    <style>
         #table {
           border-collapse: collapse;
           width: 90%;
+          background-color: white;
         }
         
         #table td, #table th {
           border: 1px solid #ddd;
           padding: 8px;
+          background-color: white;
         }
         
-        #table tr:nth-child(even){background-color: #f2f2f2;}
+        #table tr:nth-child(even){background-color: #ffffff;}
         
         #table th {
           padding-top: 12px;
@@ -167,12 +128,14 @@
                 <h6>{{ profileuser.biography }}</h6>
                 {% endif %}
                 {% if profileuser.accounttype == 1 %}
-                    <b><p>Experience Level: {{ details.experiencelevel }}</p></b>
+                    {% if details.experiencelevel != None %}
+                        <b><p>Experience Level: {{ details.experiencelevel }}</p></b>
+                    {% endif %}
                 {% endif %}
                 <br>
             </div>
             {% if profileuser.accounttype == 1 %}
-            <div class="col-9" style="display: flex; justify-content: center">
+            <div class="col-9" style ="display: flex; justify-content: right;">
                 <table id="table" style="width: 350px">
                     <tr>
                         <th style="width: 100px">Award</th>
