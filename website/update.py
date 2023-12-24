@@ -13,11 +13,10 @@ def UpdateNotificationNumber(userid): # Updates the number of unseen notificatio
             for notif in notifs:
                 if notif.commentid:
                     number += 1
-                if notif.producerid and notif.message and not notif.ranking:
+                if notif.producerid and notif.message and not notif.requeststatus and not notif.ranking:
                     number += 1
-                if notif.producerid:
-                    if notif.requeststatus == 0:
-                        number += 1
+                if notif.producerid and notif.message and notif.requeststatus == 0:
+                    number += 1
                 if notif.compid and notif.message and notif.ranking:
                     number += 1
             current_user.notifnum = number
@@ -35,7 +34,7 @@ def UpdateNotificationNumber(userid): # Updates the number of unseen notificatio
                 if notif.compid:
                     if not notif.ranking:
                         number += 1
-                if notif.requeststatus == 0:
+                if notif.requeststatus == 1 or notif.requeststatus == 2:
                     number += 1
             current_user.notifnum = number
             db.session.commit()

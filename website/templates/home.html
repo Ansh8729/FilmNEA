@@ -148,7 +148,7 @@
                             {% endif %}
                             <br>
                             <div class="row">
-                                <div class="col-4" style="text-align: left">
+                                <div class="col-3" style="text-align: left">
                                     <h4>Genres:</h4>
                                         {% for script in scripthas %}
                                                 {% if script.scriptid == post.scriptid %}
@@ -157,11 +157,11 @@
                                         {% endfor %}
                                 </div>
                                 <br>
-                                <div class="col-4" style="text-align: left;">
+                                <div class="col-6" style="text-align: center;">
                                     <h4>Logline:</h4>
                                     <p>{{post.logline}}</p>
                                 </div>
-                                <div class="col-4">
+                                <div class="col-3">
                                     {% if user.accounttype == 1 %}
                                         {% if post.writer.user.id != user.id %}
                                             <div style="text-align:center">

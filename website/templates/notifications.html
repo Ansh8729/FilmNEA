@@ -96,7 +96,7 @@
                         {% if response.requeststatus == 1 %}
                             <div class="card" style="text-align:center">
                                 {{response.message}}
-                                <a target="_blank" href="{{url_for('static', filename='images/'+response.script.fullfile)}}">Full Screenplay File</a>
+                                <a target="_blank" href="{{url_for('static', filename='files/'+response.script.fullfile)}}">Full Screenplay File</a>
                                 <form method="POST" action="/deleteresponse/{{ response.notifid }}">
                                     <button type="submit" name="Delete">Delete</button>
                                 </form>
