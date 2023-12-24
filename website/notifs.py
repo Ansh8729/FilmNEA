@@ -74,7 +74,7 @@ def requestresponse(requestid):
 @login_required
 def submissions(compid):
     UpdateNotificationNumber(current_user.id)
-    notifs = Notifications.query.filter_by(compid = compid)
+    notifs = Notifications.query.filter_by(compid = compid, message = None, ranking = None)
     competition = Competitions.query.filter_by(compid=compid).first()
     return flask.render_template('submissions.html', notifs=notifs, user=current_user, comp=competition)
 

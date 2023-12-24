@@ -262,7 +262,7 @@
                 <br>
                 <h2 style="text-align: center">Recommended Screenplays</h2>
                     <br>
-                    {% if recs == [] %}
+                    {% if recs == [] or recs == None %}
                         <h3 style="text-align: center">No recommendations available</h3>
                     {% else %}
                         <ul style="position: absolute; bottom: 200px; right: 105px">
@@ -279,6 +279,10 @@
                             {% endfor %}
                         </ul>
                     {% endif %}
+            </div>
+        {% elif user.accounttype == 2 %}
+            <div class="col-3">
+                
             </div>
         {% endif %}
     </div>
