@@ -14,6 +14,7 @@ import secrets
 import PyPDF2
 import PyPDF4
 from .subroutines import NoSpaces, IsPDF, Watermark, ExtractPDF
+from .interact import CreateComment, DeleteComment, LikeExists, RateScreenplay, NotificationExists, ProducerResponse, ProducerRequest, DeletePost
 from .update import UpdateNotificationNumber
 from .convert import convert_to_datetime, ISOtoDate 
 from .load import GiveRecommendations, LoadFeatured
@@ -134,25 +135,14 @@ def script(scriptid):
 @homepage.route("/rate/<scriptid>", methods=['POST'])
 @login_required
 def rate(scriptid):
-    rating = flask.request.form.get("rate")
     writer = Screenwriters.query.filter_by(userid = current_user.id).first()
-    script = Screenplays.query.filter_by(scriptid=scriptid).first()
-    like_exists = LikedScreenplays.query.filter(LikedScreenplays.writerid == writer.writerid, LikedScreenplays.scriptid==scriptid).first()
-    if not like_exists:
-        newrating = LikedScreenplays(writerid = writer.writerid, scriptid=scriptid, rating=rating)
-        db.session.add(newrating)
-        db.session.commit()
+    if LikeExists(writer.writerid, scriptid) == False:
+        rating = flask.request.form.get("rate")
+        RateScreenplay(writer.writerid, scriptid, rating)
+        return flask.redirect(flask.url_for('homepage.home'))
     else:
         flask.flash("You've already rated this screenplay!", category="error")
         return flask.redirect(flask.url_for('homepage.home'))
-    ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
-    total = 0
-    for i in ratings:
-        total += i.rating
-    script.avgrating = total/ratings.count()
-    db.session.commit()
-    flask.flash("Rating submitted!")
-    return flask.redirect(flask.url_for('homepage.home'))
 
 @homepage.route("/create-comment/<scriptid>", methods=['POST'])
 @login_required
@@ -161,96 +151,43 @@ def create_comment(scriptid):
     if not text:
         flask.flash('Comment cannot be empty.', category='error')
     else:
-        post = Screenplays.query.filter_by(scriptid = scriptid).first()
-        writer = Screenwriters.query.filter_by(userid = current_user.id).first()
-        if post:
-            comment = Comments(writerid=writer.writerid, scriptid=scriptid, comment=text)
-            db.session.add(comment)
-            db.session.commit()
-            flask.flash("Comment created!")
-            comment = Comments.query.order_by(Comments.commentid).first()
-            writer2 = Screenwriters.query.filter_by(userid = post.writer.user.id).first()
-            notif = Notifications(writerid = writer2.writerid, responsetype = 3, commentid=comment.commentid)
-            db.session.add(notif)
-            db.session.commit()
-        else:
-            flask.flash('Post does not exist.', category='error')
-
+        CreateComment(scriptid, current_user.id, text)
     return flask.redirect(flask.url_for('homepage.home'))
 
 @homepage.route("/delete-comment/<commentid>", methods=['GET', 'POST'])
 @login_required
 def delete_comment(commentid):
-    notif = Notifications.query.filter_by(commentid=commentid).first()
-    if notif:
-        db.session.delete(notif)
-        db.session.commit()
-    comment = Comments.query.filter_by(commentid=commentid).first()
-    db.session.delete(comment)
-    db.session.commit()
-    flask.flash("Comment removed!")
+    DeleteComment(commentid)
     return flask.redirect(flask.url_for('homepage.home'))
 
 @homepage.route('/response/<scriptid>',methods=['POST'])
 @login_required
 def response(scriptid):
-    response = flask.request.form.get('response')
-    request = flask.request.form.get('request')
-    if response:
-        producer = Producers.query.filter_by(userid = current_user.id).first()
-        response_exists = Notifications.query.filter(Notifications.producerid == producer.producerid, Notifications.scriptid == scriptid, Notifications.responsetype == 1).first()
-        if response_exists:
-            flask.flash("You've already sent a response for this script.")
-            return flask.redirect(flask.url_for("homepage.home"))
-        else:
-            producer = Producers.query.filter_by(userid = current_user.id).first()
-            script = Screenplays.query.filter_by(scriptid=scriptid).first()
-            newresponse = Notifications(producerid = producer.producerid, writerid=script.writerid, scriptid=scriptid, message=response, responsetype = 1)
-            db.session.add(newresponse)
-            db.session.commit()
-            flask.flash(f"Response sent!")
+    producer = Producers.query.filter_by(userid = current_user.id).first()
+    if NotificationExists(producer.producerid, scriptid, 1) == True:
+        flask.flash("You've already sent a response for this script.")
         return flask.redirect(flask.url_for("homepage.home"))
-    elif request:
-        producer = Producers.query.filter_by(userid = current_user.id).first()
-        request_exists = Notifications.query.filter(Notifications.producerid == producer.producerid, Notifications.scriptid == scriptid, Notifications.responsetype == 2).first()
-        if request_exists:
-            flask.flash("You've already sent a request for this script.")
-            return flask.redirect(flask.url_for("homepage.home"))
-        else:
-            producer = Producers.query.filter_by(userid = current_user.id).first()
-            script = Screenplays.query.filter_by(scriptid=scriptid).first()
-            newrequest = Notifications(producerid = producer.producerid, writerid=script.writerid, scriptid=scriptid, responsetype = 2, requeststatus = 0)
-            db.session.add(newrequest)
-            db.session.commit()
-            flask.flash(f"Request for full access for {script.title} sent!")
+    else:
+        response = flask.request.form.get('response')
+        ProducerResponse(producer.producerid, scriptid, response)
+        return flask.redirect(flask.url_for("homepage.home"))
+    
+@homepage.route('/request/<scriptid>', methods=['POST'])
+@login_required
+def request(scriptid):
+    producer = Producers.query.filter_by(userid = current_user.id).first()
+    if NotificationExists(producer.producerid, scriptid, 2) == True:
+        flask.flash("You've already sent a request for this script.")
+        return flask.redirect(flask.url_for("homepage.home"))
+    else:
+        ProducerRequest(producer.producerid, scriptid)
         return flask.redirect(flask.url_for("homepage.home"))
 
 @homepage.route("/delete-post/<scriptid>", methods=['POST'])
 @login_required
 def delete_post(scriptid):
-        post = Screenplays.query.filter_by(scriptid = scriptid).first()
-        scripthas = ScriptHas.query.all()
-        for record in scripthas:
-            if record.scriptid == post.scriptid:
-                db.session.delete(record)
-                db.session.commit()
-        comments = Comments.query.filter_by(scriptid = post.scriptid)
-        for comment in comments:
-            db.session.delete(comment)
-            db.session.commit()
-        ratings = LikedScreenplays.query.filter_by(scriptid = post.scriptid)
-        for i in ratings:
-            db.session.delete(i)
-            db.session.commit()
-        notifs = LikedScreenplays.query.filter_by(scriptid = post.scriptid)
-        for i in notifs:
-            db.session.delete(i)
-            db.session.commit()
-        post = Screenplays.query.filter_by(scriptid = scriptid).first()
-        db.session.delete(post)
-        db.session.commit()
-        flask.flash('Post deleted.', category='success')
-        return flask.redirect(flask.url_for('homepage.home'))
+    DeletePost(scriptid)
+    return flask.redirect(flask.url_for('homepage.home'))
 
 @homepage.route("/post", methods=['GET', 'POST'])
 @login_required

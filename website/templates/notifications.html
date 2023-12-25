@@ -18,14 +18,14 @@
                     {% if response.responsetype == 1 %}
                         <div class="card" style="text-align:left">
                             <h4><a href="/profilepage/{{ response.producer.user.id }}" target="_blank">{{ response.producer.user.username }}</a> says {{ response.message }}</h4>
-                            <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                            <form method="POST" action="/deletenotif/{{ response.notifid }}">
                                 <button type="submit" name="Delete">Delete</button>
                             </form>
                         </div>
-                    {% elif response.responsetype == 3 %}
+                    {% elif response.commentid %}
                         <div class="card" style="text-align:left">  
                             <h4><a href="/profilepage/{{ response.comment.writer.user.id }}" target="_blank">{{ response.comment.writer.user.username }}</a> says <i>{{ response.comment.comment }}</i> on <a href="/script/{{response.comment.script.scriptid}}" target="_blank">{{response.comment.script.title}}</a></h4>
-                            <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                            <form method="POST" action="/deletenotif/{{ response.notifid }}">
                                 <button type="submit" name="Delete">Delete</button>
                             </form>
                         </div>
@@ -48,7 +48,7 @@
                                     <br>
                                 {% endif %}
                                 <h5>Response to your submission by <a href="/profilepage/{{ response.producer.user.id }}" target="_blank">{{ response.producer.user.username }}</a>:<br> <i>{{ response.message }}</i></h5>
-                                <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                                <form method="POST" action="/deletenotif/{{ response.notifid }}">
                                     <button type="submit" name="Delete">Delete</button>
                                 </form>
                             </div>
@@ -88,7 +88,7 @@
                         {% if response.requeststatus == 2 %}
                             <div class="card" style="text-align:center">
                                 {{response.message}}
-                                <form method="POST" action="/deleteresponse/{{ response.notifid }}">
+                                <form method="POST" action="/deletenotif/{{ response.notifid }}">
                                     <button type="submit" name="Delete">Delete</button>
                                 </form>
                             </div>
@@ -97,8 +97,8 @@
                             <div class="card" style="text-align:center">
                                 {{response.message}}
                                 <a target="_blank" href="{{url_for('static', filename='files/'+response.script.fullfile)}}">Full Screenplay File</a>
-                                <form method="POST" action="/deleteresponse/{{ response.notifid }}">
-                                    <button type="submit" name="Delete">Delete</button>
+                                <form method="POST" action="/deletenotif/{{ response.notifid }}">
+                                    <button type="submit" name="Delete" onclick="return confirm('Are you sure you want to delete this request response? You will not be able to access the full file on this page unless you request for full access again.')">Delete</button>
                                 </form>
                             </div>
                         {% endif %}

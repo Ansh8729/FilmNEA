@@ -1,4 +1,3 @@
-# from flask import Blueprint, render_template, request, flash, redirect, url_for
 import flask 
 from flask_login import login_required, current_user
 from .models import Screenwriters, Producers, Competitions, Notifications, Awards
@@ -13,12 +12,12 @@ def notifications(userid):
     UpdateNotificationNumber(current_user.id)
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=userid).first()
-        notifs = Notifications.query.filter_by(writerid = writer.writerid)
+        notifs = Notifications.query.filter_by(writerid = writer.writerid).order_by(Notifications.datetime_created)
         return flask.render_template("notifications.html", notifs=notifs, user=current_user)
     if current_user.accounttype == 2:
         producer = Producers.query.filter_by(userid=userid).first()
         UpdateCompetitions(producer.producerid)
-        notifs = Notifications.query.filter_by(producerid = producer.producerid)
+        notifs = Notifications.query.filter_by(producerid = producer.producerid).order_by(Notifications.datetime_created)
         comps = Competitions.query.filter_by(producerid=producer.producerid)
         return flask.render_template("notifications.html", notifs=notifs, user=current_user, comps=comps)
     
@@ -44,13 +43,13 @@ def sendback(userid, compid):
     else:
         flask.flash("That feature is only available for producers.", category="error")
         
-@notifs.route('/deleteresponse/<responseid>', methods=['GET', 'POST'])
+@notifs.route('/deletenotif/<responseid>', methods=['GET', 'POST'])
 @login_required
 def deleteresponse(responseid):
     response = Notifications.query.filter_by(notifid = responseid).first()
     db.session.delete(response)
     db.session.commit()
-    flask.flash("Response removed!")
+    flask.flash("Notification removed!")
     return flask.redirect(flask.url_for("notifs.notifications", userid=current_user.id))
 
 @notifs.route('/requestresponse/<requestid>', methods=['GET', 'POST'])

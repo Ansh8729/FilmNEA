@@ -75,23 +75,11 @@ def comp(compid):
     UpdateNotificationNumber(current_user.id)
     comp = Competitions.query.filter_by(compid = compid).first()
     writer = Screenwriters.query.filter_by(userid=current_user.id).first()
-    notifs = Notifications.query.filter_by(writerid = writer.writerid)
-    submitted = None
-    for notif in notifs:
-        if notif.compid == compid and submission:
-            submitted = True
-            break
-    if flask.request.method == "POST":
-        submission = flask.request.files["submissions"]
-        scriptname = secure_filename(submission.filename) 
-        submission.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
-        user = Users.query.filter_by(username = current_user.username).first()
-        writer = Screenwriters.query.filter_by(userid = user.id).first()
-        newsub = Notifications(writerid = writer.writerid, compid = comp.compid, submission=scriptname)
-        db.session.add(newsub)
-        db.session.commit()
-        flask.flash("Submission sent!")
-        return flask.redirect(flask.url_for("comps.competitions"))
+    notif = Notifications.query.filter_by(writerid = writer.writerid, compid = compid)
+    if notif:
+        submitted = True
+    else:
+        submitted = False
     return flask.render_template("comp_full.html",user=current_user, comp=comp, submitted=submitted)
 
 @comps.route('/submit/<compid>', methods=['GET', 'POST'])
@@ -106,7 +94,7 @@ def submit(compid):
     else:
         writer = Screenwriters.query.filter_by(userid=current_user.id).first()
         comp = Competitions.query.filter_by(compid=compid).first()
-        newsub = Notifications(writerid=writer.writerid, producerid=comp.producerid, compid=compid, submission=scriptname)
+        newsub = Notifications(writerid=writer.writerid, producerid=comp.producerid, compid=compid, submission=scriptname, datetime_created = datetime.now())
         db.session.add(newsub)
         db.session.commit()
         flask.flash("Submission sent!")
