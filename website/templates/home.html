@@ -233,18 +233,21 @@
                                     </form>
                                 </div>
                                 {% else %}
-                                <div class="text-align:left">
-                                    <form method="POST" name="response" action="/response/{{post.scriptid}}">
-                                        <input type="text" name="response" id="response" class="form-control">
-                                        <label for="response">Send Response</label>
-                                        <input type="submit">
-                                    </form>
-                                </div>
-                                <div class="text-align:right">
-                                    <form method="POST" action="/request/{{post.scriptid}}">
-                                        <label for="request">Request Full Access</label>
-                                        <input name="request" type="submit" onclick="return confirm('Are you sure you want to request for this screenplay?')">
-                                    </form>
+                                <div style="width: 550px; border: 1px solid #ccc; padding: 10px; margin-left: auto; margin-right: auto">
+                                    <div class="text-align:left">
+                                        <form method="POST" name="response" action="/response/{{post.scriptid}}">
+                                            <label for="response">Send Response</label>
+                                            <input style="margin-bottom: 10px" type="text" name="response" id="response" class="form-control">
+                                            <input type="submit">
+                                        </form>
+                                    </div>
+                                    <br>
+                                    <div class="text-align:center">
+                                        <form method="POST" action="/request/{{post.scriptid}}">
+                                            <label for="request">Request Full Access</label>
+                                            <input name="request" type="submit" onclick="return confirm('Are you sure you want to request for this screenplay?')">
+                                        </form>
+                                    </div>
                                 </div>
                             {% endif %}
                         </div>

@@ -144,15 +144,15 @@ def rate(scriptid):
         flask.flash("You've already rated this screenplay!", category="error")
         return flask.redirect(flask.url_for('homepage.home'))
 
-@homepage.route("/create-comment/<scriptid>", methods=['POST'])
+@homepage.route("/create-comment/<scriptid>/<page>", methods=['POST'])
 @login_required
-def create_comment(scriptid):
+def create_comment(scriptid, page):
     text = flask.request.form.get('text')
     if not text:
         flask.flash('Comment cannot be empty.', category='error')
     else:
         CreateComment(scriptid, current_user.id, text)
-    return flask.redirect(flask.url_for('homepage.home'))
+        return flask.redirect(flask.url_for('homepage.home'))
 
 @homepage.route("/delete-comment/<commentid>", methods=['GET', 'POST'])
 @login_required

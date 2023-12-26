@@ -5,13 +5,13 @@ from flask_login import current_user
 from datetime import datetime, timedelta
 
 def LoadGenres(): #Adds the genres to the database when the database is created
-    genrelist = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Sports', 'Thriller', 'Western']
+    genrelist = ['All','Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Sports', 'Thriller', 'Western']
     for i in range(len(genrelist)):
             newgenre = Genres(genre=genrelist[i])
             db.session.add(newgenre)
             db.session.commit()
     for i in Genres.query.all(): # Removes duplicate additions from the list of genres
-            if i.genreid > 13:
+            if i.genreid > 14:
                 db.session.delete(i)
                 db.session.commit()
 

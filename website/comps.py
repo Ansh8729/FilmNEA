@@ -1,12 +1,9 @@
-# from flask import Blueprint, render_template, request, flash, redirect, url_for
 import flask 
 from flask_login import login_required, current_user
 from .models import Users, Screenwriters, Competitions, Genres, CompHas, Notifications
-from wtforms import widgets, SelectMultipleField
 from werkzeug.utils import secure_filename
 import os
 import shutil
-from werkzeug.utils import secure_filename
 import uuid as uuid
 from . import db
 from datetime import datetime, timedelta, date
@@ -14,10 +11,6 @@ from .subroutines import NoSpaces, IsPDF
 from .update import UpdateNotificationNumber, UpdateSubmissionNums
 
 comps = flask.Blueprint("comps", __name__)
-    
-class MultiCheckboxField(SelectMultipleField):
-    widget = widgets.ListWidget(prefix_label=False)
-    option_widget = widgets.CheckboxInput()
 
 @comps.route("/competitions", methods=['GET', 'POST'])
 @login_required
@@ -75,7 +68,7 @@ def comp(compid):
     UpdateNotificationNumber(current_user.id)
     comp = Competitions.query.filter_by(compid = compid).first()
     writer = Screenwriters.query.filter_by(userid=current_user.id).first()
-    notif = Notifications.query.filter_by(writerid = writer.writerid, compid = compid)
+    notif = Notifications.query.filter_by(writerid = writer.writerid, compid = compid).first()
     if notif:
         submitted = True
     else:
@@ -100,19 +93,17 @@ def submit(compid):
         flask.flash("Submission sent!")
         return flask.redirect(flask.url_for("comps.competitions"))
     
-@comps.route("delete-comp/<compid>", methods=['POST'])
+@comps.route("/delete-comp/<compid>", methods=['GET', 'POST'])
 @login_required
 def delete_comp(compid):
-    compsubs = Notifications.query.all()
-    for i in compsubs:
-        if i.compid == compid:
-            db.session.delete(i)
-            db.session.commit()
-    compgenres = CompHas.query.all()
-    for i in compgenres:
-        if i.compid == compid:
-            db.session.delete(i)
-            db.session.commit()
+    submissions = Notifications.query.filter_by(compid=compid)
+    for record in submissions:
+        db.session.delete(record)
+        db.session.commit()
+    compgenres = CompHas.query.filter_by(compid=compid)
+    for record in compgenres:
+        db.session.delete(record)
+        db.session.commit()
     comp = Competitions.query.filter_by(compid=compid).first()
     db.session.delete(comp)
     db.session.commit()

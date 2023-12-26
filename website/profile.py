@@ -132,6 +132,7 @@ def rate2(scriptid):
         flask.flash("You've already rated this screenplay!", category="error")
         return flask.redirect(flask.url_for("profile.profilepage", userid = script.writer.user.id))
 
+
 @profile.route("/profilepagecomment/<scriptid>", methods=['POST'])
 @login_required
 def ppcomment(scriptid):

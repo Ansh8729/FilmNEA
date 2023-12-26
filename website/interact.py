@@ -1,6 +1,6 @@
 import flask
 from .models import Screenplays, Screenwriters, Notifications, Comments, LikedScreenplays, ScriptHas
-import datetime
+from datetime import datetime
 from . import db
 
 def CreateComment(scriptid, userid, comment):
@@ -71,23 +71,21 @@ def ProducerRequest(producerid, scriptid):
     flask.flash(f"Request for full access for {script.title} sent!")
 
 def DeletePost(scriptid):
-    post = Screenplays.query.filter_by(scriptid = scriptid).first()
-    scripthas = ScriptHas.query.all()
-    for record in scripthas:
-        if record.scriptid == post.scriptid:
-            db.session.delete(record)
-            db.session.commit()
-    comments = Comments.query.filter_by(scriptid = post.scriptid)
+    notifs = LikedScreenplays.query.filter_by(scriptid = scriptid)
+    for notif in notifs:
+        db.session.delete(notif)
+        db.session.commit()
+    ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
+    for rating in ratings:
+        db.session.delete(rating)
+        db.session.commit()
+    comments = Comments.query.filter_by(scriptid = scriptid)
     for comment in comments:
         db.session.delete(comment)
         db.session.commit()
-    ratings = LikedScreenplays.query.filter_by(scriptid = post.scriptid)
-    for i in ratings:
-        db.session.delete(i)
-        db.session.commit()
-    notifs = LikedScreenplays.query.filter_by(scriptid = post.scriptid)
-    for i in notifs:
-        db.session.delete(i)
+    scripthas = ScriptHas.query.filter_by(scriptid=scriptid)
+    for record in scripthas:
+        db.session.delete(record)
         db.session.commit()
     post = Screenplays.query.filter_by(scriptid = scriptid).first()
     db.session.delete(post)

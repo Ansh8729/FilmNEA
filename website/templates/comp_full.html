@@ -1,5 +1,4 @@
-{% extends "base.html" %} {% block title %}{{comp.title}}{% endblock %} {% block content
-    %}
+{% extends "base.html" %} {% block title %}{{comp.title}}{% endblock %} {% block content%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,22 +9,23 @@
 <body>
   <button onclick="window.location.href = '/competitions';">Back</button>
   <br><br>
-  <div style="text-align:left">
-    <h1>{{comp.title}}</h1>
-    <h3>Deadline: {{comp.deadline_string}}</h3>
-  </div>
-  <p>{{comp.brief}}</p>
-  <br>
   {% if submitted == True %}
     <h2>You've already submitted to this competition.</h2>
   {% else %}
+    <div style="text-align:left">
+      <h1>{{comp.title}}</h1>
+      <h3>Deadline: {{comp.deadline_string}}</h3>
+    </div>
+    <br>
+    <p>{{comp.brief}}</p>
+    <br>
     <h2>Submit Your Entry</h2>
     <form method='POST' enctype='multipart/form-data' action="/submit/{{comp.compid}}">
       <input type="file" name="submission"><br><br>
       <input type="submit" name="Submit" onclick="return confirm('Are you sure you want to submit this screenplay file for this competition? You will not be able to resubmit.')">
     </form>
+  <br>
   {% endif %}
-
 </body>
 </html>
-  {% endblock %}
+{% endblock %}
