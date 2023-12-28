@@ -21,12 +21,14 @@ def create_app():
     from .profile import profile
     from .comps import comps
     from .notifs import notifs
+    from .screenplay import screenplay
 
     app.register_blueprint(auth, url_prefix="/")
     app.register_blueprint(homepage, url_prefix="/")
     app.register_blueprint(comps, url_prefix="/")
     app.register_blueprint(profile, url_prefix="/")
     app.register_blueprint(notifs, url_prefix="/")
+    app.register_blueprint(screenplay, url_prefix="/")
 
     from .models import Users
     from .load import LoadGenres

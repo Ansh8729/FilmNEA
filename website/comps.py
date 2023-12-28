@@ -98,6 +98,8 @@ def submit(compid):
 def delete_comp(compid):
     submissions = Notifications.query.filter_by(compid=compid)
     for record in submissions:
+        filepath = os.path.join('/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA/static/files',record.submission)
+        os.remove(filepath)
         db.session.delete(record)
         db.session.commit()
     compgenres = CompHas.query.filter_by(compid=compid)

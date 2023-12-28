@@ -79,7 +79,7 @@
                         <h2><a style="text-align: center" href="/script/{{script.script.scriptid}}" target="_blank">{{script.script.title}}</a></h2>
                         {{script.script.logline}}
                         <p>By: <a href="/profilepage/{{script.script.writer.user.id}}" class="username"><h4>{{script.script.writer.user.username}}</h4></a></p>
-                        <embed style="text-align: center;" src="{{url_for('static', filename='files/'+ script.script.screenplay)}}#toolbar=0" style="width: 200px; height: 300px">
+                        <embed style="text-align: center;" src=src="{{url_for('static', filename='files/'+ script.script.screenplay)}}#toolbar=0" style="width: 200px; height: 550px">
                     {% else %}
                         <h4>No featured scripts at the moment</h4>
                     {% endif %}
@@ -203,7 +203,7 @@
                             <p class="message">{{post.message}}</p>
                             <br>
                             {% if post.screenplay %}
-                                <embed class="pdf-embed" style="text-align: center;" src="{{url_for('static', filename='files/'+ post.screenplay)}}#toolbar=0" width = "100%" height = "550px%"> 
+                                <embed class="pdf-embed" style="text-align: center;" src="{{url_for('static', filename='files/'+ post.screenplay)}}#toolbar=0" width = "100%" height = "550px"> 
                             {% else %}
                                 <h2>Screenplay not available</h2>
                             {% endif %}
@@ -256,6 +256,10 @@
                     <br>
                 {% else %}
                     <h1>No posts available</h1>
+                    <br>
+                    {% if user.accounttype == 1 %}
+                        <a href="/post"><button type="button" class="btn btn-primary btn-lg">Create a Post</button></a>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>

@@ -1,12 +1,10 @@
 # from flask import Blueprint, render_template, request, flash, redirect, url_for
 import flask 
 from flask_login import login_required, current_user
-from .models import Screenwriters, Producers, Competitions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, Notifications, FeaturedScripts
-from wtforms import widgets, SelectMultipleField
+from .models import Screenwriters, Producers, Competitions, Screenplays, LikedScreenplays, Comments, Genres, ScriptHas, CompHas, FeaturedScripts
 from werkzeug.utils import secure_filename
 import os
 import shutil
-from werkzeug.utils import secure_filename
 import uuid as uuid
 from . import db
 from datetime import datetime, timedelta, date
@@ -20,10 +18,6 @@ from .convert import convert_to_datetime, ISOtoDate
 from .load import GiveRecommendations, LoadFeatured
 
 homepage = flask.Blueprint("homepage", __name__)
-    
-class MultiCheckboxField(SelectMultipleField):
-    widget = widgets.ListWidget(prefix_label=False)
-    option_widget = widgets.CheckboxInput()
 
 @homepage.route("/")
 @homepage.route("/home", methods=['GET', 'POST'])
@@ -58,7 +52,12 @@ def home():
 def leaderboard():
     UpdateNotificationNumber(current_user.id)
     writers = Screenwriters.query.filter(Screenwriters.experiencelevel > 0).order_by(Screenwriters.experiencelevel)
-    return flask.render_template("leaderboard.html", writers=writers, user=current_user)
+    leaderboard = []
+    number = 1
+    for writer in writers:
+        leaderboard.append([number, writer])
+        number += 1
+    return flask.render_template("leaderboard.html", writers=leaderboard, user=current_user)
 
 @homepage.route("/sort", methods=['GET','POST'])
 @login_required
@@ -123,15 +122,6 @@ def filter():
         flask.flash(f"Now showing all {genre2.genre} scripts.")
         return flask.render_template("home.html", user=current_user, posts=posts, comments=comments, scripthas=scripthas, recs=recs, likes=likes)
 
-@homepage.route("/script/<scriptid>", methods=['GET', 'POST'])
-@login_required
-def script(scriptid):
-    UpdateNotificationNumber(current_user.id)
-    script = Screenplays.query.filter_by(scriptid=scriptid).first()
-    scripthas = ScriptHas.query.all()
-    comments = Comments.query.filter_by(scriptid=scriptid)
-    return flask.render_template("script_full.html", post=script, scripthas=scripthas, user=current_user, comments=comments)
-
 @homepage.route("/rate/<scriptid>", methods=['POST'])
 @login_required
 def rate(scriptid):
@@ -144,9 +134,9 @@ def rate(scriptid):
         flask.flash("You've already rated this screenplay!", category="error")
         return flask.redirect(flask.url_for('homepage.home'))
 
-@homepage.route("/create-comment/<scriptid>/<page>", methods=['POST'])
+@homepage.route("/create-comment/<scriptid>", methods=['POST'])
 @login_required
-def create_comment(scriptid, page):
+def create_comment(scriptid):
     text = flask.request.form.get('text')
     if not text:
         flask.flash('Comment cannot be empty.', category='error')
@@ -216,47 +206,51 @@ def post():
                         flask.flash("Message is too long!", category="error")
                         flask.redirect(flask.url_for("homepage.post"))
                     else:
-                        scriptname = secure_filename(file.filename)
-                        scriptname = NoSpaces(scriptname)
-                        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
-                        if IsPDF(scriptname) == False:
-                            flask.flash("Upload a PDF!", category='error')
-                            os.remove(scriptname)
-                            return flask.redirect(flask.url_for("homepage.post"))
+                        if not genres:
+                            flask.flash("Tag your post with at least one genre.", category="error")
+                            flask.redirect(flask.url_for("homepage.post"))
                         else:
-                            file2 = PyPDF2.PdfReader(scriptname)
-                            nums = len(file2.pages)
-                            if end > nums:
-                                flask.flash("Your screenplay doesn't have "+str(end)+" pages!")
-                                os.remove(scriptname)
-                                return flask.redirect(flask.url_for("homepage.post"))
-                            elif end-start > 10:
-                                flask.flash("You can't upload more than 10 pages!")
+                            scriptname = secure_filename(file.filename)
+                            scriptname = NoSpaces(scriptname)
+                            file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
+                            if IsPDF(scriptname) == False:
+                                flask.flash("Upload a PDF!", category='error')
                                 os.remove(scriptname)
                                 return flask.redirect(flask.url_for("homepage.post"))
                             else:
-                                random_hex = secrets.token_hex(8)
-                                _, f_ext = os.path.splitext(scriptname)
-                                picture_fn = random_hex + f_ext
-                                shutil.copyfile(scriptname, picture_fn)
-                                shutil.move(picture_fn,'static/files')
-                                PyPDF4.PdfFileReader(scriptname)
-                                Watermark(scriptname,"watermarked.pdf", "watermark.pdf")
-                                os.remove(scriptname)
-                                newname = str(uuid.uuid1()) + "_" + "finalfile.pdf"
-                                ExtractPDF(input="watermarked.pdf",output=newname ,start=start, end=end)
-                                os.remove("watermarked.pdf")
-                                shutil.move(newname,'static/files')
-                                currentwriter = Screenwriters.query.filter_by(userid = current_user.id).first()
-                                newpost = Screenplays(writerid = currentwriter.writerid, title=title, logline=logline, message=message, screenplay=newname, fullfile=picture_fn)
-                                db.session.add(newpost)
-                                db.session.commit()
-                                newscript = Screenplays.query.order_by(Screenplays.scriptid.desc()).first()
-                                for i in genres:
-                                    newscripthas = ScriptHas(scriptid=newscript.scriptid, genreid=i)
-                                    db.session.add(newscripthas)
+                                file2 = PyPDF2.PdfReader(scriptname)
+                                nums = len(file2.pages)
+                                if end > nums:
+                                    flask.flash("Your screenplay doesn't have "+str(end)+" pages!")
+                                    os.remove(scriptname)
+                                    return flask.redirect(flask.url_for("homepage.post"))
+                                elif end-start > 10:
+                                    flask.flash("You can't upload more than 10 pages!")
+                                    os.remove(scriptname)
+                                    return flask.redirect(flask.url_for("homepage.post"))
+                                else:
+                                    random_hex = secrets.token_hex(8)
+                                    _, f_ext = os.path.splitext(scriptname)
+                                    fullname = random_hex + f_ext
+                                    shutil.copyfile(scriptname, fullname)
+                                    shutil.move(fullname,'static/files')
+                                    PyPDF4.PdfFileReader(scriptname)
+                                    Watermark(scriptname,"watermarked.pdf", "watermark.pdf")
+                                    os.remove(scriptname)
+                                    newname = str(uuid.uuid1()) + "_" + "finalfile.pdf"
+                                    ExtractPDF(input="watermarked.pdf",output=newname ,start=start, end=end)
+                                    os.remove("watermarked.pdf")
+                                    shutil.move(newname,'static/files')
+                                    currentwriter = Screenwriters.query.filter_by(userid = current_user.id).first()
+                                    newpost = Screenplays(writerid = currentwriter.writerid, title=title, logline=logline, message=message, screenplay=newname, fullfile=fullname)
+                                    db.session.add(newpost)
                                     db.session.commit()
-                                return flask.redirect(flask.url_for("homepage.home"))
+                                    newscript = Screenplays.query.order_by(Screenplays.scriptid.desc()).first()
+                                    for genre in genres:
+                                        newscripthas = ScriptHas(scriptid=newscript.scriptid, genreid=genre)
+                                        db.session.add(newscripthas)
+                                        db.session.commit()
+                                    return flask.redirect(flask.url_for("homepage.home"))
         return flask.render_template('create_post.html', user=current_user)
 
     elif current_user.accounttype == 2:

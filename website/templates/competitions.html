@@ -4,47 +4,48 @@
 <h1 style="text-align: center">{% block header %}Competitions{% endblock %}</h1>
 <br>
 <div id="comps" class="row">
+  <style>
+    body { background-color: #eff1f3; font-family:futura; font-weight: bold;}
+    .card {
+        width: 600px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .profile-pic {
+        width: 15%;
+        height: 15%;
+        margin-bottom: 50px
+    }
+    .user-info {
+        display: flex;
+        align-items: center;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        padding: 5px;
+    }
+    .username {
+        font-weight: bold;
+        text-align: left; 
+        margin-left: 15px; 
+        margin-bottom: 50px;
+    }
+    .genres {
+        margin-top: 5px;
+        text-align: left; 
+    }
+    .delete-button {
+        text-align: right; 
+        margin-left: 510px;
+    }
+  </style>
   <div class="col-3" style="text-align:center">
-    <style>
-      body { background-color: #eff1f3; font-family:futura; font-weight: bold;}
-      .card {
-          width: 600px;
-          border: 1px solid #ccc;
-          padding: 10px;
-          margin-left: auto;
-          margin-right: auto;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .profile-pic {
-          width: 15%;
-          height: 15%;
-          margin-bottom: 50px
-      }
-      .user-info {
-          display: flex;
-          align-items: center;
-          position: absolute;
-          top: 0px;
-          left: 0px;
-          padding: 5px;
-      }
-      .username {
-          font-weight: bold;
-          text-align: left; 
-          margin-left: 15px; 
-          margin-bottom: 50px;
-      }
-      .genres {
-          margin-top: 5px;
-          text-align: left; 
-      }
-      .delete-button {
-          text-align: right; 
-          margin-left: 510px;
-      }
-    </style>
     <br><br>
     <div class="dropdown">
+      <!--Genre List for filtering by genre-->
       <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="height:50%; width:50%">Genre List</button>
       <ul class="dropdown-menu">
           <form action="/filter2" method="POST" style="text-align:center">
@@ -68,6 +69,7 @@
   </div>
   </div>
   <div class="col-6" style="text-align:center">
+    <!--Form for sorting the feed-->
     <form action="/sort2" method='POST'>
       <input type="radio" name="sorted" id="default" value="0"></input>
       <label for="default">Default</label>
@@ -80,16 +82,18 @@
       <input type="submit" value="Submit">
     </form>
     <br>
-    {% if comps %}
+    {% if comps.count() != 0 %}
       {% for comp in comps %}
           <div class="card">
             {% if user.id == comp.producer.user.id %}
+                <!--Delete Button-->
                 <div style="text-align:right">
                   <form action = /delete-comp/{{comp.compid}} method="POST">
                       <input class="delete-button" type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this competition?')">
                   </form>
                 </div>
             {% endif %}
+              <!--Info about creator of competition-->
               <div class="user-info">
                 {% if comp.producer.user.profilepic %}
                     <img src="{{ url_for('static', filename='images/'+ comp.producer.user.profilepic) }}" width = "110px" height = "110px" alt="Profile picture" class="profile-pic">
@@ -104,6 +108,7 @@
               <br><br>
               <div class="row">
                 <div class="col-3" style="text-align: left">
+                  <!--Genre tags-->
                   <h4>Genres:</h4>
                   {% for record in comphas %}
                     {% if record.compid == comp.compid %}

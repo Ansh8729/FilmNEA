@@ -8,18 +8,29 @@
 </head>
 <body style="text-align:center">
         <h1>Leaderboard</h1>
-        {% if writers %}
-            {% for writer in writers %}
-                    <div class="card" style="text-align:center;margin: auto; width:30%; padding:10px">
-                        <a href="/profilepage/{{writer.user.id}}" target="_blank"><h3>{{writer.user.username}}</h3></a>
-                        <h4>Experience Level: {{ writer.experiencelevel }}<h4>
+        {% if writers|length != 0 %}
+            {% for record in writers %}
+                {% set writer = record[1] %}
+                    <div class="card" style="text-align:center;margin: auto; width:30%; padding: 10px;">
+                        <div class="row">
+                            <div class="col-2">
+                                <h1 style="margin-top: 12px;">{{record[0]}}.</h1>
+                            </div>
+                            <div class="col-10" style="text-align: left">
+                                <a href="/profilepage/{{writer.user.id}}" target="_blank"><h3>{{writer.user.username}}</h3></a>
+                                <h4>Experience Level: {{ writer.experiencelevel }}<h4>
+                            </div>
+                        </div>
                     </div>
+                    <br>
             {% endfor %}
         {% else %}
-            <h1>Leaderboard currently unavailable</h1>
-            {% if currentuser.accounttype == 1 %}
-                <h2>Want to be the first on the board?</h2>
-                <h3>Put out posts or submit to competitions to increase your experience level!</h3>
+            <br>
+            <h2>Leaderboard unavailable</h2>
+            {% if current_user.accounttype == 1 %}
+                <br>
+                <h3>Want to be the first on the board?</h3>
+                <h4>Put out posts or submit to competitions to increase your experience level!</h4>
             {% endif %}
         {% endif %}
 </body>

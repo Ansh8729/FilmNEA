@@ -54,10 +54,11 @@
             <a class="nav-item nav-link" href="/competitions">Competitions</a>
             <a class="nav-item nav-link" href="/leaderboard">Leaderboard</a>
             <a class="nav-item nav-link" style="position:relative" href="/notifications/{{user.id}}">Notifications</a>
+            <!--Notification badge to indicate number unseen notifications-->
             {% if user.notifnum != 0 %}
               <span class="notifnum">{{current_user.notifnum}}</span>
             {% endif %}
-            <a class="nav-item nav-link" href="/logout">Logout</a>
+            <a class="nav-item nav-link" href="/logout" onclick="return confirm('Are you sure you want to log out?')">Logout</a>
             {% else %}
             <a class="nav-item nav-link" href="/login">Login</a>
             <a class="nav-item nav-link" href="/sign-up">Sign Up</a>
@@ -83,21 +84,21 @@
         {% endif %}
       </div>
     </nav>
+    <!--Code for alerts for confirmations and errors-->
     {% with messages = get_flashed_messages(with_categories=True) %}
       {% if messages %}
         {% for category, message in messages %}
-        {% if category == "error" %}
-        <div class="alert alert-danger alter-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% else %}
-        <div class="alert alert-success alter-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endif %}
-
+          {% if category == "error" %}
+          <div class="alert alert-danger alter-dismissible fade show" role="alert" style="text-align: center; width: 400px; margin: auto;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+          {% else %}
+          <div class="alert alert-success alter-dismissible fade show" role="alert" style="text-align: center; width: 400px; margin: auto;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+          {% endif %}
         {% endfor %}
       {% endif %}
     {% endwith %}

@@ -61,6 +61,7 @@ def Watermark(InputPDF, OutputPDF, watermark): # Watermarks the pages of a given
         OutputFile.write(output)
 
 def ExtractPDF(input, output, start, end): # Extracts a specific range of pages from a PDF
+    start -= 1
     reader = PyPDF2.PdfReader(input)
     writer = PyPDF2.PdfWriter()
     for page_num in range(start,end): 

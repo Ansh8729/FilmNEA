@@ -2,6 +2,8 @@ import flask
 from .models import Screenplays, Screenwriters, Notifications, Comments, LikedScreenplays, ScriptHas
 from datetime import datetime
 from . import db
+import os
+import shutil
 
 def CreateComment(scriptid, userid, comment):
     post = Screenplays.query.filter_by(scriptid = scriptid).first()
@@ -88,6 +90,10 @@ def DeletePost(scriptid):
         db.session.delete(record)
         db.session.commit()
     post = Screenplays.query.filter_by(scriptid = scriptid).first()
+    filepath = os.path.join('/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA/static/files',post.screenplay)
+    os.remove(filepath)
+    fullfilepath = os.path.join('/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA/static/files',post.fullfile)
+    os.remove(fullfilepath)
     db.session.delete(post)
     db.session.commit()
     flask.flash('Post deleted.', category='success')

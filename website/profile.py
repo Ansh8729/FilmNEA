@@ -119,7 +119,7 @@ def pageeditor(userid):
     
     return flask.render_template("pageeditor.html", user=current_user)
 
-@profile.route("/rate2/<scriptid>", methods=['POST'])
+@profile.route("/pprate/<scriptid>", methods=['POST'])
 @login_required
 def rate2(scriptid):
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
@@ -144,13 +144,13 @@ def ppcomment(scriptid):
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     return flask.redirect(flask.url_for("profile.profilepage", userid = script.writer.user.id))
 
-@profile.route("/delete-comment2/<commentid>", methods=['GET', 'POST'])
+@profile.route("/delete-pp-comment/<commentid>", methods=['GET', 'POST'])
 @login_required
 def deleteppcomment(commentid):
     DeleteComment(commentid)
     return flask.redirect(flask.url_for('profile.profilepage'))
 
-@profile.route('/response2/<scriptid>',methods=['POST'])
+@profile.route('/ppresponse/<scriptid>',methods=['POST'])
 @login_required
 def response2(scriptid):
     producer = Producers.query.filter_by(userid = current_user.id).first()
@@ -164,7 +164,7 @@ def response2(scriptid):
         script = Screenplays.query.filter_by(scriptid=scriptid).first()
         return flask.redirect(flask.url_for("profile.profilepage", userid = script.writer.user.id))
     
-@profile.route('/request2/<scriptid>', methods=['POST'])
+@profile.route('/pprequest/<scriptid>', methods=['POST'])
 @login_required
 def request2(scriptid):
     producer = Producers.query.filter_by(userid = current_user.id).first()
@@ -177,7 +177,7 @@ def request2(scriptid):
         script = Screenplays.query.filter_by(scriptid=scriptid).first()
         return flask.redirect(flask.url_for("profile.profilepage", userid = script.writer.user.id))
     
-@profile.route("/delete-post2/<scriptid>/<userid>", methods=['POST'])
+@profile.route("/ppdelete-post/<scriptid>/<userid>", methods=['POST'])
 @login_required
 def delete_post2(scriptid, userid):
     DeletePost(scriptid)

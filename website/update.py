@@ -15,7 +15,7 @@ def UpdateNotificationNumber(userid): # Updates the number of unseen notificatio
                     number += 1
                 if notif.producerid and notif.message and not notif.requeststatus and not notif.ranking:
                     number += 1
-                if notif.producerid and notif.message and notif.requeststatus == 0:
+                if notif.producerid and notif.requeststatus == 0:
                     number += 1
                 if notif.compid and notif.message and notif.ranking:
                     number += 1
