@@ -15,7 +15,8 @@ def script(scriptid):
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     scripthas = ScriptHas.query.all()
     comments = Comments.query.filter_by(scriptid=scriptid)
-    return flask.render_template("script_full.html", post=script, scripthas=scripthas, user=current_user, comments=comments)
+    likes = LikedScreenplays.query.filter_by(scriptid=scriptid)
+    return flask.render_template("script_full.html", post=script, scripthas=scripthas, user=current_user, comments=comments, likes=likes)
 
 @screenplay.route("/rate2/<scriptid>", methods=['POST'])
 @login_required

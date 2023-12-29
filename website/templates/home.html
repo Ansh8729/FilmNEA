@@ -52,9 +52,6 @@
             margin-top: 5px;
             text-align: left; 
         }
-        .average-rating {
-            text-align: left;
-        }
         .delete-button {
             text-align: right; 
             margin-left: 510px;
@@ -65,10 +62,11 @@
         }
     </style>
 </head>
+<h1 style="text-align: center">{% block header %}Screenplays{% endblock %}</h1>
 <body>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    <br><br>
+    <br>
     <div class="row">
         <div style="text-align:center; margin-left: auto; margin-right: auto" class="col-3">
             <br><br>
@@ -131,6 +129,12 @@
                                 <form action = /delete-post/{{post.scriptid}} method="POST">
                                     <input class="delete-button" type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this post?')">
                                 </form>
+                            {% else %}
+                                {% for like in likes %}
+                                    {% if (like.writer.user.id == user.id) and (like.script.scriptid == post.scriptid) %}
+                                        <p style="position: absolute; right: 15px">You rated it: {{like.rating}}/5</p>
+                                    {% endif %}
+                                {% endfor %}
                             {% endif %}
                             <div class="user-info">
                                 {% if post.writer.user.profilepic %}
@@ -146,60 +150,67 @@
                             {% else %}
                                 <h2>{{post.title}}</h2>
                             {% endif %}
-                            <br>
-                            <div class="row">
-                                <div class="col-3" style="text-align: left">
-                                    <h4>Genres:</h4>
-                                        {% for script in scripthas %}
-                                                {% if script.scriptid == post.scriptid %}
-                                                    <b>{{script.has.genre}}</b><br>
-                                                {% endif %}
-                                        {% endfor %}
-                                </div>
+                            {% if post.avgrating %}
                                 <br>
-                                <div class="col-6" style="text-align: center;">
-                                    <h4>Logline:</h4>
-                                    <p>{{post.logline}}</p>
-                                </div>
-                                <div class="col-3">
-                                    {% if user.accounttype == 1 %}
-                                        {% if post.writer.user.id != user.id %}
-                                            <div style="text-align:center">
-                                                <form method = "POST" action="/rate/{{post.scriptid}}">
-                                                    <div class="star-slider">
-                                                        <input name="rate" type="range" min="1" max="5" step="0.5" class="starRating">
-                                                        <p>Rating: <span class="ratingValue">3</span> stars</p>
-                                                    </div>
-                                                    <script>
-                                                        document.addEventListener('DOMContentLoaded', function() {
-                                                            const sliders = document.querySelectorAll('.starRating');
-                                                            sliders.forEach((slider) => {
-                                                                const ratingDisplay = slider.parentElement.querySelector('.ratingValue');
-                                                    
-                                                                slider.addEventListener('input', () => {
-                                                                    ratingDisplay.textContent = slider.value;
+                                <h4 style="text-align: center">Average Rating: {{post.avgrating}}/5</h4>
+                            {% endif %}
+                            <br>
+                            {% if user.accounttype == 1 and user.id != post.writer.user.id %}
+                                <div class="row">
+                                    <div class="col-3" style="text-align: left">
+                                        <h4>Genres:</h4>
+                                            {% for script in scripthas %}
+                                                    {% if script.scriptid == post.scriptid %}
+                                                        <b>{{script.has.genre}}</b><br>
+                                                    {% endif %}
+                                            {% endfor %}
+                                    </div>
+                                    <br>
+                                    <div class="col-6" style="text-align: center;">
+                                        <h4>Logline:</h4>
+                                        <p>{{post.logline}}</p>
+                                    </div>
+                                    <div class="col-3">
+                                        <div style="text-align:center">
+                                                    <form method = "POST" action="/rate/{{post.scriptid}}">
+                                                        <div class="star-slider">
+                                                            <input name="rate" type="range" min="1" max="5" step="0.5" class="starRating">
+                                                            <p>Rating: <span class="ratingValue">3</span> stars</p>
+                                                        </div>
+                                                        <script>
+                                                            document.addEventListener('DOMContentLoaded', function() {
+                                                                const sliders = document.querySelectorAll('.starRating');
+                                                                sliders.forEach((slider) => {
+                                                                    const ratingDisplay = slider.parentElement.querySelector('.ratingValue');
+                                                        
+                                                                    slider.addEventListener('input', () => {
+                                                                        ratingDisplay.textContent = slider.value;
+                                                                    });
                                                                 });
                                                             });
-                                                        });
-                                                    </script>
-                                                    <input type="submit" value="Submit Rating" onclick="return confirm('Are you sure you want to give this screenplay this rating? You cannot change your rating once it is submitted.')">
-                                                </form>
-                                            </div>
-                                        {% endif %}
-                                    {% endif %}
+                                                        </script>
+                                                        <input type="submit" value="Submit Rating" onclick="return confirm('Are you sure you want to give this screenplay this rating? You cannot change your rating once it is submitted.')">
+                                                    </form>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <br>
-                            <div class="average-rating">
-                                {% for like in likes %}
-                                    {% if (like.writer.user.id == user.id) and (like.script.scriptid == post.scriptid) %}
-                                        <p>You rated it: {{like.rating}}/5</p>
-                                    {% endif %}
-                                {% endfor %}
-                                {% if post.avgrating %}
-                                <span class="average-rating">Average Rating: {{post.avgrating}}</span>
-                                {% endif %}
-                            </div>
+                            {% else %}
+                                <div class="row">
+                                    <div class="col-6" style="text-align: left;">
+                                        <h4>Genres:</h4>
+                                            {% for script in scripthas %}
+                                                    {% if script.scriptid == post.scriptid %}
+                                                        <b>{{script.has.genre}}</b><br>
+                                                    {% endif %}
+                                            {% endfor %}
+                                    </div>
+                                    <br>
+                                    <div class="col-6" style="text-align: left;">
+                                        <h4>Logline:</h4>
+                                        <p>{{post.logline}}</p>
+                                    </div>
+                                </div>
+                            {% endif %}
                             <p class="message">{{post.message}}</p>
                             <br>
                             {% if post.screenplay %}

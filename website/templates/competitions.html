@@ -122,13 +122,13 @@
                 </div>
               </div>
               <br>
-              <h5>Deadline: {{comp.deadline_string}}</h5>
-              <br>
+              <h4>Deadline: {{comp.deadline_string}}</h4>
               {% if user.accounttype == 1 %}
+                <br>
                 <a href="/comp/{{comp.compid}}"><button type="button">Submit to Competition</button></a>
               {% endif %}
           </div>
-          <br/> 
+          <br>
       {% endfor %}
     {% else %}
       <h1>No competitions available</h1>

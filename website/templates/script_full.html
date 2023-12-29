@@ -45,39 +45,77 @@
             {% endif %}
             <a href="/profilepage/{{post.writer.user.id}}" class="username"><h4>{{post.writer.user.username}}</h4></a>
         </div>
-        <h2>{{post.title}}</h2>
-    </div>
-    <br><br>
-    <div class="row">
-        <div class="col-4" style="text-align:left">
-            <h4>Genres:</h4>
-            {% for script in scripthas %}
-                {% if script.scriptid == post.scriptid %}
-                    <b>{{script.has.genre}}</b><br>
-                {% endif %}
-            {% endfor %}
-        </div>
-        <div class="col-4" style="text-align:left">
-            <h4>Logline:</h4>
-            <p>{{post.logline}}</p>
-        </div>
-        <div class="col-4" style="text-align:left">
-            {% if post.writer.user.id == current_user.id %}
-                <h4>Message:</h4>
-                {{post.message}}
-            {% elif user.accounttype == 2 %}
-                <h4>Message:</h4>
-                {{post.message}}
-            {% else %}
-                <h4>Rating here</h4>
-            {% endif %}
-        </div>
+        <h1>{{post.title}}</h1>
+        <br>
+        {% if post.avgrating %}
+                    <h3 style="text-align: center;">Average Rating: {{post.avgrating}}/5</h3> 
+        {% endif %}
     </div>
     <br>
-    {% if post.writer.user.id != user.id and user.accounttype == 1 %}
-        <h4>Message:</h4>
-        {{post.message}}
-    {% endif %}
+    <div class="row">
+        {% if user.accounttype == 1 and user.id != post.writer.user.id %}
+            <div class="col-4" style="text-align:left">
+                <h4>Genres:</h4>
+                {% for script in scripthas %}
+                    {% if script.scriptid == post.scriptid %}
+                        <b>{{script.has.genre}}</b><br>
+                    {% endif %}
+                {% endfor %}
+                <br>
+                <p></ps><h4>Message:</h4>{{post.message}}</p>
+            </div>
+            <div class="col-4" style="text-align:left">
+                <h4>Logline:</h4>
+                <p>{{post.logline}}</p>
+            </div>
+            <div class="col-4" style="text-align:left">
+                <form method = "POST" action="/rate2/{{post.scriptid}}" style="text-align:center">
+                    <div class="star-slider">
+                        <input name="rate" type="range" min="1" max="5" step="0.5" class="starRating">
+                        <p>Rating: <span class="ratingValue">3</span> stars</p>
+                    </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const sliders = document.querySelectorAll('.starRating');
+                            sliders.forEach((slider) => {
+                                const ratingDisplay = slider.parentElement.querySelector('.ratingValue');
+                    
+                                slider.addEventListener('input', () => {
+                                    ratingDisplay.textContent = slider.value;
+                                });
+                            });
+                        });
+                    </script>
+                    <input type="submit" value="Submit Rating" onclick="return confirm('Are you sure you want to give this screenplay this rating? You cannot change your rating once it is submitted.')">
+                </form>
+                <br>
+                <div style="text-align: center">
+                    {% for like in likes %}
+                            {% if like.writer.user.id == user.id %}
+                                <p>You rated it: {{like.rating}}/5</p>
+                            {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class="col-4" style="text-align:left">
+                <h4>Genres:</h4>
+                {% for script in scripthas %}
+                    {% if script.scriptid == post.scriptid %}
+                        <b>{{script.has.genre}}</b><br>
+                    {% endif %}
+                {% endfor %}     
+            </div>
+            <div class="col-4" style="text-align:left">
+                <h4>Logline:</h4>
+                <p>{{post.logline}}</p>
+            </div>
+            <div class="col-4" style="text-align: left">
+                <h4>Message:</h4>
+                <p>{{post.message}}</p>
+            </div>
+        {% endif %}
+    </div>
     <br>
     <embed style="text-align: center;" src="{{url_for('static', filename='files/'+ post.screenplay)}}#toolbar=0" width = "100%" height = "550px"> 
     <br>

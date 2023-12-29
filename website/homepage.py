@@ -219,13 +219,17 @@ def post():
                                 return flask.redirect(flask.url_for("homepage.post"))
                             else:
                                 file2 = PyPDF2.PdfReader(scriptname)
-                                nums = len(file2.pages)
-                                if end > nums:
+                                length = len(file2.pages)
+                                if end > length:
                                     flask.flash("Your screenplay doesn't have "+str(end)+" pages!")
                                     os.remove(scriptname)
                                     return flask.redirect(flask.url_for("homepage.post"))
-                                elif end-start > 10:
+                                elif (end-start) > 9:
                                     flask.flash("You can't upload more than 10 pages!")
+                                    os.remove(scriptname)
+                                    return flask.redirect(flask.url_for("homepage.post"))
+                                elif (end == start) or (start > end):
+                                    flask.flash("Invalid page numbers!")
                                     os.remove(scriptname)
                                     return flask.redirect(flask.url_for("homepage.post"))
                                 else:
@@ -257,10 +261,11 @@ def post():
         if flask.request.method == "POST":
             producerdetails = Producers.query.filter_by(userid = current_user.id).first()
             num = producerdetails.producerid
+            genres = flask.request.form.getlist("genres")
             deadline = str(flask.request.form.get("date"))
             date = convert_to_datetime(deadline)
-            if date < datetime.today():
-                flask.flash("Invalid deadline. Set a deadline today or after today.", category="error")
+            if date <= datetime.today():
+                flask.flash("Invalid deadline. Set a deadline for after today.", category="error")
                 return flask.redirect(flask.url_for("homepage.post"))
             else:
                 title = flask.request.form.get("title")
@@ -269,16 +274,19 @@ def post():
                     flask.flash("Title is already being used.", category="error")
                     return flask.redirect(flask.url_for("homepage.post"))
                 else:
-                    newcomp = Competitions(producerid = num, title=flask.request.form.get("title"), brief=flask.request.form.get("brief"), deadline=date, deadline_string=ISOtoDate(deadline))
-                    db.session.add(newcomp)
-                    db.session.commit()
-                    newcomp = Competitions.query.order_by(Competitions.compid.desc()).first()
-                    genres = flask.request.form.getlist("genres")
-                    for i in genres:
-                        newcomphas = CompHas(compid=newcomp.compid, genreid=i)
-                        db.session.add(newcomphas)
+                    if not genres:
+                            flask.flash("Tag your competition with at least one genre.", category="error")
+                            flask.redirect(flask.url_for("homepage.post"))
+                    else: 
+                        newcomp = Competitions(producerid = num, title=flask.request.form.get("title"), brief=flask.request.form.get("brief"), deadline=date, deadline_string=ISOtoDate(deadline))
+                        db.session.add(newcomp)
                         db.session.commit()
-                    flask.flash("Competition created!")
-                    return flask.redirect(flask.url_for('comps.competitions'))
+                        newcomp = Competitions.query.order_by(Competitions.compid.desc()).first()
+                        for i in genres:
+                            newcomphas = CompHas(compid=newcomp.compid, genreid=i)
+                            db.session.add(newcomphas)
+                            db.session.commit()
+                        flask.flash("Competition created!")
+                        return flask.redirect(flask.url_for('comps.competitions'))
         return flask.render_template('create_post.html', user=current_user)
     
