@@ -77,3 +77,4 @@ def GiveRecommendations(writerid): # Returns a list of 3 screenplay recommendati
                 if script.writer.user.id != current_user.id:
                     recs.append(script)
         return recs
+    

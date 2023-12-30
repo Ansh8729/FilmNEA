@@ -70,6 +70,13 @@ def ExtractPDF(input, output, start, end): # Extracts a specific range of pages 
     with open(output,"wb") as out:
         writer.write(out)
 
+def IncludesAtSymbol(handle):
+    handle = list(handle)
+    if handle[0] == "@":
+        return True
+    else:
+        return False
+
     
 
 

@@ -16,7 +16,7 @@ class Users(db.Model, UserMixin):
     insta = db.Column(db.String(), nullable=True) 
     twitter = db.Column(db.String(), nullable=True) 
     notifnum = db.Column(db.Integer)
-    date_created = db.Column(db.DateTime(timezone=True), default=func.now())
+    # datetime_created = db.Column(db.DateTime(timezone=True), default=func.now())
 
     # Back references like this allow for tables to be linked, allowing data to be accessed without multiple queries
     writers = db.relationship('Screenwriters', backref="user", passive_deletes=True)
@@ -100,7 +100,7 @@ class Competitions(db.Model):
     brief = db.Column(db.Text)
     deadline = db.Column(db.DateTime(timezone=True))
     deadline_string = db.Column(db.String(300))
-    date_created = db.Column(db.String(300))
+    date_created = db.Column(db.Date, default=func.current_date())
     datetime_created = db.Column(db.DateTime(timezone=True), default=func.now())
     submissionnum = db.Column(db.Integer)
     

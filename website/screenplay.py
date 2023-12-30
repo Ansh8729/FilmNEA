@@ -4,7 +4,7 @@ from .models import Screenwriters, Producers, Screenplays, LikedScreenplays, Com
 import uuid as uuid
 from . import db
 from .interact import CreateComment, DeleteComment, LikeExists, RateScreenplay, NotificationExists, ProducerResponse, ProducerRequest, DeletePost
-from .update import UpdateNotificationNumber
+from .update import UpdateNotificationNumber, UpdateExperienceLevel
 
 screenplay = flask.Blueprint("screenplay", __name__)
 
@@ -20,11 +20,12 @@ def script(scriptid):
 
 @screenplay.route("/rate2/<scriptid>", methods=['POST'])
 @login_required
-def rate(scriptid):
+def rate2(scriptid):
     writer = Screenwriters.query.filter_by(userid = current_user.id).first()
     if LikeExists(writer.writerid, scriptid) == False:
         rating = flask.request.form.get("rate")
         RateScreenplay(writer.writerid, scriptid, rating)
+        UpdateExperienceLevel(writer.user.id)
         return flask.redirect(flask.url_for('screenplay.script', scriptid=scriptid))
     else:
         flask.flash("You've already rated this screenplay!", category="error")
@@ -32,7 +33,7 @@ def rate(scriptid):
 
 @screenplay.route("/create-comment2/<scriptid>", methods=['POST'])
 @login_required
-def create_comment(scriptid):
+def create_comment2(scriptid):
     text = flask.request.form.get('text')
     if not text:
         flask.flash('Comment cannot be empty.', category='error')
@@ -42,13 +43,13 @@ def create_comment(scriptid):
 
 @screenplay.route("/delete-comment2/<scriptid>/<commentid>", methods=['GET', 'POST'])
 @login_required
-def delete_comment(scriptid, commentid):
+def delete_comment2(scriptid, commentid):
     DeleteComment(commentid)
     return flask.redirect(flask.url_for('screenplay.script', scriptid=scriptid))
 
 @screenplay.route('/response2/<scriptid>',methods=['POST'])
 @login_required
-def response(scriptid):
+def response2(scriptid):
     producer = Producers.query.filter_by(userid = current_user.id).first()
     if NotificationExists(producer.producerid, scriptid, 1) == True:
         flask.flash("You've already sent a response for this script.", category="error")
@@ -60,7 +61,7 @@ def response(scriptid):
     
 @screenplay.route('/request2/<scriptid>', methods=['POST'])
 @login_required
-def request(scriptid):
+def request2(scriptid):
     producer = Producers.query.filter_by(userid = current_user.id).first()
     if NotificationExists(producer.producerid, scriptid, 2) == True:
         flask.flash("You've already sent a request for this script.")
@@ -71,6 +72,6 @@ def request(scriptid):
 
 @screenplay.route("/delete-post2/<scriptid>", methods=['POST'])
 @login_required
-def delete_post(scriptid):
+def delete_post2(scriptid):
     DeletePost(scriptid)
     return flask.redirect(flask.url_for('homepage.home'))

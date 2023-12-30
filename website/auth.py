@@ -12,68 +12,75 @@ auth = Blueprint("auth", __name__)
 @auth.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get("email")
-        password = request.form.get("password")
+        try: 
+            email = request.form.get("email")
+            password = request.form.get("password")
+            user = Users.query.filter_by(email=email).first()
 
-        user = Users.query.filter_by(email=email).first()
-        if user:
-            if check_password_hash(user.password, password):
-                if user.accounttype == 2:
-                    producer = Producers.query.filter_by(userid = user.id).first()
-                    email = email.split("@")
-                    if producer.approved == 0 and email[1] == 'producersguild.org': # Producer accounts from the guild are not logged in if they haven't gotten approved via OTP verification
-                        flash('User is not approved.', category='error')
-                    else:
-                        flash("Logged in!", category='success')
-                        login_user(user, remember=True)
-                        return redirect(url_for('homepage.home'))
+            if not user:
+                raise ValueError('Account does not exist.')
+            elif not check_password_hash(user.password, password):
+                raise ValueError('Password is incorrect.')
+            
+            if user.accounttype == 2:
+                producer = Producers.query.filter_by(userid = user.id).first()
+                email = email.split("@")
+                # Producer accounts from the guild are not logged in if they haven't gotten approved via OTP verification
+                if producer.approved == 0 and email[1] == 'producersguild.org': 
+                    flash('User is not approved.', category='error')
                 else:
                     flash("Logged in!", category='success')
                     login_user(user, remember=True)
                     return redirect(url_for('homepage.home'))
             else:
-                flash('Password is incorrect.', category='error')
-        else:
-            flash('Email does not exist.', category='error')
+                flash("Logged in!", category='success')
+                login_user(user, remember=True)
+                return redirect(url_for('homepage.home'))
+            
+        except ValueError as e:
+            flash(str(e), category='error')
 
     return render_template("login.html", user=current_user)
 
 @auth.route("/sign-up", methods=['GET', 'POST'])
-def sign_up():
+def signup():
     if request.method == 'POST': 
-        email = request.form.get("email")
-        username = request.form.get("username")
-        password1 = request.form.get("password1")
-        password2 = request.form.get("password2")
-        accounttype = request.form.get("accounttype")
+        try:
+            email = request.form.get("email")
+            username = request.form.get("username")
+            password1 = request.form.get("password1")
+            password2 = request.form.get("password2")
+            accounttype = request.form.get("accounttype")
 
-        email_exists = Users.query.filter_by(email=email).first()
-        username_exists = Users.query.filter_by(username=username).first()
+            email_exists = Users.query.filter_by(email=email).first()
+            username_exists = Users.query.filter_by(username=username).first()
 
-        if email_exists:
-            flash('Email is already in use.', category='error')
-        elif username_exists:
-            flash('Username is already in use.', category='error')
-        elif password1 != password2:
-            flash("Passwords don't match!", category='error')
-        elif len(username) < 6:
-            flash('Username is too short.', category='error')
-        elif len(password1) < 8:
-            flash('Password is too short.', category='error')
-        elif len(email) < 4:
-            flash("Email is invalid.", category='error')
-        else:
+            if email_exists:
+                raise ValueError('Email is already in use.')
+            elif username_exists:
+                raise ValueError('Username is already in use.')
+            elif password1 != password2:
+                raise ValueError("Passwords don't match!")
+            elif len(username) < 6:
+                raise ValueError('Username is too short.')
+            elif len(password1) < 8:
+                raise ValueError('Password is too short.')
+            elif len(email) < 4:
+                raise ValueError('Email is invalid.')
+
             names = username.split(" ")
             forename = names[0]
             surname = names[1]
+
             if accounttype == "Screenwriter":
                 new_user = Users(email=email, username=username, forename=forename, surname=surname, password=generate_password_hash(
-                password1, method='scrypt'), accounttype = 1)
+                    password1, method='scrypt'), accounttype=1)
                 db.session.add(new_user)
                 newuser = Users.query.order_by(Users.id.desc()).first()
-                new_writer = Screenwriters(userid = newuser.id)
+                new_writer = Screenwriters(userid=newuser.id)
                 db.session.add(new_writer)
                 db.session.commit()
+
                 genres = Genres.query.all()
                 if genres:
                     login_user(new_user, remember=True)
@@ -84,31 +91,37 @@ def sign_up():
                     login_user(new_user, remember=True)
                     flash('User created!')
                     return redirect(url_for('homepage.home'))
-            if accounttype == "Producer":
+
+            elif accounttype == "Producer":
                 new_user = Users(email=email, username=username, forename=forename, surname=surname, password=generate_password_hash(
-                password1, method='scrypt'), accounttype = 2)
+                    password1, method='scrypt'), accounttype=2)
                 db.session.add(new_user)
                 db.session.commit()
                 newuser = Users.query.order_by(Users.id.desc()).first()
-                email = email.split("@")
-                if email[1] == 'producersguild.org': # Producer accounts from the guild have to be approved using OTP verification
-                    otp = ""
-                    for i in range(6):
-                        num = random.randint(0,9)
-                        otp += str(num)
-                    msg = 'Hello, Your OTP is '+otp
-                    new_producer = Producers(userid = newuser.id, otp=otp)
+                email_parts = email.split("@")
+
+                if email_parts[1] == 'producersguild.org':
+                    otp = "".join(str(random.randint(0, 9)) for _ in range(6))
+                    msg = f'Hello, Your OTP is {otp}'
+                    new_producer = Producers(userid=newuser.id, otp=otp)
                     db.session.add(new_producer)
                     db.session.commit()
                     SendEmail('Writers World OTP Request', msg, newuser.email, 'writersworldnoreply@gmail.com', 'lolfruollznvecyd')
-                    return redirect(url_for('auth.approval'))  
+
+                    # Redirect to OTP verification page
+                    return redirect(url_for('auth.approval'))
+
                 else:
-                    new_producer = Producers(userid = newuser.id)
+                    new_producer = Producers(userid=newuser.id)
                     db.session.add(new_producer)
                     db.session.commit()
                     login_user(new_user, remember=True)
                     flash('User created!')
                     return redirect(url_for('homepage.home'))
+
+        except ValueError as e:
+            flash(str(e), category='error')
+            return redirect(url_for('auth.signup'))
 
     return render_template("signup.html", user=current_user)
 
@@ -117,6 +130,7 @@ def approval():
     if request.method == 'POST':
         newproducer = Producers.query.order_by(Producers.producerid.desc()).first()
         code = request.form.get("otp")
+
         if code == newproducer.otp:
             newproducer = Producers.query.order_by(Producers.producerid.desc()).first()
             new_user = Users.query.order_by(Users.id.desc()).first()
@@ -145,20 +159,23 @@ def forgotpassword1():
 @auth.route("/forgotpassword2/<email>", methods=['GET', 'POST'])
 def forgotpassword2(email):
     if request.method == "POST":
-        password1 = request.form.get("password1")
-        password2 = request.form.get("password2")
-        if password1 == password2:
-            if len(password1) >= 8:
-                password = generate_password_hash(password1, method='scrypt')
-                user = Users.query.filter_by(email=email).first()
-                user.password = password
-                db.session.commit()
-                flash("Password changed!", category="success")
-                return redirect(url_for("auth.login"))
-            else:
-                flash("Password is too short.", category="error")
-        else:
-            flash("Passwords don't match.", category="error")
+        try:
+            password1 = request.form.get("password1")
+            password2 = request.form.get("password2")
+            if password1 != password2:
+                raise ValueError("Passwords don't match.")
+            elif len(password1) < 8:
+                raise ValueError("Password is too short.")
+            
+            password = generate_password_hash(password1, method='scrypt')
+            user = Users.query.filter_by(email=email).first()
+            user.password = password
+            db.session.commit()
+            flash("Password changed!", category="success")
+            return redirect(url_for("auth.login"))
+        
+        except ValueError as e:
+            flash(str(e), category="error")
 
     return render_template("forgot_password2.html", user=current_user)
 

@@ -27,6 +27,7 @@ def sort2():
     UpdateNotificationNumber(current_user.id)
     comphas = CompHas.query.all()
     sort = flask.request.form.get('sorted')
+
     if sort == "0":
         return flask.redirect(flask.url_for("comps.competitions"))
     elif sort == "1":
@@ -50,16 +51,21 @@ def filter2():
     UpdateNotificationNumber(current_user.id)
     comphas = CompHas.query.all()
     genre = flask.request.form.get("genre")
+    
     if genre == "0":
         return flask.redirect(flask.url_for("comps.competitions"))
     else:
-        genre2 = Genres.query.filter_by(genreid=genre).first()
+        genrename = Genres.query.filter_by(genreid=genre).first()
         compids = CompHas.query.filter_by(genreid=genre).all()
         comps = []
-        for i in compids:
-            comp = Competitions.query.filter_by(compid=i.compid).first()
+        for comp in compids:
+            comp = Competitions.query.filter_by(compid=comp.compid).first()
             comps.append(comp)
-        flask.flash(f"Now showing all {genre2.genre} competitions.")
+        if genre == "1":
+            flask.flash(f"Now showing all competitions that accept all genres.")
+        else:
+            flask.flash(f"Now showing all {genrename.genre} competitions.")
+        
         return flask.render_template("competitions.html", user=current_user, comps=comps, comphas=comphas)
 
 @comps.route('/comp/<compid>', methods=['GET', 'POST'])
@@ -69,10 +75,12 @@ def comp(compid):
     comp = Competitions.query.filter_by(compid = compid).first()
     writer = Screenwriters.query.filter_by(userid=current_user.id).first()
     notif = Notifications.query.filter_by(writerid = writer.writerid, compid = compid).first()
+
     if notif:
         submitted = True
     else:
         submitted = False
+
     return flask.render_template("comp_full.html",user=current_user, comp=comp, submitted=submitted)
 
 @comps.route('/submit/<compid>', methods=['GET', 'POST'])
@@ -81,10 +89,13 @@ def submit(compid):
     file = flask.request.files['submission']
     scriptname = NoSpaces(secure_filename(file.filename))
     file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),'/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA',scriptname)) 
-    shutil.move(scriptname,'static/files')
+
     if IsPDF(file.filename) == False:
+        os.remove(file.filename)
         flask.flash("Upload a PDF!", category='error')
+        return flask.redirect(flask.url_for("comps.comp", compid=compid))
     else:
+        shutil.move(scriptname,'static/files')
         writer = Screenwriters.query.filter_by(userid=current_user.id).first()
         comp = Competitions.query.filter_by(compid=compid).first()
         newsub = Notifications(writerid=writer.writerid, producerid=comp.producerid, compid=compid, submission=scriptname, datetime_created = datetime.now())
@@ -96,16 +107,22 @@ def submit(compid):
 @comps.route("/delete-comp/<compid>", methods=['GET', 'POST'])
 @login_required
 def delete_comp(compid):
+    
+    #1. Delete all submissions 
     submissions = Notifications.query.filter_by(compid=compid)
     for record in submissions:
         filepath = os.path.join('/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA/static/files',record.submission)
         os.remove(filepath)
         db.session.delete(record)
         db.session.commit()
+
+    #2. Delete all genre tags
     compgenres = CompHas.query.filter_by(compid=compid)
     for record in compgenres:
         db.session.delete(record)
         db.session.commit()
+    
+    #3. Delete competition
     comp = Competitions.query.filter_by(compid=compid).first()
     db.session.delete(comp)
     db.session.commit()

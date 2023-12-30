@@ -50,20 +50,20 @@
       <ul class="dropdown-menu">
           <form action="/filter2" method="POST" style="text-align:center">
               <li><button name="genre" value="0" class="btn btn-dark">All Posts</button></li><br>
-              <li><button name="genre" value="14" class="btn btn-dark">All Genres</button></li><br>
-              <li><button name="genre" value="1" class="btn btn-dark">Action</button></li><br>
-              <li><button name="genre" value="2" class="btn btn-dark">Adventure</button></li><br>
-              <li><button name="genre" value="3" class="btn btn-dark">Comedy</button></li><br>
-              <li><button name="genre" value="4" class="btn btn-dark">Drama</button></li><br>
-              <li><button name="genre" value="5" class="btn btn-dark">Fantasy</button></li><br>
-              <li><button name="genre" value="6" class="btn btn-dark">Horror</button></li><br>
-              <li><button name="genre" value="7" class="btn btn-dark">Musical</button></li><br>
-              <li><button name="genre" value="8" class="btn btn-dark">Mystery</button></li><br>
-              <li><button name="genre" value="9" class="btn btn-dark">Romance</button></li><br>
-              <li><button name="genre" value="10" class="btn btn-dark">Sci-Fi</button></li><br>
-              <li><button name="genre" value="11" class="btn btn-dark">Sports</button></li><br>
-              <li><button name="genre" value="12" class="btn btn-dark">Thriller</button></li><br>
-              <li><button name="genre" value="13" class="btn btn-dark">Western</button></li><br>
+              <li><button name="genre" value="1" class="btn btn-dark">All</button></li><br>
+              <li><button name="genre" value="2" class="btn btn-dark">Action</button></li><br>
+              <li><button name="genre" value="3" class="btn btn-dark">Adventure</button></li><br>
+              <li><button name="genre" value="4" class="btn btn-dark">Comedy</button></li><br>
+              <li><button name="genre" value="5" class="btn btn-dark">Drama</button></li><br>
+              <li><button name="genre" value="6" class="btn btn-dark">Fantasy</button></li><br>
+              <li><button name="genre" value="7" class="btn btn-dark">Horror</button></li><br>
+              <li><button name="genre" value="8" class="btn btn-dark">Musical</button></li><br>
+              <li><button name="genre" value="9" class="btn btn-dark">Mystery</button></li><br>
+              <li><button name="genre" value="10" class="btn btn-dark">Romance</button></li><br>
+              <li><button name="genre" value="11" class="btn btn-dark">Sci-Fi</button></li><br>
+              <li><button name="genre" value="12" class="btn btn-dark">Sports</button></li><br>
+              <li><button name="genre" value="13" class="btn btn-dark">Thriller</button></li><br>
+              <li><button name="genre" value="14" class="btn btn-dark">Western</button></li><br>
           </form>
       </ul>
   </div>
@@ -82,7 +82,9 @@
       <input type="submit" value="Submit">
     </form>
     <br>
-    {% if comps.count() != 0 %}
+    {% if comps == [] %}
+      <h1>No competitions available</h1>
+    {% else %}
       {% for comp in comps %}
           <div class="card">
             {% if user.id == comp.producer.user.id %}
@@ -130,8 +132,6 @@
           </div>
           <br>
       {% endfor %}
-    {% else %}
-      <h1>No competitions available</h1>
     {% endif %}
   </div>
   <div class="col-3">
