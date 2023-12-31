@@ -10,7 +10,8 @@ from datetime import datetime, timedelta, date
 import secrets
 import PyPDF2
 import PyPDF4
-from .subroutines import NoSpaces, IsPDF, Watermark, ExtractPDF
+from .subroutines import NoSpaces
+from .pdf import IsPDF, Watermark, ExtractPDF
 from .interact import CreateComment, DeleteComment, LikeExists, RateScreenplay, NotificationExists, ProducerResponse, ProducerRequest, DeletePost
 from .update import UpdateNotificationNumber, UpdateExperienceLevel
 from .convert import convert_to_datetime, ISOtoDate 
@@ -29,7 +30,7 @@ def home():
     else:
         recs = None
 
-    posts = Screenplays.query.filter(Screenplays.date_created == date.today()).order_by(Screenplays.avgrating.desc())
+    posts = Screenplays.query.filter_by(date_created = date.today()).order_by(Screenplays.avgrating.desc())
     comments = Comments.query.all()
     scripthas = ScriptHas.query.all()
     likes = LikedScreenplays.query.all()

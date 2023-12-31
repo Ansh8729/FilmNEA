@@ -4,20 +4,20 @@ from .models import Screenwriters, Producers, Notifications, Screenplays, Awards
 from flask_login import current_user
 from datetime import datetime
 
-def UpdateNotificationNumber(userid): # Updates the number of unseen notification a user has 
+def UpdateNotificationNumber(userid): # Updates the badge indicating the number of unseen notification a user has 
     if current_user.accounttype == 1:
         writer = Screenwriters.query.filter_by(userid=userid).first()
         notifs = Notifications.query.filter_by(writerid=writer.writerid)
         number = 0
         if notifs:
             for notif in notifs:
-                if notif.commentid:
+                if notif.commentid: # Comments 
                     number += 1
-                if notif.producerid and notif.message and not notif.requeststatus and not notif.ranking:
+                if notif.producerid and notif.message and not notif.requeststatus and not notif.ranking: # Producer responses
                     number += 1
-                if notif.producerid and notif.requeststatus == 0:
+                if notif.producerid and notif.requeststatus == 0: # Producer requests 
                     number += 1
-                if notif.compid and notif.message and notif.ranking:
+                if notif.compid and notif.message and notif.ranking: # Competition submissions being sent back
                     number += 1
             current_user.notifnum = number
             db.session.commit()
@@ -32,9 +32,9 @@ def UpdateNotificationNumber(userid): # Updates the number of unseen notificatio
         if notifs:
             for notif in notifs:
                 if notif.compid:
-                    if not notif.ranking:
+                    if not notif.ranking: # Competition submissions 
                         number += 1
-                if notif.requeststatus == 1 or notif.requeststatus == 2:
+                if notif.requeststatus == 1 or notif.requeststatus == 2: # Requests being returned 
                     number += 1
             current_user.notifnum = number
             db.session.commit()

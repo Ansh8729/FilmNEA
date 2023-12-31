@@ -90,7 +90,7 @@ class Notifications(db.Model):
     submission = db.Column(db.String(150)) 
     ranking = db.Column(db.String(150))
     message = db.Column(db.Text)
-    datetime_created = db.Column(db.DateTime(timezone=True))
+    datetime_created = db.Column(db.DateTime(timezone=True), default=func.now())
 
 class Competitions(db.Model):
     __tablename__ = "Competitions"

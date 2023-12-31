@@ -36,45 +36,42 @@ def LoadFeatured(queue, date): #Loads the queue with 6 screenplays that got 10 o
         script = FeaturedScripts.query.filter_by(featuredid = num).first()
         queue[num-1] = script
 
-def GiveRecommendations(writerid): # Returns a list of 3 screenplay recommendations for a screenwriter user based on the genres the user likes
-    UsersLikedPosts = LikedScreenplays.query.filter(LikedScreenplays.rating > 3.5).all()
-    postids = [] 
-    for post in UsersLikedPosts:
-        if post.writerid == writerid:
-            postids.append(post.scriptid) 
-    if len(postids) == 0: 
-        recs = None
-        return recs
-    
-    else:
-        LikedPostsGenreIDs = [] 
-        for i in range(len(postids)):
-            genreinfo = ScriptHas.query.filter(ScriptHas.scriptid == postids[i])
-            for genre in genreinfo:
-                 LikedPostsGenreIDs.append(genre.genreid) 
-
-        GenreList = []
-        for i in range(len(LikedPostsGenreIDs)):
-            genre2 = Genres.query.filter(Genres.genreid ==  LikedPostsGenreIDs[i])
-            for genre in genre2:
-                GenreList.append(genre.genreid) 
-        if (list(set(GenreList)) == GenreList and len(list(set(GenreList))) > 1) or len(GenreList) == 0:
-            recs = None
-            return recs
+def GiveRecommendations(writerid): # Returns a list of screenplay recommendations for a screenwriter user based on the genres the user likes
+    try:
+        UsersLikedPosts = LikedScreenplays.query.filter(LikedScreenplays.rating > 3.5, LikedScreenplays.writerid == writerid).all()
+        postids = [post.scriptid for post in UsersLikedPosts]
+        if len(postids) == 0: 
+            raise ValueError
         else:
-            favgenreid = max(set(GenreList), key = GenreList.count) 
+            LikedPostsGenreIDs = [] 
+            for index in range(len(postids)):
+                genreinfo = ScriptHas.query.filter(ScriptHas.scriptid == postids[index])
+                for genre in genreinfo:
+                    LikedPostsGenreIDs.append(genre.genreid) 
+
+            GenreList = []
+            for index in range(len(LikedPostsGenreIDs)):
+                genres = Genres.query.filter(Genres.genreid ==  LikedPostsGenreIDs[index])
+                for genre in genres:
+                    GenreList.append(genre.genreid) 
+            if (list(set(GenreList)) == GenreList and len(list(set(GenreList))) > 1) or len(GenreList) == 0:
+                raise ValueError
+            else:
+                favgenreid = max(set(GenreList), key = GenreList.count) 
+                
+            ScriptsofFavGenre = ScriptHas.query.filter(ScriptHas.genreid == favgenreid)
+            ScriptShortlist = [script.scriptid for script in ScriptsofFavGenre]
             
-        ScriptsofFavGenre = ScriptHas.query.filter(ScriptHas.genreid == favgenreid)
-        ScriptShortlist = []
-        for script in ScriptsofFavGenre:
-            ScriptShortlist.append(script.scriptid) 
-        
-        LikedScriptIDs = [script.scriptid for script in LikedScreenplays.query.all()]
-        recs = []
-        for id in ScriptShortlist:
-            if (id not in LikedScriptIDs): 
-                script = Screenplays.query.filter(Screenplays.scriptid == id).first()
-                if script.writer.user.id != current_user.id:
+            LikedScriptIDs = [script.scriptid for script in LikedScreenplays.query.all()]
+            recs = []
+            for id in ScriptShortlist:
+                if id not in LikedScriptIDs: 
+                    script = Screenplays.query.filter_by(scriptid=id).first()
                     recs.append(script)
-        return recs
+
+            return recs
+        
+    except ValueError:
+        recs = None
+        return recs 
     

@@ -7,7 +7,8 @@ import shutil
 import uuid as uuid
 from . import db
 from datetime import datetime, timedelta, date
-from .subroutines import NoSpaces, IsPDF
+from .subroutines import NoSpaces
+from .pdf import IsPDF
 from .update import UpdateNotificationNumber, UpdateSubmissionNums
 
 comps = flask.Blueprint("comps", __name__)

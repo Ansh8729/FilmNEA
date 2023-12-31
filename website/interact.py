@@ -15,7 +15,7 @@ def CreateComment(scriptid, userid, comment):
         flask.flash("Comment created!")
         comment = Comments.query.order_by(Comments.commentid).first()
         writer2 = Screenwriters.query.filter_by(userid = post.writer.user.id).first()
-        notif = Notifications(writerid = writer2.writerid, commentid=comment.commentid, datetime_created = datetime.now())
+        notif = Notifications(writerid = writer2.writerid, commentid=comment.commentid)
         db.session.add(notif)
         db.session.commit()
     else:
@@ -46,14 +46,14 @@ def RateScreenplay(writerid, scriptid, rating):
     script = Screenplays.query.filter_by(scriptid=scriptid).first()
     ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
     total = 0
-    for i in ratings:
-        total += i.rating
+    for record in ratings:
+        total += record.rating
     script.avgrating = total/ratings.count()
     db.session.commit()
 
 def NotificationExists(producerid, scriptid, type):
-    notifquery = Notifications.query.filter_by(producerid = producerid, scriptid = scriptid, responsetype = type).first()
-    if notifquery:
+    notif_exists = Notifications.query.filter_by(producerid = producerid, scriptid = scriptid, responsetype = type).first()
+    if notif_exists:
         return True
     else:
         return False
@@ -73,27 +73,38 @@ def ProducerRequest(producerid, scriptid):
     flask.flash(f"Request for full access for {script.title} sent!")
 
 def DeletePost(scriptid):
+    # 1. Delete all notifications relating to the post
     notifs = LikedScreenplays.query.filter_by(scriptid = scriptid)
     for notif in notifs:
         db.session.delete(notif)
         db.session.commit()
+
+    # 2. Delete all of the post's ratings 
     ratings = LikedScreenplays.query.filter_by(scriptid = scriptid)
     for rating in ratings:
         db.session.delete(rating)
         db.session.commit()
+
+    # 3. Delete all of the post's comments
     comments = Comments.query.filter_by(scriptid = scriptid)
     for comment in comments:
         db.session.delete(comment)
         db.session.commit()
+
+    # 4. Delete all of the post's genre tags 
     scripthas = ScriptHas.query.filter_by(scriptid=scriptid)
     for record in scripthas:
         db.session.delete(record)
         db.session.commit()
+    
+    # 5. Delete the screenplay and its full file 
     post = Screenplays.query.filter_by(scriptid = scriptid).first()
     filepath = os.path.join('/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA/static/files',post.screenplay)
     os.remove(filepath)
     fullfilepath = os.path.join('/Users/anshbindroo/Desktop/CSFilmNEA/FilmNEA/static/files',post.fullfile)
     os.remove(fullfilepath)
+
+    #6. Delete the post from the database
     db.session.delete(post)
     db.session.commit()
     flask.flash('Post deleted.', category='success')
