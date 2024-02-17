@@ -27,7 +27,7 @@ def LoadFeatured(queue, date): #Loads the queue with 6 screenplays that got 10 o
     hour = 4
     for post in posts:
         likes = LikedScreenplays.query.filter(LikedScreenplays.scriptid == post.scriptid, LikedScreenplays.rating >= 4.0)
-        if likes.count() >= 10 and ScriptInFeatured(post.scriptid) == False: 
+        if likes.count() >= 5 and ScriptInFeatured(post.scriptid) == False: 
             newfeatured = FeaturedScripts(scriptid = post.scriptid, dequeuedatetime = datetime.now()+timedelta(hours=hour))
             db.session.add(newfeatured)
             db.session.commit()

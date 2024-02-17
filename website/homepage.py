@@ -128,7 +128,8 @@ def rate(scriptid):
     if LikeExists(writer.writerid, scriptid) == False:
         rating = flask.request.form.get("rate")
         RateScreenplay(writer.writerid, scriptid, rating)
-        UpdateExperienceLevel(writer.user.id)
+        script = Screenplays.query.filter_by(scriptid=scriptid).first()
+        UpdateExperienceLevel(script.writer.userid)
         return flask.redirect(flask.url_for('homepage.home'))
     else:
         flask.flash("You've already rated this screenplay!", category="error")

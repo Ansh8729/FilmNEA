@@ -58,8 +58,8 @@ def UpdateExperienceLevel(userid): # Updates a screenwriter user's experience le
             score += 2
         if award.ranking == "3rd":
             score += 1
-        writer.experiencelevel = rating*scripts.count()+score
-        db.session.commit()
+    writer.experiencelevel = (rating*scripts.count())+score
+    db.session.commit()
 
 def UpdateCompetitions(producerid): # Updates a producer's list of competitions by removing ones that are over
     comps = Competitions.query.filter_by(producerid=producerid)

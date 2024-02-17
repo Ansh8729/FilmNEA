@@ -100,7 +100,7 @@ def signup():
                 newuser = Users.query.order_by(Users.id.desc()).first()
                 email_parts = email.split("@")
 
-                if email_parts[1] == 'producersguild.org':
+                if email_parts[1] == 'producersguild.org' or (email_parts[1] == 'gmail.com'):
                     otp = "".join(str(random.randint(0, 9)) for _ in range(6))
                     msg = f'Hello, Your OTP is {otp}'
                     new_producer = Producers(userid=newuser.id, otp=otp)

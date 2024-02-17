@@ -85,6 +85,7 @@
     </style>
     {% if profileuser.accounttype == 1 %}
         {% if details.backgroundcolour != None %} 
+        <!-- Customisation of background and font for screenwriter users -->
         <style>
             .profilepage {
                 background-color: {{ details.backgroundcolour }}
@@ -103,6 +104,7 @@
 <body class="profilepage">
         <div class="row">
             <div class="col-4">
+                <!--Profile details-->
                 {% if profileuser.id == user.id %}
                 <a href="/pageeditor/{{user.id}}"><button type="button">Edit Profile</button></a>
                 {% endif %}
@@ -133,6 +135,7 @@
                 {% endif %}
                 <br>
             </div>
+            <!--Awards table-->
             {% if profileuser.accounttype == 1 %}
             <div class="col-8" style ="display: flex; justify-content: right;">
                 <table id="table" style="width: 350px">
@@ -181,6 +184,7 @@
             {% endif %}
         </div>
             <br>
+            <!--Screenplay section-->
             {% if profileuser.accounttype == 1 %}
             <div id="posts" style="text-align:center">
                 <br>
@@ -192,7 +196,7 @@
                 {% for post in posts %}
                     <div class="card">
                         {% if user.id == post.writer.user.id %}
-                            <form action = /ppdelete-post/{{post.scriptid}} method="POST">
+                            <form action = /ppdelete-post/{{post.scriptid}}/{{post.writer.userid}} method="POST">
                                 <input class="delete-button" type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this post?')">
                             </form>
                         {% else %}
